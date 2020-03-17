@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="hive"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<bridge-type id="account">
+		<label>Hive Account</label>
+		<description>
+			An account for using the Hive REST API.
+			(This the same account you use to login to the Hive mobile app or my.hivehome.com)
+		</description>
+
+		<config-description>
+			<parameter name="username" type="text" required="true">
+				<label>Username</label>
+				<description>Your Hive account username (email address)</description>
+			</parameter>
+			<parameter name="password" type="text" required="true">
+				<label>Password</label>
+				<description>Your Hive account password</description>
+			</parameter>
+
+			<parameter name="pollingInterval" type="integer" min="1" required="true" unit="s">
+				<label>Polling Interval</label>
+				<description>How many seconds to wait between polling Hive API for updates</description>
+				<unitLabel>seconds</unitLabel>
+				<default>10</default>
+			</parameter>
+		</config-description>
+	</bridge-type>
+</thing:thing-descriptions>
