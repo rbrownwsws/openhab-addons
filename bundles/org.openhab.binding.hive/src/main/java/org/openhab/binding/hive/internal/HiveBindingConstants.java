@@ -70,6 +70,10 @@ public final class HiveBindingConstants {
     /* ######## Channel ids ######## */
     public static final String CHANNEL_BATTERY_LEVEL = "battery-level";
     public static final String CHANNEL_BATTERY_LOW = "battery-low";
+    public static final String CHANNEL_BATTERY_STATE = "battery-state";
+    public static final String CHANNEL_BATTERY_VOLTAGE = "battery-voltage";
+    public static final String CHANNEL_BATTERY_NOTIFICATION_STATE = "battery-notification_state";
+
     public static final String CHANNEL_MODE_ON_OFF = "mode-on_off";
     public static final String CHANNEL_MODE_OPERATING = "mode-operating";
     public static final String CHANNEL_MODE_OPERATING_OVERRIDE = "mode-operating-override";

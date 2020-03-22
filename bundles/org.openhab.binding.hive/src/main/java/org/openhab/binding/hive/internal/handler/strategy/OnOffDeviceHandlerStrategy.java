@@ -29,46 +29,46 @@ import org.openhab.binding.hive.internal.client.feature.OnOffDeviceFeature;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class OnOffDeviceHandlerStrategy extends ThingHandlerStrategyBase<OnOffDeviceFeature> {
+public final class OnOffDeviceHandlerStrategy extends ThingHandlerStrategyBase {
     private static final OnOffDeviceHandlerStrategy INSTANCE = new OnOffDeviceHandlerStrategy();
 
     public static OnOffDeviceHandlerStrategy getInstance() {
         return INSTANCE;
     }
 
-    public OnOffDeviceHandlerStrategy() {
-        super(OnOffDeviceFeature.class);
-    }
-
     @Override
     public boolean handleCommand(
             final ChannelUID channelUID,
             final Command command,
-            final Node hiveNode,
-            final OnOffDeviceFeature onOffDeviceFeature
+            final Node hiveNode
     ) {
-        if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_MODE_ON_OFF)
-                && command instanceof OnOffType) {
-            // Set the new target heating temperature.
-            final OnOffType value = (OnOffType) command;
-            final OnOffMode mode = value == OnOffType.ON ? OnOffMode.ON : OnOffMode.OFF;
+        return useFeatureSafely(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
+            if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_MODE_ON_OFF)
+                    && command instanceof OnOffType) {
+                // Set the new target heating temperature.
+                final OnOffType value = (OnOffType) command;
+                final OnOffMode mode = value == OnOffType.ON ? OnOffMode.ON : OnOffMode.OFF;
 
-            onOffDeviceFeature.setMode(mode);
+                onOffDeviceFeature.setMode(mode);
 
-            return true;
-        }
+                return true;
+            }
 
-        return false;
+            return false;
+        });
     }
 
     @Override
     public void handleUpdate(
             final Thing thing,
             final ThingHandlerCallback thingHandlerCallback,
-            final OnOffDeviceFeature onOffDeviceFeature
+            final Node hiveNode
     ) {
-        final ChannelUID onOffModeChannel = thing.getChannel(HiveBindingConstants.CHANNEL_MODE_ON_OFF).getUID();
-        final OnOffType value = onOffDeviceFeature.getMode() == OnOffMode.ON ? OnOffType.ON : OnOffType.OFF;
-        thingHandlerCallback.stateUpdated(onOffModeChannel, value);
+        useFeatureSafely(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
+            useChannelSafely(thing, HiveBindingConstants.CHANNEL_MODE_ON_OFF, onOffModeChannel -> {
+                final OnOffType value = onOffDeviceFeature.getMode() == OnOffMode.ON ? OnOffType.ON : OnOffType.OFF;
+                thingHandlerCallback.stateUpdated(onOffModeChannel, value);
+            });
+        });
     }
 }

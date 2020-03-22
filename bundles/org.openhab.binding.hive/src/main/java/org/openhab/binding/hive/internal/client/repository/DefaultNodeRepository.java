@@ -20,6 +20,8 @@ import org.openhab.binding.hive.internal.client.exception.HiveApiNotAuthorisedEx
 import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
 import org.openhab.binding.hive.internal.client.exception.HiveClientResponseException;
 import org.openhab.binding.hive.internal.client.feature.*;
+import tec.uom.se.quantity.Quantities;
+import tec.uom.se.unit.Units;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -55,7 +57,12 @@ public final class DefaultNodeRepository implements NodeRepository {
                         BatteryLevel::new,
                         batteryDeviceV1FeatureDto.batteryLevel
                 ),
-                FeatureAttributeFactory.getReadOnlyFromDto(batteryDeviceV1FeatureDto.batteryState)
+                FeatureAttributeFactory.getReadOnlyFromDto(batteryDeviceV1FeatureDto.batteryState),
+                FeatureAttributeFactory.getReadOnlyFromDtoWithAdapter(
+                        (val) -> Quantities.getQuantity(val, Units.VOLT),
+                        batteryDeviceV1FeatureDto.batteryVoltage
+                ),
+                FeatureAttributeFactory.getReadOnlyFromDto(batteryDeviceV1FeatureDto.notificationState)
         );
     }
 
@@ -106,24 +113,17 @@ public final class DefaultNodeRepository implements NodeRepository {
         );
     }
 
-    private HeatingTransientModeFeature getHeatingTransientModeFeature(
+    private TransientModeHeatingActionsFeature getTransientModeHeatingActionsFeature(
             final TransientModeV1FeatureDto transientModeV1FeatureDto
     ) {
         // FIXME: Check the DTO is valid before blindly using it.
         final Temperature targetHeatTemperature = new Temperature(new BigDecimal(transientModeV1FeatureDto.actions.reportedValue.get(0).value));
 
-        return new HeatingTransientModeFeature(
+        return new TransientModeHeatingActionsFeature(
                 FeatureAttributeFactory.getSettableFromDtoWithAdapter(
                         (val) -> targetHeatTemperature,
                         transientModeV1FeatureDto.actions
-                ),
-                FeatureAttributeFactory.getSettableFromDtoWithAdapter(
-                        Duration::ofSeconds,
-                        transientModeV1FeatureDto.duration
-                ),
-                FeatureAttributeFactory.getReadOnlyFromDto(transientModeV1FeatureDto.isEnabled),
-                FeatureAttributeFactory.getReadOnlyFromDto(transientModeV1FeatureDto.startDatetime),
-                FeatureAttributeFactory.getReadOnlyFromDto(transientModeV1FeatureDto.endDatetime)
+                )
         );
     }
 
@@ -176,10 +176,10 @@ public final class DefaultNodeRepository implements NodeRepository {
                 features.put(TemperatureSensorFeature.class, getTemperatureSensorFeature(nodeDto.features.temperature_sensor_v1));
             }
             if (nodeDto.features.transient_mode_v1 != null) {
+                features.put(TransientModeFeature.class, getTransientModeFeature(nodeDto.features.transient_mode_v1));
+
                 if (nodeDto.features.heating_thermostat_v1 != null) {
-                    features.put(HeatingTransientModeFeature.class, getHeatingTransientModeFeature(nodeDto.features.transient_mode_v1));
-                } else {
-                    features.put(TransientModeFeature.class, getTransientModeFeature(nodeDto.features.transient_mode_v1));
+                    features.put(TransientModeHeatingActionsFeature.class, getTransientModeHeatingActionsFeature(nodeDto.features.transient_mode_v1));
                 }
             }
             if (nodeDto.features.water_heater_v1 != null) {
@@ -291,33 +291,33 @@ public final class DefaultNodeRepository implements NodeRepository {
                         nodeDto.features.heating_thermostat_v1.temporaryOperatingModeOverride.targetValue = heatingThermostatFeature.getTemporaryOperatingModeOverrideAttribute().getTargetValue();
                     }
                 }
-            } else if (featureClass.equals(TransientModeFeature.class) || featureClass.equals(HeatingTransientModeFeature.class)) {
+            } else if (featureClass.equals(TransientModeFeature.class)) {
                 final TransientModeFeature transientModeFeature = (TransientModeFeature) feature;
 
                 if (transientModeFeature.getDurationAttribute().getTargetValue() != null) {
-                    nodeDto.features.transient_mode_v1 = new TransientModeV1FeatureDto();
+                    if (nodeDto.features.transient_mode_v1 == null) {
+                        nodeDto.features.transient_mode_v1 = new TransientModeV1FeatureDto();
+                    }
 
                     nodeDto.features.transient_mode_v1.duration = new FeatureAttributeDto<>();
                     nodeDto.features.transient_mode_v1.duration.targetValue = Math.max(1, transientModeFeature.getDurationAttribute().getTargetValue().getSeconds());
                 }
+            } else if (featureClass.equals(TransientModeHeatingActionsFeature.class)) {
+                final TransientModeHeatingActionsFeature transientModeHeatingActionsFeature = (TransientModeHeatingActionsFeature) feature;
 
-                if (featureClass.equals(HeatingTransientModeFeature.class)) {
-                    final HeatingTransientModeFeature heatingTransientModeFeature = (HeatingTransientModeFeature) feature;
-
-                    if (heatingTransientModeFeature.getBoostTargetTemperatureAttribute().getTargetValue() != null) {
-                        if (nodeDto.features.transient_mode_v1 == null) {
-                            nodeDto.features.transient_mode_v1 = new TransientModeV1FeatureDto();
-                        }
-
-                        final ActionDto actionDto = new ActionDto();
-                        actionDto.actionType = ActionType.GENERIC;
-                        actionDto.featureType = FeatureType.HEATING_THERMOSTAT_V1;
-                        actionDto.attribute = AttributeName.ATTRIBUTE_NAME_TARGET_HEAT_TEMPERATURE;
-                        actionDto.value = heatingTransientModeFeature.getBoostTargetTemperatureAttribute().getTargetValue().getValue().toString();
-
-                        nodeDto.features.transient_mode_v1.actions = new FeatureAttributeDto<>();
-                        nodeDto.features.transient_mode_v1.actions.targetValue = Collections.singletonList(actionDto);
+                if (transientModeHeatingActionsFeature.getBoostTargetTemperatureAttribute().getTargetValue() != null) {
+                    if (nodeDto.features.transient_mode_v1 == null) {
+                        nodeDto.features.transient_mode_v1 = new TransientModeV1FeatureDto();
                     }
+
+                    final ActionDto actionDto = new ActionDto();
+                    actionDto.actionType = ActionType.GENERIC;
+                    actionDto.featureType = FeatureType.HEATING_THERMOSTAT_V1;
+                    actionDto.attribute = AttributeName.ATTRIBUTE_NAME_TARGET_HEAT_TEMPERATURE;
+                    actionDto.value = transientModeHeatingActionsFeature.getBoostTargetTemperatureAttribute().getTargetValue().getValue().toString();
+
+                    nodeDto.features.transient_mode_v1.actions = new FeatureAttributeDto<>();
+                    nodeDto.features.transient_mode_v1.actions.targetValue = Collections.singletonList(actionDto);
                 }
             } else if (featureClass.equals(WaterHeaterFeature.class)) {
                 final WaterHeaterFeature waterHeaterFeature = (WaterHeaterFeature) feature;

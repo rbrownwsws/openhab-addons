@@ -13,25 +13,67 @@
 package org.openhab.binding.hive.internal.handler.strategy;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.client.Node;
+import org.openhab.binding.hive.internal.client.feature.Feature;
 
 /**
+ * A strategy for how a {@link ThingHandler} should handle commands on and
+ * updates from {@link Node}s.
  *
+ * <p>
+ *     This is intended to decouple the handling of specific {@link Feature}s
+ *     so it can be re-used by multiple {@link ThingHandler}s.
+ * </p>
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
 public interface ThingHandlerStrategy {
+    /**
+     * Called when a {@link Channel} has received a command that needs
+     * to be handled.
+     *
+     * @param channelUID
+     *      The UID of the channel that received the command.
+     *
+     * @param command
+     *      The command that was received.
+     *
+     * @param hiveNode
+     *      The {@linkplain Node} that the {@code command} needs to be
+     *      performed on.
+     *
+     * @return
+     *      {@code true} - If {@code thing} was updated.
+     *      {@code false} - If {@code thing} was not updated.
+     */
     boolean handleCommand(
             final ChannelUID channelUID,
             final Command command,
             final Node hiveNode
     );
 
+    /**
+     * Called when a {@link Thing} must be updated with new information
+     * from a {@link Node}.
+     *
+     * @param thing
+     *      The {@linkplain Thing} to be updated.
+     *
+     * @param thingHandlerCallback
+     *      The {@linkplain ThingHandlerCallback} to use to update
+     *      {@code thing}.
+     *
+     * @param hiveNode
+     *      The {@linkplain Node} containing the information to update
+     *      {@code thing} with.
+     */
     void handleUpdate(
             final Thing thing,
             final ThingHandlerCallback thingHandlerCallback,

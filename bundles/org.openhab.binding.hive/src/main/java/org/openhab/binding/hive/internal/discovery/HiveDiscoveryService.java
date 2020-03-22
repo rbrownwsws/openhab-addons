@@ -36,8 +36,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @NonNullByDefault
 public class HiveDiscoveryService extends AbstractDiscoveryService {
-    private static final String NODE_ID = "nodeId";
-
     /**
      * Number of seconds before discovery should timeout.
      *
@@ -87,8 +85,6 @@ public class HiveDiscoveryService extends AbstractDiscoveryService {
 
         // Go through the set of nodes and report their discovery.
         for (final Node node : nodes.values()) {
-            final ThingUID thingUID = new ThingUID("hive:node:" + node.getId().toString());
-
             // Convert Hive API ProductTypes into ThingTypes.
             final ThingTypeUID thingTypeUID;
             if (node.getProductType().equals(ProductType.BOILER_MODULE)) {
@@ -111,6 +107,8 @@ public class HiveDiscoveryService extends AbstractDiscoveryService {
                 // We do not have a thing type for this yet so skip.
                 continue;
             }
+
+            final ThingUID thingUID = new ThingUID(thingTypeUID, this.bridgeUid, node.getId().toString());
 
             // Do some fiddling with node names to get more descriptive
             // thing labels.
@@ -139,8 +137,8 @@ public class HiveDiscoveryService extends AbstractDiscoveryService {
                     .withThingType(thingTypeUID)
                     .withBridge(this.bridgeUid)
                     .withLabel(label)
-                    .withProperty(NODE_ID, node.getId().toString())
-                    .withRepresentationProperty(NODE_ID)
+                    .withProperty(HiveBindingConstants.CONFIG_NODE_ID, node.getId().toString())
+                    .withRepresentationProperty(HiveBindingConstants.CONFIG_NODE_ID)
                     .build();
 
             thingDiscovered(discoveryResult);

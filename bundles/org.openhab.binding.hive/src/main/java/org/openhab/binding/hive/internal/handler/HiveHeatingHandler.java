@@ -14,10 +14,7 @@ package org.openhab.binding.hive.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.thing.Thing;
-import org.openhab.binding.hive.internal.handler.strategy.HeatingThermostatHandlerStrategy;
-import org.openhab.binding.hive.internal.handler.strategy.HeatingTransientModeHandlerStrategy;
-import org.openhab.binding.hive.internal.handler.strategy.OnOffDeviceHandlerStrategy;
-import org.openhab.binding.hive.internal.handler.strategy.TemperatureSensorHandlerStrategy;
+import org.openhab.binding.hive.internal.handler.strategy.*;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,6 +33,7 @@ public final class HiveHeatingHandler extends HiveHandlerBase {
                         HeatingThermostatHandlerStrategy.getInstance(),
                         OnOffDeviceHandlerStrategy.getInstance(),
                         TemperatureSensorHandlerStrategy.getInstance(),
+                        TransientModeHandlerStrategy.getInstance(),
                         HeatingTransientModeHandlerStrategy.getInstance()
                 ).collect(Collectors.toSet())
         );

@@ -34,7 +34,7 @@ import java.time.temporal.ChronoUnit;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class TransientModeHandlerStrategy extends ThingHandlerStrategyBase<TransientModeFeature> {
+public final class TransientModeHandlerStrategy extends ThingHandlerStrategyBase {
     private static final int SECONDS_PER_MINUTE = 60;
 
     private static final TransientModeHandlerStrategy INSTANCE = new TransientModeHandlerStrategy();
@@ -43,50 +43,54 @@ public final class TransientModeHandlerStrategy extends ThingHandlerStrategyBase
         return INSTANCE;
     }
 
-    private TransientModeHandlerStrategy() {
-        super(TransientModeFeature.class);
-    }
-
     @Override
     public boolean handleCommand(
             final ChannelUID channelUID,
             final Command command,
-            final Node hiveNode,
-            final TransientModeFeature transientModeFeature
+            final Node hiveNode
     ) {
-        if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TRANSIENT_DURATION)
-                && command instanceof DecimalType
-        ) {
-            final DecimalType newDurationMins = (DecimalType) command;
+        return useFeatureSafely(hiveNode, TransientModeFeature.class, transientModeFeature -> {
+            if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TRANSIENT_DURATION)
+                    && command instanceof DecimalType
+            ) {
+                final DecimalType newDurationMins = (DecimalType) command;
 
-            transientModeFeature.setDuration(Duration.ofSeconds(newDurationMins.longValue() * SECONDS_PER_MINUTE));
+                transientModeFeature.setDuration(Duration.ofSeconds(newDurationMins.longValue() * SECONDS_PER_MINUTE));
 
-            return true;
-        }
+                return true;
+            }
 
-        return false;
+            return false;
+        });
     }
 
     @Override
     public void handleUpdate(
             final Thing thing,
             final ThingHandlerCallback thingHandlerCallback,
-            final TransientModeFeature transientModeFeature
+            final Node hiveNode
     ) {
-        final long durationMins = transientModeFeature.getDuration().getSeconds() / SECONDS_PER_MINUTE;
-        final ChannelUID transientDurationChannel = thing.getChannel(HiveBindingConstants.CHANNEL_TRANSIENT_DURATION).getUID();
-        thingHandlerCallback.stateUpdated(transientDurationChannel, new DecimalType(durationMins));
+        useFeatureSafely(hiveNode, TransientModeFeature.class, transientModeFeature -> {
+            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_DURATION, transientDurationChannel -> {
+                final long durationMins = transientModeFeature.getDuration().getSeconds() / SECONDS_PER_MINUTE;
+                thingHandlerCallback.stateUpdated(transientDurationChannel, new DecimalType(durationMins));
+            });
 
-        final ChannelUID transientEnabledChannel = thing.getChannel(HiveBindingConstants.CHANNEL_TRANSIENT_ENABLED).getUID();
-        thingHandlerCallback.stateUpdated(transientEnabledChannel, OnOffType.from(transientModeFeature.getIsEnabled()));
+            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_ENABLED, transientEnabledChannel -> {
+                thingHandlerCallback.stateUpdated(transientEnabledChannel, OnOffType.from(transientModeFeature.getIsEnabled()));
+            });
 
-        final ChannelUID transientStartTimeChannel = thing.getChannel(HiveBindingConstants.CHANNEL_TRANSIENT_START_TIME).getUID();
-        thingHandlerCallback.stateUpdated(transientStartTimeChannel, new DateTimeType(transientModeFeature.getStartDatetime()));
+            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_START_TIME, transientStartTimeChannel -> {
+                thingHandlerCallback.stateUpdated(transientStartTimeChannel, new DateTimeType(transientModeFeature.getStartDatetime()));
+            });
 
-        final ChannelUID transientEndTimeChannel = thing.getChannel(HiveBindingConstants.CHANNEL_TRANSIENT_END_TIME).getUID();
-        thingHandlerCallback.stateUpdated(transientEndTimeChannel, new DateTimeType(transientModeFeature.getEndDatetime()));
+            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_END_TIME, transientEndTimeChannel -> {
+                thingHandlerCallback.stateUpdated(transientEndTimeChannel, new DateTimeType(transientModeFeature.getEndDatetime()));
+            });
 
-        final ChannelUID transientRemainingChannel = thing.getChannel(HiveBindingConstants.CHANNEL_TRANSIENT_REMAINING).getUID();
-        thingHandlerCallback.stateUpdated(transientRemainingChannel, new DecimalType(Math.max(0, Instant.now().until(transientModeFeature.getEndDatetime(), ChronoUnit.MINUTES))));
+            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_REMAINING, transientRemainingChannel -> {
+                thingHandlerCallback.stateUpdated(transientRemainingChannel, new DecimalType(Math.max(0, Instant.now().until(transientModeFeature.getEndDatetime(), ChronoUnit.MINUTES))));
+            });
+        });
     }
 }

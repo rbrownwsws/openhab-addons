@@ -109,27 +109,33 @@ No channels exposed in current version of binding.
 
 ### Hive Thermostat
 
-| Channel                  | Type               | Read/Write   | Description                  |
-|--------------------------|--------------------|--------------|------------------------------|
-| battery-level            | Number             | Read Only    | The percentage of charge the device's battery has left. _N.B. This seems to be a very course measurement so don't expect to see it change very often._ |
-| battery-low              | Switch             | Read Only    | Turns "On" when the battery is low. _N.B. I don't have any devices with low battery at the moment so my implementation may be wrong.  This may give a false alarm for now._ |
-| radio-lqi-average        | Number             | Read Only    | The average zigbee radio **L**ink **Q**uality **I**ndicator                    |
-| radio-lqi-last_known     | Number             | Read Only    | The last known zigbee radio **L**ink **Q**uality **I**ndicator                 |
-| radio-rssi-average       | Number             | Read Only    | The average zigbee radio **R**eceived **S**ignal **S**trength **I**ndicator    |
-| radio-rssi-last_known    | Number             | Read Only    | The last known zigbee radio **R**eceived **S**ignal **S**trength **I**ndicator |
+| Channel                    | Type                     | Read/Write   | Description                  |
+|----------------------------|--------------------------|--------------|------------------------------|
+| battery-level              | Number                   | Read Only    | The percentage of charge the device's battery has left. _N.B. This seems to be a very course measurement so don't expect to see it change very often._ |
+| battery-low                | Switch                   | Read Only    | Turns "On" when the battery is low. _N.B. I don't have any devices with low battery at the moment so my implementation may be wrong.  This may give a false alarm for now._ |
+| battery-state              | String                   | Read Only    | The battery state (FULL/NORMAL/LOW) |
+| battery-voltage            | Number:ElectricPotential | Read Only    | The battery voltage. |
+| battery-notification_state | String                   | Read Only    | Indicates whether a "low battery" notification has been sent to the Hive app. |
+| radio-lqi-average          | Number                   | Read Only    | The average zigbee radio **L**ink **Q**uality **I**ndicator                    |
+| radio-lqi-last_known       | Number                   | Read Only    | The last known zigbee radio **L**ink **Q**uality **I**ndicator                 |
+| radio-rssi-average         | Number                   | Read Only    | The average zigbee radio **R**eceived **S**ignal **S**trength **I**ndicator    |
+| radio-rssi-last_known      | Number                   | Read Only    | The last known zigbee radio **R**eceived **S**ignal **S**trength **I**ndicator |
 
 
 ### Hive Radiator Valve
 
-| Channel                  | Type               | Read/Write   | Description                  |
-|--------------------------|--------------------|--------------|------------------------------|
-| temperature-current      | Number:Temperature | Read Only    |                              |
-| battery-level            | Number             | Read Only    | The percentage of charge the device's battery has left. _N.B. This seems to be a very course measurement so don't expect to see it change very often._ |
-| battery-low              | Switch             | Read Only    | Turns "On" when the battery is low. _N.B. I don't have any devices with low battery at the moment so my implementation may be wrong.  This may give a false alarm for now._ |
-| radio-lqi-average        | Number             | Read Only    | The average zigbee radio **L**ink **Q**uality **I**ndicator                    |
-| radio-lqi-last_known     | Number             | Read Only    | The last known zigbee radio **L**ink **Q**uality **I**ndicator                 |
-| radio-rssi-average       | Number             | Read Only    | The average zigbee radio **R**eceived **S**ignal **S**trength **I**ndicator    |
-| radio-rssi-last_known    | Number             | Read Only    | The last known zigbee radio **R**eceived **S**ignal **S**trength **I**ndicator |
+| Channel                    | Type                     | Read/Write   | Description                  |
+|----------------------------|--------------------------|--------------|------------------------------|
+| temperature-current        | Number:Temperature       | Read Only    |                              |
+| battery-level              | Number                   | Read Only    | The percentage of charge the device's battery has left. _N.B. This seems to be a very course measurement so don't expect to see it change very often._ |
+| battery-low                | Switch                   | Read Only    | Turns "On" when the battery is low. _N.B. I don't have any devices with low battery at the moment so my implementation may be wrong.  This may give a false alarm for now._ |
+| battery-state              | String                   | Read Only    | The battery state (FULL/NORMAL/LOW) |
+| battery-voltage            | Number:ElectricPotential | Read Only    | The battery voltage. |
+| battery-notification_state | String                   | Read Only    | Indicates whether a "low battery" notification has been sent to the Hive app. |
+| radio-lqi-average          | Number                   | Read Only    | The average zigbee radio **L**ink **Q**uality **I**ndicator                    |
+| radio-lqi-last_known       | Number                   | Read Only    | The last known zigbee radio **L**ink **Q**uality **I**ndicator                 |
+| radio-rssi-average         | Number                   | Read Only    | The average zigbee radio **R**eceived **S**ignal **S**trength **I**ndicator    |
+| radio-rssi-last_known      | Number                   | Read Only    | The last known zigbee radio **R**eceived **S**ignal **S**trength **I**ndicator |
 
 
 ### Hive Radiator Valve Heating Zone
@@ -152,6 +158,7 @@ No channels exposed in current version of binding.
 ## Full Example
 
 ### Things
+
 Add using the UI and auto-discovery as explained above.
 
 ### example.items

@@ -15,10 +15,10 @@ package org.openhab.binding.hive.internal.handler.strategy;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.library.unit.SIUnits;
-import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.TemperatureSensorFeature;
 
 /**
@@ -27,25 +27,24 @@ import org.openhab.binding.hive.internal.client.feature.TemperatureSensorFeature
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class TemperatureSensorHandlerStrategy extends ThingHandlerStrategyBase<TemperatureSensorFeature> {
+public final class TemperatureSensorHandlerStrategy extends ThingHandlerStrategyBase {
     private static final TemperatureSensorHandlerStrategy INSTANCE = new TemperatureSensorHandlerStrategy();
 
     public static TemperatureSensorHandlerStrategy getInstance() {
         return INSTANCE;
     }
 
-    public TemperatureSensorHandlerStrategy() {
-        super(TemperatureSensorFeature.class);
-    }
-
     @Override
     public void handleUpdate(
             final Thing thing,
             final ThingHandlerCallback thingHandlerCallback,
-            final TemperatureSensorFeature temperatureSensorFeature
+            final Node hiveNode
     ) {
-        // FIXME: Actually check temperature unit.
-        final ChannelUID temperatureChannel = thing.getChannel(HiveBindingConstants.CHANNEL_TEMPERATURE_CURRENT).getUID();
-        thingHandlerCallback.stateUpdated(temperatureChannel, new QuantityType<>(temperatureSensorFeature.getTemperature().getValue(), SIUnits.CELSIUS));
+        useFeatureSafely(hiveNode, TemperatureSensorFeature.class, temperatureSensorFeature -> {
+            // FIXME: Actually check temperature unit.
+            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_CURRENT, temperatureChannel -> {
+                thingHandlerCallback.stateUpdated(temperatureChannel, new QuantityType<>(temperatureSensorFeature.getTemperature().getValue(), SIUnits.CELSIUS));
+            });
+        });
     }
 }

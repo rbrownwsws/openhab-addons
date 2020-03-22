@@ -16,6 +16,9 @@
 		<channels>
 			<channel id="battery-level" typeId="system.battery-level" />
 			<channel id="battery-low" typeId="system.low-battery" />
+			<channel id="battery-state" typeId="battery-state" />
+			<channel id="battery-voltage" typeId="battery-voltage" />
+			<channel id="battery-notification_state" typeId="battery-notification_state" />
 
 			<channel id="radio-lqi-average" typeId="radio-lqi-average" />
 			<channel id="radio-lqi-last_known" typeId="radio-lqi-last_known" />

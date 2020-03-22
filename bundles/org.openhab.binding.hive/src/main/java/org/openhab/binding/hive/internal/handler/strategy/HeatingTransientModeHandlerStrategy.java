@@ -22,7 +22,7 @@ import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.Temperature;
-import org.openhab.binding.hive.internal.client.feature.HeatingTransientModeFeature;
+import org.openhab.binding.hive.internal.client.feature.TransientModeHeatingActionsFeature;
 
 /**
  *
@@ -30,48 +30,44 @@ import org.openhab.binding.hive.internal.client.feature.HeatingTransientModeFeat
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class HeatingTransientModeHandlerStrategy extends ThingHandlerStrategyBase<HeatingTransientModeFeature>  {
+public final class HeatingTransientModeHandlerStrategy extends ThingHandlerStrategyBase  {
     private static final HeatingTransientModeHandlerStrategy INSTANCE = new HeatingTransientModeHandlerStrategy();
 
     public static HeatingTransientModeHandlerStrategy getInstance() {
         return INSTANCE;
     }
 
-    private HeatingTransientModeHandlerStrategy() {
-        super(HeatingTransientModeFeature.class);
-    }
-
     @Override
     public boolean handleCommand(
             final ChannelUID channelUID,
             final Command command,
-            final Node hiveNode,
-            final HeatingTransientModeFeature transientModeFeature
+            final Node hiveNode
     ) {
-        boolean needUpdate = TransientModeHandlerStrategy.getInstance().handleCommand(channelUID, command, hiveNode, transientModeFeature);
+        return useFeatureSafely(hiveNode, TransientModeHeatingActionsFeature.class, transientModeFeature -> {
+            if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST)
+                    && command instanceof QuantityType
+            ) {
+                final QuantityType<?> newTargetHeatTemperature = (QuantityType<?>) command;
+                transientModeFeature.setBoostTargetTemperature(new Temperature(newTargetHeatTemperature.toBigDecimal()));
 
-        if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST)
-                && command instanceof QuantityType
-        ) {
-            final QuantityType<?> newTargetHeatTemperature = (QuantityType<?>) command;
-            transientModeFeature.setBoostTargetTemperature(new Temperature(newTargetHeatTemperature.toBigDecimal()));
+                return true;
+            }
 
-            needUpdate = true;
-        }
-
-        return needUpdate;
+            return false;
+        });
     }
 
     @Override
     public void handleUpdate(
             final Thing thing,
             final ThingHandlerCallback thingHandlerCallback,
-            final HeatingTransientModeFeature transientModeFeature
+            final Node hiveNode
     ) {
-        TransientModeHandlerStrategy.getInstance().handleUpdate(thing, thingHandlerCallback, transientModeFeature);
-
-        // FIXME: Actually check temperature unit.
-        final ChannelUID boostTargetHeatTemperatureChannel = thing.getChannel(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST).getUID();
-        thingHandlerCallback.stateUpdated(boostTargetHeatTemperatureChannel, new QuantityType<>(transientModeFeature.getBoostTargetTemperature().getValue(), SIUnits.CELSIUS));
+        useFeatureSafely(hiveNode, TransientModeHeatingActionsFeature.class, transientModeFeature -> {
+            // FIXME: Actually check temperature unit.
+            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST, boostTargetHeatTemperatureChannel -> {
+                thingHandlerCallback.stateUpdated(boostTargetHeatTemperatureChannel, new QuantityType<>(transientModeFeature.getBoostTargetTemperature().getValue(), SIUnits.CELSIUS));
+            });
+        });
     }
 }
