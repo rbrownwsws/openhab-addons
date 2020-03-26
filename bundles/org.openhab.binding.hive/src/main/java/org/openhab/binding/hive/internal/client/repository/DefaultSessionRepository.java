@@ -12,21 +12,19 @@
  */
 package org.openhab.binding.hive.internal.client.repository;
 
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.*;
 import org.openhab.binding.hive.internal.client.dto.SessionDto;
 import org.openhab.binding.hive.internal.client.dto.SessionsDto;
-import org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException;
-import org.openhab.binding.hive.internal.client.exception.HiveApiNotAuthorisedException;
-import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
-import org.openhab.binding.hive.internal.client.exception.HiveClientUnknownException;
+import org.openhab.binding.hive.internal.client.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URI;
-import java.util.Collections;
-import java.util.Objects;
 
 /**
  * Default implementation of {@link SessionRepository}.
@@ -76,17 +74,29 @@ public final class DefaultSessionRepository implements SessionRepository {
 
         /* Try to convert DTO into a domain object */
         final SessionsDto responseEntity = response.getContent(SessionsDto.class);
-        try {
-            final SessionDto sessionDto = responseEntity.sessions.get(0);
 
-            logger.debug("Created new Hive API session with sessionId: {}", sessionDto.sessionId);
+        final @Nullable List<@Nullable SessionDto> sessions = responseEntity.sessions;
+        if (sessions == null || sessions.size() == 0) {
+            throw new HiveClientResponseException("List of sessions is unexpectedly empty.");
+        }
+
+        final @Nullable SessionDto sessionDto = sessions.get(0);
+        if (sessionDto == null) {
+            throw new HiveClientResponseException("Session object is unexpectedly null.");
+        }
+
+        final @Nullable SessionId sessionId = sessionDto.sessionId;
+        final @Nullable UserId userId = sessionDto.userId;
+
+        if (sessionId != null && userId != null) {
+            logger.trace("Created new Hive API session with sessionId: {}", sessionDto.sessionId);
 
             return new Session(
-                    sessionDto.sessionId,
-                    sessionDto.userId
+                    sessionId,
+                    userId
             );
-        } catch (NullPointerException | IllegalArgumentException | IndexOutOfBoundsException ex) {
-            throw new HiveClientUnknownException("Something went wrong parsing the Hive API response.", ex);
+        } else {
+            throw new HiveClientResponseException("Session object is malformed.");
         }
     }
 

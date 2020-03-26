@@ -12,11 +12,11 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-
 import java.time.Instant;
 import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  *
@@ -24,7 +24,7 @@ import java.util.Objects;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class SettableFeatureAttribute<T>  extends FeatureAttribute<T> {
+public final class SettableFeatureAttribute<T> extends FeatureAttribute<T> {
     private @Nullable T targetValue = null;
 
     SettableFeatureAttribute(

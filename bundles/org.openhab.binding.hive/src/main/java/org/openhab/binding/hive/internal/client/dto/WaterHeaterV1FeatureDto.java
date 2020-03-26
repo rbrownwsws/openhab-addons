@@ -13,17 +13,18 @@
 package org.openhab.binding.hive.internal.client.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.hive.internal.client.OperatingMode;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.OverrideMode;
+import org.openhab.binding.hive.internal.client.WaterHeaterOperatingMode;
 
 /**
  *
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class WaterHeaterV1FeatureDto extends FeatureDtoBase {
-    public FeatureAttributeDto<OperatingMode> operatingMode;
-    public FeatureAttributeDto<Boolean> isOn;
-    public FeatureAttributeDto<OverrideMode> temporaryOperatingModeOverride;
+    public @Nullable FeatureAttributeDto<WaterHeaterOperatingMode> operatingMode;
+    public @Nullable FeatureAttributeDto<Boolean> isOn;
+    public @Nullable FeatureAttributeDto<OverrideMode> temporaryOperatingModeOverride;
 }

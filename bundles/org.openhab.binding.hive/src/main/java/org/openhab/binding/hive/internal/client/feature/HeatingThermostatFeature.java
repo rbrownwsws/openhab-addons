@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.hive.internal.client.feature;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.*;
-
-import java.util.Objects;
 
 /**
  *
@@ -24,13 +24,13 @@ import java.util.Objects;
  */
 @NonNullByDefault
 public final class HeatingThermostatFeature implements Feature {
-    private final SettableFeatureAttribute<OperatingMode> operatingMode;
+    private final SettableFeatureAttribute<HeatingThermostatOperatingMode> operatingMode;
     private final FeatureAttribute<String> operatingState;
     private final SettableFeatureAttribute<Temperature> targetHeatTemperature;
     private final SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride;
 
     public HeatingThermostatFeature(
-            final SettableFeatureAttribute<OperatingMode> operatingMode,
+            final SettableFeatureAttribute<HeatingThermostatOperatingMode> operatingMode,
             final FeatureAttribute<String> operatingState,
             final SettableFeatureAttribute<Temperature> targetHeatTemperature,
             final SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride
@@ -46,15 +46,15 @@ public final class HeatingThermostatFeature implements Feature {
         this.temporaryOperatingModeOverride = temporaryOperatingModeOverride;
     }
 
-    public SettableFeatureAttribute<OperatingMode> getOperatingModeAttribute() {
+    public SettableFeatureAttribute<HeatingThermostatOperatingMode> getOperatingModeAttribute() {
         return this.operatingMode;
     }
 
-    public OperatingMode getOperatingMode() {
+    public HeatingThermostatOperatingMode getOperatingMode() {
         return this.operatingMode.getDisplayValue();
     }
 
-    public void setOperatingMode(final OperatingMode operatingMode) {
+    public void setOperatingMode(final HeatingThermostatOperatingMode operatingMode) {
         Objects.requireNonNull(operatingMode);
 
         this.operatingMode.setTargetValue(operatingMode);

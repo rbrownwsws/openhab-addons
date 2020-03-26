@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.ActionType;
 import org.openhab.binding.hive.internal.client.AttributeName;
 import org.openhab.binding.hive.internal.client.FeatureType;
@@ -22,10 +23,10 @@ import org.openhab.binding.hive.internal.client.FeatureType;
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class ActionDto {
-    public ActionType actionType;
-    public FeatureType featureType;
-    public AttributeName attribute;
-    public String value;
+    public @Nullable ActionType actionType;
+    public @Nullable FeatureType featureType;
+    public @Nullable AttributeName attribute;
+    public @Nullable String value;
 }

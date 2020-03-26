@@ -16,7 +16,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * The {@link HiveAccountConfig} class contains fields mapping thing configuration parameters.
+ * The {@link HiveAccountConfig} class contains fields mapping configuration
+ * parameters for Hive Account things.
  *
  * @author Ross Brown - Initial contribution
  */

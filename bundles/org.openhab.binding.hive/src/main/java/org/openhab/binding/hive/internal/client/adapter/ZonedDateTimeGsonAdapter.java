@@ -12,18 +12,20 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+
 /**
- *2020-03-04T19:13:47.462+0000
+ * A gson {@link TypeAdapter} for {@link ZonedDateTime} as used by the
+ * Hive API.
  *
  * @author Ross Brown - Initial contribution
  */

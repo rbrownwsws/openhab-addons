@@ -12,17 +12,16 @@
  */
 package org.openhab.binding.hive.internal.handler;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.openhab.binding.hive.internal.handler.strategy.OnOffDeviceHandlerStrategy;
-import org.openhab.binding.hive.internal.handler.strategy.TransientModeHandlerStrategy;
-import org.openhab.binding.hive.internal.handler.strategy.WaterHeaterHandlerStrategy;
-
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.core.thing.Thing;
+import org.openhab.binding.hive.internal.handler.strategy.*;
+
 /**
- *
+ * A {@link org.eclipse.smarthome.core.thing.binding.ThingHandler} for
+ * virtual Hive Hot Water things.
  *
  * @author Ross Brown - Initial contribution
  */
@@ -32,9 +31,11 @@ public final class HiveHotWaterHandler extends HiveHandlerBase {
         super(
                 thing,
                 Stream.of(
+                        BoostTimeRemainingHandlerStrategy.getInstance(),
                         OnOffDeviceHandlerStrategy.getInstance(),
                         TransientModeHandlerStrategy.getInstance(),
-                        WaterHeaterHandlerStrategy.getInstance()
+                        WaterHeaterHandlerStrategy.getInstance(),
+                        WaterHeaterEasyHandlerStrategy.getInstance()
                 ).collect(Collectors.toSet())
         );
     }

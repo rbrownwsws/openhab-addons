@@ -12,21 +12,50 @@
  */
 package org.openhab.binding.hive.internal.client;
 
+import java.util.Set;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import java.util.Set;
-
 /**
- *
+ * A class for interacting with the Hive API as a specific user.
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
 public interface HiveClient extends AutoCloseable {
+    /**
+     * Get the {@link UserId} of the user this client is authenticated as.
+     */
     UserId getUserId();
 
+    /**
+     * Gets all the {@link Node}s associated with the authenticated user.
+     */
     Set<Node> getAllNodes();
+
+    /**
+     * Get a node with a given {@link NodeId}.
+     *
+     * @param nodeId
+     *      The ID of the {@linkplain Node} to get.
+     *
+     * @return
+     *      {@code null} if no {@linkplain Node} exists with the id
+     *      {@code nodeId}.
+     */
     @Nullable Node getNode(NodeId nodeId);
+
+    /**
+     * Push an updated version of a {@link Node} to the Hive API.
+     *
+     * @param node
+     *      The locally updated {@linkplain Node} that you want to push
+     *      to the Hive API.
+     *
+     * @return
+     *      The updated version of the {@linkplain Node} returned by the
+     *      Hive API.
+     */
     @Nullable Node updateNode(Node node);
 }

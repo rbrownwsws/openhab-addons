@@ -15,12 +15,19 @@ package org.openhab.binding.hive.internal.client;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- *
+ * Represents the type of mode that a water_heater is operating in.
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public enum OperatingMode {
+public enum WaterHeaterOperatingMode {
+    /**
+     * Following the schedule.
+     */
     SCHEDULE,
-    MANUAL
+
+    /**
+     * Manually controlled.
+     */
+    ON
 }

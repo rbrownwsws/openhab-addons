@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.FeatureType;
 
 /**
@@ -20,7 +21,7 @@ import org.openhab.binding.hive.internal.client.FeatureType;
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public abstract class FeatureDtoBase {
-    public FeatureAttributeDto<FeatureType> featureType;
+    public @Nullable FeatureAttributeDto<FeatureType> featureType;
 }

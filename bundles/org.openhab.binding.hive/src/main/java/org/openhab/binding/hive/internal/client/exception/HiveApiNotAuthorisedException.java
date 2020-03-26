@@ -21,6 +21,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class HiveApiNotAuthorisedException extends HiveApiException {
+    private static final long serialVersionUID = 1L;
+
     public HiveApiNotAuthorisedException() {
         super();
     }

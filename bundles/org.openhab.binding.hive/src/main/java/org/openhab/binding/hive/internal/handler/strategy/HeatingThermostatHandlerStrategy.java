@@ -22,14 +22,15 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.client.HeatingThermostatOperatingMode;
 import org.openhab.binding.hive.internal.client.Node;
-import org.openhab.binding.hive.internal.client.OperatingMode;
 import org.openhab.binding.hive.internal.client.OverrideMode;
 import org.openhab.binding.hive.internal.client.Temperature;
 import org.openhab.binding.hive.internal.client.feature.HeatingThermostatFeature;
 
 /**
- *
+ * A {@link ThingHandlerStrategy} for handling
+ * {@link HeatingThermostatFeature}.
  *
  * @author Ross Brown - Initial contribution
  */
@@ -60,7 +61,7 @@ public final class HeatingThermostatHandlerStrategy extends ThingHandlerStrategy
                     && command instanceof StringType
             ) {
                 final StringType newOperatingMode = (StringType) command;
-                heatingThermostatFeature.setOperatingMode(OperatingMode.valueOf(newOperatingMode.toString()));
+                heatingThermostatFeature.setOperatingMode(HeatingThermostatOperatingMode.valueOf(newOperatingMode.toString()));
 
                 needUpdate = true;
             } else if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE)

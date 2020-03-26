@@ -16,13 +16,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Thrown to indicate that the {@link org.openhab.binding.hive.internal.client.HiveClient}
- * got a "success" response from the Hive API but either does not understand
- * the response or thinks it is malformed.
+ * got a "failure" response from the Hive API but does not understand why.
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
 public final class HiveClientUnknownException extends HiveClientException {
+    private static final long serialVersionUID = 1L;
+
     public HiveClientUnknownException() {
         super();
     }

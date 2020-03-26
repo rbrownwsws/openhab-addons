@@ -12,15 +12,16 @@
  */
 package org.openhab.binding.hive.internal.handler;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.openhab.binding.hive.internal.handler.strategy.*;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 /**
- *
+ * A {@link org.eclipse.smarthome.core.thing.binding.ThingHandler} for
+ * virtual Hive Radiator Valve heating zones.
  *
  * @author Ross Brown - Initial contribution
  */
@@ -30,11 +31,13 @@ public final class HiveTrvGroupHandler extends HiveHandlerBase {
         super(
                 thing,
                 Stream.of(
+                        BoostTimeRemainingHandlerStrategy.getInstance(),
                         HeatingThermostatHandlerStrategy.getInstance(),
                         OnOffDeviceHandlerStrategy.getInstance(),
                         TemperatureSensorHandlerStrategy.getInstance(),
                         TransientModeHandlerStrategy.getInstance(),
-                        HeatingTransientModeHandlerStrategy.getInstance()
+                        HeatingTransientModeHandlerStrategy.getInstance(),
+                        HeatingThermostatEasyHandlerStrategy.getInstance()
                 ).collect(Collectors.toSet())
         );
     }

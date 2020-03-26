@@ -12,13 +12,13 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
- *
+ * A simple temperature value type.
  *
  * @author Ross Brown - Initial contribution
  */
@@ -66,11 +66,12 @@ public final class Temperature {
     @NonNullByDefault({})
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         final Temperature that = (Temperature) o;
-        return value.equals(that.value) &&
-                unit == that.unit;
+        return value.equals(that.value) && unit == that.unit;
     }
 
     @Override

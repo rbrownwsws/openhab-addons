@@ -12,18 +12,19 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
+import java.time.Instant;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.dto.HiveApiInstant;
 
-import java.io.IOException;
-import java.time.Instant;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 /**
- *
+ * A gson {@link TypeAdapter} for {@link HiveApiInstant}.
  *
  * @author Ross Brown - Initial contribution
  */

@@ -15,7 +15,7 @@ package org.openhab.binding.hive.internal.client;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- *
+ * Represents a Hive API node name.
  *
  * @author Ross Brown - Initial contribution
  */

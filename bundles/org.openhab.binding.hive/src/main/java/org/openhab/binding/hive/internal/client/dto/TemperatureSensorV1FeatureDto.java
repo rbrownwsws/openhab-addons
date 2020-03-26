@@ -12,16 +12,17 @@
  */
 package org.openhab.binding.hive.internal.client.dto;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.math.BigDecimal;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  *
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class TemperatureSensorV1FeatureDto extends FeatureDtoBase {
-    public FeatureAttributeDto<BigDecimal> temperature;
+    public @Nullable FeatureAttributeDto<BigDecimal> temperature;
 }

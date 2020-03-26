@@ -13,7 +13,6 @@
 package org.openhab.binding.hive.internal.client;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.hive.internal.client.exception.HiveClientRequestException;
 
 /**
  * A facade for HTTP requests to the Hive API
@@ -26,27 +25,25 @@ public interface HiveApiRequest {
 
     /**
      *
-     * @throws HiveClientRequestException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveClientRequestException
      */
     HiveApiResponse get();
 
-
     /**
      *
-     * @throws HiveClientRequestException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveClientRequestException
      */
     HiveApiResponse post(Object requestBody);
 
     /**
      *
-     * @throws HiveClientRequestException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveClientRequestException
      */
     HiveApiResponse put(Object requestBody);
 
-
     /**
      *
-     * @throws HiveClientRequestException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveClientRequestException
      */
     HiveApiResponse delete();
 }

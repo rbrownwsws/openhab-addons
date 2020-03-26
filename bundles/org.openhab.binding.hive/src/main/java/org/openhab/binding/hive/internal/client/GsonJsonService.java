@@ -12,14 +12,17 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.time.ZonedDateTime;
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.adapter.*;
 import org.openhab.binding.hive.internal.client.dto.HiveApiInstant;
 
-import java.time.ZonedDateTime;
-import java.util.Objects;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 /**
  *
@@ -60,6 +63,17 @@ final class GsonJsonService implements JsonService {
         Objects.requireNonNull(json);
         Objects.requireNonNull(classOfT);
 
-        return this.gson.fromJson(json, classOfT);
+        final @Nullable T parsedObject;
+        try {
+            parsedObject = this.gson.fromJson(json, classOfT);
+        } catch (final JsonSyntaxException ex) {
+            throw new IllegalArgumentException("The provided json could not be parsed into " + classOfT.getName());
+        }
+
+        if (parsedObject == null) {
+            throw new IllegalArgumentException("The provided json was empty!");
+        }
+
+        return parsedObject;
     }
 }

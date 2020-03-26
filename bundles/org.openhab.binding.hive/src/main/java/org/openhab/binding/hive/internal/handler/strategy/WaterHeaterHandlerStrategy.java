@@ -21,12 +21,13 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.client.Node;
-import org.openhab.binding.hive.internal.client.OperatingMode;
 import org.openhab.binding.hive.internal.client.OverrideMode;
+import org.openhab.binding.hive.internal.client.WaterHeaterOperatingMode;
 import org.openhab.binding.hive.internal.client.feature.WaterHeaterFeature;
 
 /**
- *
+ * A {@link ThingHandlerStrategy} for handling
+ * {@link WaterHeaterFeature}.
  *
  * @author Ross Brown - Initial contribution
  */
@@ -52,7 +53,7 @@ public final class WaterHeaterHandlerStrategy extends ThingHandlerStrategyBase {
             ) {
                 final StringType newOperatingMode = (StringType) command;
 
-                waterHeaterFeature.setOperatingMode(OperatingMode.valueOf(newOperatingMode.toString()));
+                waterHeaterFeature.setOperatingMode(WaterHeaterOperatingMode.valueOf(newOperatingMode.toString()));
 
                 needUpdate = true;
             } else if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE)
@@ -79,7 +80,7 @@ public final class WaterHeaterHandlerStrategy extends ThingHandlerStrategyBase {
                 thingHandlerCallback.stateUpdated(operatingModeChannel, new StringType(waterHeaterFeature.getOperatingMode().toString()));
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_IS_ON, isOnChannel -> {
+            useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_STATE_IS_ON, isOnChannel -> {
                 thingHandlerCallback.stateUpdated(isOnChannel, OnOffType.from(waterHeaterFeature.isOn()));
             });
 

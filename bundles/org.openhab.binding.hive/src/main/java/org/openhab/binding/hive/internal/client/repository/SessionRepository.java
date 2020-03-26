@@ -17,9 +17,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.Password;
 import org.openhab.binding.hive.internal.client.Session;
 import org.openhab.binding.hive.internal.client.Username;
-import org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException;
-import org.openhab.binding.hive.internal.client.exception.HiveApiNotAuthorisedException;
-import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
 
 /**
  *
@@ -40,10 +37,10 @@ public interface SessionRepository {
      * @return
      *      The the newly created Session.
      *
-     * @throws HiveApiAuthenticationException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException
      *      If the provided username and password are not valid.
      *
-     * @throws HiveApiUnknownException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException
      *      If the call to the Hive API fails for an unknown reason.
      *
      * @throws IllegalStateException
@@ -63,10 +60,10 @@ public interface SessionRepository {
      * @param session
      *      The session to delete.
      *
-     * @throws HiveApiNotAuthorisedException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiNotAuthorisedException
      *      If you are not authorised to delete the provided session.
      *
-     * @throws HiveApiUnknownException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException
      *      If the call to the Hive API fails for an unknown reason.
      */
     void deleteSession(Session session);
@@ -80,7 +77,7 @@ public interface SessionRepository {
      * @return
      *      {@code true} if the session is valid or {@code false} if it is not.
      *
-     * @throws HiveApiUnknownException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException
      *      If the call to the Hive API fails for an unknown reason.
      */
     boolean isValidSession(@Nullable Session session);

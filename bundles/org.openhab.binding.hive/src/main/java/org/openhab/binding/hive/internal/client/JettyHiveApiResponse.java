@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.hive.internal.client;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.api.ContentResponse;
-
-import java.util.Objects;
 
 /**
  *

@@ -12,6 +12,14 @@
  */
 package org.openhab.binding.hive.internal.handler;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
@@ -20,7 +28,6 @@ import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveAccountConfig;
@@ -31,14 +38,6 @@ import org.openhab.binding.hive.internal.client.exception.HiveApiException;
 import org.openhab.binding.hive.internal.discovery.HiveDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The {@link HiveAccountHandler} is responsible for handling interaction with
@@ -60,8 +59,9 @@ public final class HiveAccountHandler extends BaseBridgeHandler {
     private @Nullable HiveClient hiveClient = null;
 
     /**
+     *
      * @param bridge
-     * @see BaseThingHandler
+     *      The {@link Bridge} that this handler is handling.
      */
     public HiveAccountHandler(final Bridge bridge) {
         super(bridge);
@@ -77,12 +77,12 @@ public final class HiveAccountHandler extends BaseBridgeHandler {
             // The the openHAB runtime should ensure none of this are null.
             // Do a little dance to make the null checker happy.
             final HiveAccountConfig config = getConfigAs(HiveAccountConfig.class);
-            assert config != null;
-            final String username = config.username;
-            final String password = config.password;
-            final int pollingInterval = config.pollingInterval;
-            assert username != null;
-            assert password != null;
+            final @Nullable String username = config.username;
+            final @Nullable String password = config.password;
+            final @Nullable Integer pollingInterval = config.pollingInterval;
+            if (username == null || password == null || pollingInterval == null) {
+                throw new IllegalStateException("Config is malformed");
+            }
 
             try {
                 this.hiveClient = HiveClientFactory.newClient(
@@ -129,7 +129,7 @@ public final class HiveAccountHandler extends BaseBridgeHandler {
     public void dispose() {
         final ScheduledFuture<?> pollingJob = this.pollingJob;
         if (pollingJob != null) {
-            this.pollingJob.cancel(true);
+            pollingJob.cancel(true);
         }
 
         super.dispose();

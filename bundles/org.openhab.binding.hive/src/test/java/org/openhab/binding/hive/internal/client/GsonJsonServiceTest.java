@@ -144,7 +144,7 @@ public class GsonJsonServiceTest {
         assertThat(nodeDto.features.heating_thermostat_v1.featureType).isNotNull();
         assertThat(nodeDto.features.heating_thermostat_v1.featureType.reportedValue).isEqualTo(FeatureType.HEATING_THERMOSTAT_V1);
         assertThat(nodeDto.features.heating_thermostat_v1.operatingMode).isNotNull();
-        assertThat(nodeDto.features.heating_thermostat_v1.operatingMode.reportedValue).isEqualTo(OperatingMode.SCHEDULE);
+        assertThat(nodeDto.features.heating_thermostat_v1.operatingMode.reportedValue).isEqualTo(HeatingThermostatOperatingMode.SCHEDULE);
         assertThat(nodeDto.features.heating_thermostat_v1.targetHeatTemperature).isNotNull();
         assertThat(nodeDto.features.heating_thermostat_v1.targetHeatTemperature.reportedValue).isEqualTo(BigDecimal.valueOf(7));
     }

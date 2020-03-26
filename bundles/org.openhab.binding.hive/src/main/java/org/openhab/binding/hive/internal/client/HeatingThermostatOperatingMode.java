@@ -15,13 +15,19 @@ package org.openhab.binding.hive.internal.client;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Represents a Hive API Session ID.
+ * Represents the type of mode that a heating_thermostat is operating in.
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class SessionId extends StringTypeBase {
-    public SessionId(final String stringValue) {
-        super(stringValue);
-    }
+public enum HeatingThermostatOperatingMode {
+    /**
+     * Following the schedule.
+     */
+    SCHEDULE,
+
+    /**
+     * Manually controlled.
+     */
+    MANUAL
 }

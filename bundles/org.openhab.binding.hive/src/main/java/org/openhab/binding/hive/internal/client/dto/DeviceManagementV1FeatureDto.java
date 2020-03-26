@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.ProductType;
 
 /**
@@ -20,7 +21,7 @@ import org.openhab.binding.hive.internal.client.ProductType;
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class DeviceManagementV1FeatureDto extends FeatureDtoBase {
-    public FeatureAttributeDto<ProductType> productType;
+    public @Nullable FeatureAttributeDto<ProductType> productType;
 }

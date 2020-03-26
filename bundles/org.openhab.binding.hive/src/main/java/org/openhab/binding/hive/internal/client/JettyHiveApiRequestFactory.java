@@ -12,16 +12,14 @@
  */
 package org.openhab.binding.hive.internal.client;
 
+import java.net.URI;
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.WWWAuthenticationProtocolHandler;
 import org.eclipse.jetty.client.api.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.URI;
-import java.util.Objects;
 
 /**
  *
@@ -32,8 +30,6 @@ import java.util.Objects;
 final class JettyHiveApiRequestFactory implements HiveApiRequestFactory, SessionAuthenticationManager {
     private static final String ACCESS_TOKEN_HEADER = "X-Omnia-Access-Token";
     private static final String CLIENT_ID_HEADER = "X-Omnia-Client";
-
-    private final Logger logger = LoggerFactory.getLogger(JettyHiveApiRequestFactory.class);
 
     private final HttpClient httpClient;
     private final URI apiBasePath;
@@ -96,8 +92,9 @@ final class JettyHiveApiRequestFactory implements HiveApiRequestFactory, Session
         request.header(CLIENT_ID_HEADER, this.clientId);
 
         // If we have a session ID add X-Omnia-Access-Token header.
-        if (this.session != null) {
-            request.header(ACCESS_TOKEN_HEADER, this.session.getSessionId().toString());
+        final @Nullable Session session = this.session;
+        if (session != null) {
+            request.header(ACCESS_TOKEN_HEADER, session.getSessionId().toString());
         }
 
         return new JettyHiveApiRequest(

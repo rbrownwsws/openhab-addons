@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.hive.internal.client;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -19,8 +21,6 @@ import org.openhab.binding.hive.internal.client.repository.DefaultNodeRepository
 import org.openhab.binding.hive.internal.client.repository.DefaultSessionRepository;
 import org.openhab.binding.hive.internal.client.repository.NodeRepository;
 import org.openhab.binding.hive.internal.client.repository.SessionRepository;
-
-import java.util.Objects;
 
 /**
  *
@@ -40,7 +40,9 @@ public final class HiveClientFactory {
         try {
             httpClient.start();
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            // Wrap up all exceptions and throw a runtime exception as there
+            // is nothing we can do to recover.
+            throw new IllegalStateException("Could not start HttpClient.", ex);
         }
 
         final JettyHiveApiRequestFactory requestFactory = new JettyHiveApiRequestFactory(

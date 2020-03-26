@@ -12,13 +12,13 @@
  */
 package org.openhab.binding.hive.internal.client.feature;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.FeatureAttribute;
-import org.openhab.binding.hive.internal.client.OperatingMode;
 import org.openhab.binding.hive.internal.client.OverrideMode;
 import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
-
-import java.util.Objects;
+import org.openhab.binding.hive.internal.client.WaterHeaterOperatingMode;
 
 /**
  *
@@ -27,12 +27,12 @@ import java.util.Objects;
  */
 @NonNullByDefault
 public final class WaterHeaterFeature implements Feature {
-    private final SettableFeatureAttribute<OperatingMode> operatingMode;
+    private final SettableFeatureAttribute<WaterHeaterOperatingMode> operatingMode;
     private final FeatureAttribute<Boolean> isOn;
     private final SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride;
 
     public WaterHeaterFeature(
-            final SettableFeatureAttribute<OperatingMode> operatingMode,
+            final SettableFeatureAttribute<WaterHeaterOperatingMode> operatingMode,
             final FeatureAttribute<Boolean> isOn,
             final SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride
     ) {
@@ -45,15 +45,15 @@ public final class WaterHeaterFeature implements Feature {
         this.temporaryOperatingModeOverride = temporaryOperatingModeOverride;
     }
 
-    public SettableFeatureAttribute<OperatingMode> getOperatingModeAttribute() {
+    public SettableFeatureAttribute<WaterHeaterOperatingMode> getOperatingModeAttribute() {
         return this.operatingMode;
     }
 
-    public OperatingMode getOperatingMode() {
+    public WaterHeaterOperatingMode getOperatingMode() {
         return this.operatingMode.getDisplayValue();
     }
 
-    public void setOperatingMode(final OperatingMode operatingMode) {
+    public void setOperatingMode(final WaterHeaterOperatingMode operatingMode) {
         Objects.requireNonNull(operatingMode);
 
         this.operatingMode.setTargetValue(operatingMode);

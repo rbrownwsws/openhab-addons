@@ -12,9 +12,10 @@
  */
 package org.openhab.binding.hive.internal.client.dto;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * A model of a "NodeRequestEntity"/"NodeResponseEntity"
@@ -23,7 +24,7 @@ import java.util.List;
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class NodesDto {
     /*
      * linked (object, optional): Linked entities grouped by entity type. Used when side-loading entities
@@ -40,5 +41,5 @@ public final class NodesDto {
     /**
      * sessions (Array[Session], optional): List of sessions
      */
-    public List<NodeDto> nodes;
+    public @Nullable List<@Nullable NodeDto> nodes;
 }

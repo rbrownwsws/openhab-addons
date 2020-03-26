@@ -12,22 +12,23 @@
  */
 package org.openhab.binding.hive.internal.client.dto;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.time.ZonedDateTime;
 import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  *
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class TransientModeV1FeatureDto extends FeatureDtoBase {
-    public FeatureAttributeDto<List<ActionDto>> actions;
-    public FeatureAttributeDto<Long> duration;
-    public FeatureAttributeDto<Boolean> isEnabled;
-    public FeatureAttributeDto<List<ActionDto>> previousConfiguration;
-    public FeatureAttributeDto<ZonedDateTime> startDatetime;
-    public FeatureAttributeDto<ZonedDateTime> endDatetime;
+    public @Nullable FeatureAttributeDto<List<ActionDto>> actions;
+    public @Nullable FeatureAttributeDto<Long> duration;
+    public @Nullable FeatureAttributeDto<Boolean> isEnabled;
+    public @Nullable FeatureAttributeDto<List<ActionDto>> previousConfiguration;
+    public @Nullable FeatureAttributeDto<ZonedDateTime> startDatetime;
+    public @Nullable FeatureAttributeDto<ZonedDateTime> endDatetime;
 }

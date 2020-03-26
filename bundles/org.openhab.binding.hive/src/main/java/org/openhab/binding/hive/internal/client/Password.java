@@ -15,7 +15,7 @@ package org.openhab.binding.hive.internal.client;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A password value type.
+ * Represents a Hive API password.
  *
  * @author Ross Brown - Initial contribution
  */

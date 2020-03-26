@@ -12,14 +12,15 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import com.google.gson.stream.JsonReader;
+import java.io.IOException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.ProductType;
 
-import java.io.IOException;
+import com.google.gson.stream.JsonReader;
 
 /**
- *
+ * A gson {@link com.google.gson.TypeAdapter} for {@link ProductType}.
  *
  * @author Ross Brown - Initial contribution
  */

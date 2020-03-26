@@ -23,6 +23,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class HiveClientResponseException extends HiveClientException {
+    private static final long serialVersionUID = 1L;
+
     public HiveClientResponseException() {
         super();
     }

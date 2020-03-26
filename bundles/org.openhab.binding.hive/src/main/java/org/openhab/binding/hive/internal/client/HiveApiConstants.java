@@ -12,12 +12,12 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.net.URI;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
- *
+ * Constants related to the Hive API.
  *
  * @author Ross Brown - Initial contribution
  */
@@ -31,7 +31,6 @@ public final class HiveApiConstants {
      * The location of the real Hive API.
      */
     public static final URI DEFAULT_BASE_PATH = URI.create("https://api.prod.bgchprod.info/omnia/");
-
 
     public static final URI ENDPOINT_ACCESS_TOKENS = URI.create("accessTokens");
 

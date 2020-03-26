@@ -12,9 +12,10 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * A base class for simple value types constructed from strings.
@@ -22,7 +23,7 @@ import java.util.Objects;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-abstract class FromStringTypeBase<T> {
+abstract class FromStringTypeBase<@NonNull T> {
     private final T value;
 
     public FromStringTypeBase(final String stringValue) {
@@ -45,8 +46,10 @@ abstract class FromStringTypeBase<T> {
     @NonNullByDefault({})
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || this.getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || this.getClass() != o.getClass())
+            return false;
         final FromStringTypeBase<?> other = (FromStringTypeBase<?>) o;
         return value.equals(other.value);
     }

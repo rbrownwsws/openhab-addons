@@ -12,15 +12,17 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import java.io.IOException;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonWriter;
 
 /**
- *
+ * An abstract base class for simple gson {@link TypeAdapter}s that write their
+ * value as strings.
  *
  * @author Ross Brown - Initial contribution
  */

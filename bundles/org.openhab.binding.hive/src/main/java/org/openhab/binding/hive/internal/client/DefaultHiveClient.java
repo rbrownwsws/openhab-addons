@@ -12,19 +12,15 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException;
-import org.openhab.binding.hive.internal.client.exception.HiveApiNotAuthorisedException;
-import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
-import org.openhab.binding.hive.internal.client.repository.NodeRepository;
-import org.openhab.binding.hive.internal.client.repository.SessionRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.hive.internal.client.exception.HiveApiNotAuthorisedException;
+import org.openhab.binding.hive.internal.client.repository.NodeRepository;
+import org.openhab.binding.hive.internal.client.repository.SessionRepository;
 
 /**
  * The default implementation of {@link HiveClient}
@@ -33,8 +29,6 @@ import java.util.function.Supplier;
  */
 @NonNullByDefault
 final class DefaultHiveClient implements HiveClient {
-    private final Logger logger = LoggerFactory.getLogger(DefaultHiveClient.class);
-
     private final SessionAuthenticationManager authenticationManager;
 
     private final Username username;
@@ -46,18 +40,12 @@ final class DefaultHiveClient implements HiveClient {
     private @Nullable Session session;
 
     /**
-     * Indicated whether the client is currently authenticated with the Hive
-     * API.
-     */
-    private boolean authenticated = false;
-
-    /**
      *
      *
-     * @throws HiveApiAuthenticationException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException
      *      If we failed to authenticate with the provided username and password.
      *
-     * @throws HiveApiUnknownException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException
      *      If something unexpected happens while communicating with the Hive
      *      API.
      */
@@ -84,17 +72,17 @@ final class DefaultHiveClient implements HiveClient {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         // TODO: Clean up
     }
 
     /**
      * Try to authenticate with the Hive API.
      *
-     * @throws HiveApiAuthenticationException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException
      *      If we failed to authenticate with the stored username and password.
      *
-     * @throws HiveApiUnknownException
+     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException
      *      If something unexpected happens while communicating with the Hive
      *      API.
      */
@@ -108,8 +96,6 @@ final class DefaultHiveClient implements HiveClient {
 
         this.session = session;
         this.authenticationManager.setSession(session);
-
-        this.authenticated = true;
     }
 
     private <T> T makeAuthenticatedApiCall(final Supplier<T> apiCall) {
@@ -136,16 +122,14 @@ final class DefaultHiveClient implements HiveClient {
         }
     }
 
-    private void makeAuthenticatedApiCall(final Runnable apiCall) {
-        makeAuthenticatedApiCall(() -> {
-            apiCall.run();
-            return null;
-        });
-    }
-
     @Override
     public UserId getUserId() {
-        return this.session.getUserId();
+        final @Nullable Session session = this.session;
+        if (session == null) {
+            throw new IllegalStateException("Session is unexpectedly null.");
+        }
+
+        return session.getUserId();
     }
 
     @Override

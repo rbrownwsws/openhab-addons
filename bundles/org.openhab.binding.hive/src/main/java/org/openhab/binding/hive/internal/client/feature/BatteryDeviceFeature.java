@@ -12,13 +12,14 @@
  */
 package org.openhab.binding.hive.internal.client.feature;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.hive.internal.client.BatteryLevel;
-import org.openhab.binding.hive.internal.client.FeatureAttribute;
+import java.util.Objects;
 
 import javax.measure.Quantity;
 import javax.measure.quantity.ElectricPotential;
-import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.BatteryLevel;
+import org.openhab.binding.hive.internal.client.FeatureAttribute;
 
 /**
  *

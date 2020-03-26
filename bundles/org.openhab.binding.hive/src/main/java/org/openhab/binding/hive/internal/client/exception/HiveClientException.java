@@ -21,6 +21,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public abstract class HiveClientException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
     public HiveClientException() {
         super();
     }

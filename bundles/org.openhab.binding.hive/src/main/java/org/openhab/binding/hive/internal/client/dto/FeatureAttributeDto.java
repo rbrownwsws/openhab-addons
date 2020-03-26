@@ -13,23 +13,24 @@
 package org.openhab.binding.hive.internal.client.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  *
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class FeatureAttributeDto<T> {
-    public T reportedValue;
-    public T targetValue;
-    public T displayValue;
+    public @Nullable T reportedValue;
+    public @Nullable T targetValue;
+    public @Nullable T displayValue;
 
-    public HiveApiInstant reportReceivedTime;
-    public HiveApiInstant reportChangedTime;
-    public HiveApiInstant targetSetTime;
-    public HiveApiInstant targetExpiryTime;
+    public @Nullable HiveApiInstant reportReceivedTime;
+    public @Nullable HiveApiInstant reportChangedTime;
+    public @Nullable HiveApiInstant targetSetTime;
+    public @Nullable HiveApiInstant targetExpiryTime;
 
-    public String targetSetTXId;
-    public String propertyStatus;
+    public @Nullable String targetSetTXId;
+    public @Nullable String propertyStatus;
 }

@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
+import java.time.Duration;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -24,12 +26,9 @@ import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.TransientModeFeature;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-
 /**
- *
+ * A {@link ThingHandlerStrategy} for handling
+ * {@link TransientModeFeature}.
  *
  * @author Ross Brown - Initial contribution
  */
@@ -86,10 +85,6 @@ public final class TransientModeHandlerStrategy extends ThingHandlerStrategyBase
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_END_TIME, transientEndTimeChannel -> {
                 thingHandlerCallback.stateUpdated(transientEndTimeChannel, new DateTimeType(transientModeFeature.getEndDatetime()));
-            });
-
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_REMAINING, transientRemainingChannel -> {
-                thingHandlerCallback.stateUpdated(transientRemainingChannel, new DecimalType(Math.max(0, Instant.now().until(transientModeFeature.getEndDatetime(), ChronoUnit.MINUTES))));
             });
         });
     }

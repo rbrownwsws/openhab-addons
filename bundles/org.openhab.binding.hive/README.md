@@ -52,18 +52,17 @@ You should not have to modify these parameters if you use auto-discovery.
 |-----------|----------|-------------------------------------------------------------|
 | nodeId    | YES      | The Hive API `nodeId` that identifies the thing.            |
 
-_N.B. You can only get the nodeId of thing by querying the Hive API.  This is why use of auto-discovery is recommended._
+_N.B. You can only get the nodeId of things by querying the Hive API.  This is why use of auto-discovery is recommended._
 
 ## Channels
 
-_Here you should provide information about available channel types, what their meaning is and how they can be used._
-
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
 ### Hive Account
 
 No channels (just acts as a bridge)
 
 ### Hive Boiler Module
+
+#### Advanced Channels
 
 | Channel                  | Type               | Read/Write   | Description                                                                    |
 |--------------------------|--------------------|--------------|--------------------------------------------------------------------------------|
@@ -75,32 +74,53 @@ No channels (just acts as a bridge)
 
 ### Hive Heating Zone
 
+#### Basic channels
+
 | Channel                  | Type               | Read/Write   | Description                  |
 |--------------------------|--------------------|--------------|------------------------------|
 | temperature-current      | Number:Temperature | Read Only    | The current temperature of the zone.  Only in Celsius for now. |
 | temperature-target       | Number:Temperature | Read/Write   | The temperature you want the zone to be heated to.  Only in Celsius for now. |
+| easy-mode-operating      | String             | Read/Write   | The operating mode of heating in this zone as in app (Manual / Schedule/ Off). |
+| easy-mode-boost          | Switch             | Read/Write   | Is the transient override (boost) active for this zone. (Handles API trickiness for you). |
+| easy-state-is_on         | Switch             | Read Only    | Is the heating currently active in this zone? |
+| temperature-target-boost | Number:Temperature | Read/Write   | The temperature you want the zone to be heated to when the transient override (boost) is active.  Only in Celsius for now. |
+| transient-duration       | Number             | Read/Write   | How long in minutes the transient override (boost) should be active for once started. |
+| transient-remaining      | Number             | Read Only    | If `transient-end_time` is in the future and the transient override (boost) is active: the time between now and `transient-end_time` in minutes, otherwise 0. |
+
+#### Advanced Channels
+
+| Channel                  | Type               | Read/Write   | Description                  |
+|--------------------------|--------------------|--------------|------------------------------|
 | mode-operating           | String             | Read/Write   | The operating mode of heating in the zone (Schedule vs. Manual). |
 | mode-on_off              | Switch             | Read/Write   | Is heating for this zone turned on or off. |
 | state-operating          | String             | Read Only    | Is heating for this zone active? (OFF/HEAT). |
 | mode-operating-override  | Switch             | Read/Write   | Is the transient override (boost) active for this zone. |
-| temperature-target-boost | Number:Temperature | Read/Write   | The temperature you want the zone to be heated to when the transient override (boost) is active.  Only in Celsius for now. |
-| transient-duration       | Number             | Read/Write   | How long in minutes the transient override (boost) should be active for once started. |
+| transient-enabled        | Switch             | Read/Write   | Is the transient override (boost) enabled for this zone. |
 | transient-start_time     | DateTime           | Read Only    | The last time the transient override (boost) was started. |
 | transient-end_time       | DateTime           | Read Only    | The last time the transient override (boost) was scheduled to end (even if it was cancelled). |
-| transient-remaining      | Number             | Read Only    | The time between now and `transient-end_time` in minutes. _N.B. This does not reset to 0 if you cancel the transient override (boost)._ |
-
 
 ### Hive Hot Water
 
+#### Basic Channels
+
 | Channel                  | Type               | Read/Write   | Description                  |
 |--------------------------|--------------------|--------------|------------------------------|
-| mode-operating           | String             | Read/Write   | The operating mode of the hot water (Schedule vs. Manual). |
-| mode-on_off              | Switch             | Read/Write   | Is the hot water turned on or off. |
-| is_on                    | Switch             | Read Only    | Is the hot water currently being heated. |
+| easy-mode-operating      | String             | Read/Write   | The operating mode of hot water as in app (On / Schedule/ Off). |
+| easy-mode-boost          | Switch             | Read/Write   | Is the transient override (boost) active for this zone. (Handles API trickiness for you). |
+| easy-state-is_on         | Switch             | Read Only    | Is the hot water currently being heated. |
 | transient-duration       | Number             | Read/Write   | How long in minutes the transient override (boost) should be active for once started. |
+| transient-remaining      | Number             | Read Only    | If `transient-end_time` is in the future and the transient override (boost) is active: the time between now and `transient-end_time` in minutes, otherwise 0. |
+
+
+#### Advanced Channels
+
+| Channel                  | Type               | Read/Write   | Description                  |
+|--------------------------|--------------------|--------------|------------------------------|
+| mode-operating           | String             | Read/Write   | The operating mode of the hot water (Schedule vs. On). |
+| mode-on_off              | Switch             | Read/Write   | Is the hot water turned on or off. |
+| transient-enabled        | Switch             | Read/Write   | Is the transient override (boost) enabled for this zone. |
 | transient-start_time     | DateTime           | Read Only    | The last time the transient override (boost) was started. |
 | transient-end_time       | DateTime           | Read Only    | The last time the transient override (boost) was scheduled to end (even if it was cancelled). |
-| transient-remaining      | Number             | Read Only    | The time between now and `transient-end_time` in minutes. _N.B. This does not reset to 0 if you cancel the transient override (boost)._ |
 
 
 ### Hive Hub
@@ -109,10 +129,17 @@ No channels exposed in current version of binding.
 
 ### Hive Thermostat
 
+#### Basic channels
+
 | Channel                    | Type                     | Read/Write   | Description                  |
 |----------------------------|--------------------------|--------------|------------------------------|
 | battery-level              | Number                   | Read Only    | The percentage of charge the device's battery has left. _N.B. This seems to be a very course measurement so don't expect to see it change very often._ |
-| battery-low                | Switch                   | Read Only    | Turns "On" when the battery is low. _N.B. I don't have any devices with low battery at the moment so my implementation may be wrong.  This may give a false alarm for now._ |
+| battery-low                | Switch                   | Read Only    | Turns "On" when the battery is low. |
+
+#### Advanced channels
+
+| Channel                    | Type                     | Read/Write   | Description                  |
+|----------------------------|--------------------------|--------------|------------------------------|
 | battery-state              | String                   | Read Only    | The battery state (FULL/NORMAL/LOW) |
 | battery-voltage            | Number:ElectricPotential | Read Only    | The battery voltage. |
 | battery-notification_state | String                   | Read Only    | Indicates whether a "low battery" notification has been sent to the Hive app. |
@@ -121,14 +148,20 @@ No channels exposed in current version of binding.
 | radio-rssi-average         | Number                   | Read Only    | The average zigbee radio **R**eceived **S**ignal **S**trength **I**ndicator    |
 | radio-rssi-last_known      | Number                   | Read Only    | The last known zigbee radio **R**eceived **S**ignal **S**trength **I**ndicator |
 
-
 ### Hive Radiator Valve
+
+#### Basic channels
 
 | Channel                    | Type                     | Read/Write   | Description                  |
 |----------------------------|--------------------------|--------------|------------------------------|
-| temperature-current        | Number:Temperature       | Read Only    |                              |
+| temperature-current        | Number:Temperature       | Read Only    | The current temperature of the zone.  Only in Celsius for now. |
 | battery-level              | Number                   | Read Only    | The percentage of charge the device's battery has left. _N.B. This seems to be a very course measurement so don't expect to see it change very often._ |
-| battery-low                | Switch                   | Read Only    | Turns "On" when the battery is low. _N.B. I don't have any devices with low battery at the moment so my implementation may be wrong.  This may give a false alarm for now._ |
+| battery-low                | Switch                   | Read Only    | Turns "On" when the battery is low. |
+
+#### Advanced channels
+
+| Channel                    | Type                     | Read/Write   | Description                  |
+|----------------------------|--------------------------|--------------|------------------------------|
 | battery-state              | String                   | Read Only    | The battery state (FULL/NORMAL/LOW) |
 | battery-voltage            | Number:ElectricPotential | Read Only    | The battery voltage. |
 | battery-notification_state | String                   | Read Only    | Indicates whether a "low battery" notification has been sent to the Hive app. |
@@ -140,19 +173,30 @@ No channels exposed in current version of binding.
 
 ### Hive Radiator Valve Heating Zone
 
+#### Basic channels
+
 | Channel                  | Type               | Read/Write   | Description                  |
 |--------------------------|--------------------|--------------|------------------------------|
 | temperature-current      | Number:Temperature | Read Only    | The current temperature of the zone.  Only in Celsius for now. |
 | temperature-target       | Number:Temperature | Read/Write   | The temperature you want the zone to be heated to.  Only in Celsius for now. |
+| easy-mode-operating      | String             | Read/Write   | The operating mode of heating in this zone as in app (Manual / Schedule/ Off). |
+| easy-mode-boost          | Switch             | Read/Write   | Is the transient override (boost) active for this zone. (Handles API trickiness for you). |
+| easy-state-is_on         | Switch             | Read Only    | Is the heating currently active in this zone? |
+| temperature-target-boost | Number:Temperature | Read/Write   | The temperature you want the zone to be heated to when the transient override (boost) is active.  Only in Celsius for now. |
+| transient-duration       | Number             | Read/Write   | How long in minutes the transient override (boost) should be active for once started. |
+| transient-remaining      | Number             | Read Only    | If `transient-end_time` is in the future and the transient override (boost) is active: the time between now and `transient-end_time` in minutes, otherwise 0. |
+
+#### Advanced Channels
+
+| Channel                  | Type               | Read/Write   | Description                  |
+|--------------------------|--------------------|--------------|------------------------------|
 | mode-operating           | String             | Read/Write   | The operating mode of heating in the zone (Schedule vs. Manual). |
 | mode-on_off              | Switch             | Read/Write   | Is heating for this zone turned on or off. |
 | state-operating          | String             | Read Only    | Is heating for this zone active? (OFF/HEAT). |
 | mode-operating-override  | Switch             | Read/Write   | Is the transient override (boost) active for this zone. |
-| temperature-target-boost | Number:Temperature | Read/Write   | The temperature you want the zone to be heated to when the transient override (boost) is active.  Only in Celsius for now. |
-| transient-duration       | Number             | Read/Write   | How long in minutes the transient override (boost) should be active for once started. |
+| transient-enabled        | Switch             | Read/Write   | Is the transient override (boost) enabled for this zone. |
 | transient-start_time     | DateTime           | Read Only    | The last time the transient override (boost) was started. |
 | transient-end_time       | DateTime           | Read Only    | The last time the transient override (boost) was scheduled to end (even if it was cancelled). |
-| transient-remaining      | Number             | Read Only    | The time between now and `transient-end_time` in minutes. _N.B. This does not reset to 0 if you cancel the transient override (boost)._ |
 
 
 ## Full Example
@@ -165,21 +209,21 @@ Add using the UI and auto-discovery as explained above.
 
 ```
 // Thermostat / TRV Heating Zone
-Number:Temperature LivingRoom_HeatingZone_Temperature            "Current Temperature"         <temperature> {channel="hive:node:deadbeef-dead-beef-dead-beefdeadbeef:temperature-current"}
-Number:Temperature LivingRoom_HeatingZone_TargetTemperature      "Target Temperature"          <heating>     {channel="hive:node:deadbeef-dead-beef-dead-beefdeadbeef:temperature-target"}
-String             LivingRoom_HeatingZone_OperatingMode          "Heating Mode"                <heating>     {channel="hive:node:deadbeef-dead-beef-dead-beefdeadbeef:mode-operating"}
-String             LivingRoom_HeatingZone_OperatingState         "Heating State"               <heating>     {channel="hive:node:deadbeef-dead-beef-dead-beefdeadbeef:state-operating"}
-Switch             LivingRoom_HeatingZone_OnOff                  "Heating Enabled"             <heating>     {channel="hive:node:deadbeef-dead-beef-dead-beefdeadbeef:mode-on_off"}
-Switch             LivingRoom_HeatingZone_BoostActive            "Boost Active"                <heating>     {channel="hive:node:deadbeef-dead-beef-dead-beefdeadbeef:mode-operating-override"}
-Number             LivingRoom_HeatingZone_BoostDuration          "Boost Duration [%d minutes]" <heating>     {channel="hive:node:deadbeef-dead-beef-dead-beefdeadbeef:transient-duration"}
-Number:Temperature LivingRoom_HeatingZone_BoostTargetTemperature "Boost Target Temperature"    <heating>     {channel="hive:node:deadbeef-dead-beef-dead-beefdeadbeef:temperature-target-boost"}
+Number:Temperature LivingRoom_HeatingZone_Temperature            "Current Temperature"          <temperature> {channel="hive:heating:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:temperature-current"}
+Number:Temperature LivingRoom_HeatingZone_TargetTemperature      "Target Temperature"           <heating>     {channel="hive:heating:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:temperature-target"}
+Switch             LivingRoom_HeatingZone_IsActive               "Heating On"                   <heating>     {channel="hive:heating:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:easy-state-is_on"}
+String             LivingRoom_HeatingZone_Mode                   "Heating Mode"                 <heating>     {channel="hive:heating:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:easy-mode-operating"}
+Switch             LivingRoom_HeatingZone_BoostActive            "Boost Active"                 <heating>     {channel="hive:heating:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:easy-mode-boost"}
+Number             LivingRoom_HeatingZone_BoostDuration          "Boost Duration [%d minutes]"  <heating>     {channel="hive:heating:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:transient-duration"}
+Number             LivingRoom_HeatingZone_BoostRemaining         "Boost Remaining [%d minutes]" <heating>     {channel="hive:heating:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:transient-remaining"}
+Number:Temperature LivingRoom_HeatingZone_BoostTargetTemperature "Boost Target Temperature"     <heating>     {channel="hive:heating:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:temperature-target-boost"}
 
 // Hot Water
-Switch            HotWater_On                                    "Hot Water On"                <water>       {channel="hive:node:cafebabe-cafe-babe-cafe-babecafebabe:is_on"}
-String            HotWater_Operating_Mode                        "Hot Water Operating Mode"    <water>       {channel="hive:node:cafebabe-cafe-babe-cafe-babecafebabe:mode-operating"}
-Switch            HotWater_OnOff                                 "Hot Water Enabled"           <water>       {channel="hive:node:cafebabe-cafe-babe-cafe-babecafebabe:mode-on_off"}
-Switch            HotWater_BoostActive                           "Boost Active"                <water>       {channel="hive:node:cafebabe-cafe-babe-cafe-babecafebabe:mode-operating-override"}
-Number            HotWater_BoostDuration                         "Boost Duration [%d minutes]" <water>       {channel="hive:node:cafebabe-cafe-babe-cafe-babecafebabe:transient-duration"}
+Switch            HotWater_IsActive                              "Hot Water On"                 <water>       {channel="hive:hot_water:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:easy-state-is_on"}
+String            HotWater_Mode                                  "Hot Water Mode"               <water>       {channel="hive:hot_water:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:easy-mode-operating"}
+Switch            HotWater_BoostActive                           "Boost Active"                 <water>       {channel="hive:hot_water:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:easy-mode-boost"}
+Number            HotWater_BoostDuration                         "Boost Duration [%d minutes]"  <water>       {channel="hive:hot_water:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:transient-duration"}
+Number            HotWater_BoostRemaining                        "Boost Remaining [%d minutes]" <water>       {channel="hive:hot_water:my-bridge:deadbeef-dead-beef-dead-beefdeadbeef:transient-remaining"}
 ```
 
 ### example.sitemap
@@ -187,22 +231,22 @@ Number            HotWater_BoostDuration                         "Boost Duration
 ```
 sitemap home label="Home" {
     Frame label="Living Room" icon="sofa" {
-        Default  item=LivingRoom_TRV_Temperature
+        Default  item=LivingRoom_HeatingZone_Temperature
         Setpoint item=LivingRoom_HeatingZone_TargetTemperature minValue=7 maxValue=25
-        Default  item=LivingRoom_HeatingZone_OperatingMode
-        Default  item=LivingRoom_HeatingZone_OperatingState
-        Default  item=LivingRoom_HeatingZone_OnOff
+        Text     item=LivingRoom_HeatingZone_IsActive label="Heating is currently [%s]"
+        Default  item=LivingRoom_HeatingZone_Mode
         Default  item=LivingRoom_HeatingZone_BoostActive
-        Default  item=LivingRoom_HeatingZone_BoostDuration
-        Setpoint item=LivingRoom_HeatingZone_BoostTargetTemperature minValue=7 maxValue=25
+        Setpoint item=LivingRoom_HeatingZone_BoostDuration minValue=10 maxValue=60 step=5
+        Default  item=LivingRoom_HeatingZone_BoostRemaining
+        Setpoint item=LivingRoom_HeatingZone_BoostTargetTemperature minValue=7 maxValue=25 step=0.5
     }
 
     Frame label="Hot Water" icon="water" {
-        Text    item=HotWater_On label="Hot Water is currently [%s]"
-        Default item=HotWater_Operating_Mode
-        Default item=HotWater_OnOff
-        Default item=HotWater_BoostActive
-        Default item=HotWater_BoostDuration
+        Text     item=HotWater_IsActive label="Hot Water is currently [%s]"
+        Default  item=HotWater_Mode
+        Default  item=HotWater_BoostActive
+        Setpoint item=HotWater_BoostDuration minValue=10 maxValue=60 step=5
+        Default  item=LivingRoom_HeatingZone_BoostRemaining
     }
 }
 ```

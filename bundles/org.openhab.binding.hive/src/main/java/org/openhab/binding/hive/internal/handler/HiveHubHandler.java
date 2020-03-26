@@ -12,13 +12,16 @@
  */
 package org.openhab.binding.hive.internal.handler;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.thing.Thing;
-
-import java.util.Collections;
+import org.openhab.binding.hive.internal.handler.strategy.PhysicalDeviceHandlerStrategy;
 
 /**
- *
+ * A {@link org.eclipse.smarthome.core.thing.binding.ThingHandler} for
+ * Hive Hubs.
  *
  * @author Ross Brown - Initial contribution
  */
@@ -27,7 +30,9 @@ public final class HiveHubHandler extends HiveHandlerBase {
     public HiveHubHandler(final Thing thing) {
         super(
                 thing,
-                Collections.emptySet()
+                Stream.of(
+                        PhysicalDeviceHandlerStrategy.getInstance()
+                ).collect(Collectors.toSet())
         );
     }
 }

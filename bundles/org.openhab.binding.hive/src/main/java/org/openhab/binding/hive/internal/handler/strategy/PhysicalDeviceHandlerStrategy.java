@@ -13,25 +13,22 @@
 package org.openhab.binding.hive.internal.handler.strategy;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
-import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.client.Node;
-import org.openhab.binding.hive.internal.client.feature.TemperatureSensorFeature;
+import org.openhab.binding.hive.internal.client.feature.PhysicalDeviceFeature;
 
 /**
  * A {@link ThingHandlerStrategy} for handling
- * {@link TemperatureSensorFeature}.
+ * {@link PhysicalDeviceFeature}.
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class TemperatureSensorHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final TemperatureSensorHandlerStrategy INSTANCE = new TemperatureSensorHandlerStrategy();
+public final class PhysicalDeviceHandlerStrategy extends ThingHandlerStrategyBase {
+    private static final PhysicalDeviceHandlerStrategy INSTANCE = new PhysicalDeviceHandlerStrategy();
 
-    public static TemperatureSensorHandlerStrategy getInstance() {
+    public static PhysicalDeviceHandlerStrategy getInstance() {
         return INSTANCE;
     }
 
@@ -41,11 +38,11 @@ public final class TemperatureSensorHandlerStrategy extends ThingHandlerStrategy
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, TemperatureSensorFeature.class, temperatureSensorFeature -> {
-            // FIXME: Actually check temperature unit.
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_CURRENT, temperatureChannel -> {
-                thingHandlerCallback.stateUpdated(temperatureChannel, new QuantityType<>(temperatureSensorFeature.getTemperature().getValue(), SIUnits.CELSIUS));
-            });
+        useFeatureSafely(hiveNode, PhysicalDeviceFeature.class, physicalDeviceFeature -> {
+            thing.setProperty(Thing.PROPERTY_VENDOR, physicalDeviceFeature.getManufacturer());
+            thing.setProperty(Thing.PROPERTY_MODEL_ID, physicalDeviceFeature.getModel());
+            thing.setProperty(Thing.PROPERTY_FIRMWARE_VERSION, physicalDeviceFeature.getSoftwareVersion());
+            thing.setProperty(Thing.PROPERTY_SERIAL_NUMBER, physicalDeviceFeature.getHardwareIdentifier());
         });
     }
 }

@@ -13,22 +13,21 @@
 package org.openhab.binding.hive.internal.handler.strategy;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.client.Node;
-import org.openhab.binding.hive.internal.client.feature.Feature;
 
 /**
- * A strategy for how a {@link ThingHandler} should handle commands on and
- * updates from {@link Node}s.
+ * A strategy for how a {@link org.eclipse.smarthome.core.thing.binding.ThingHandler}
+ * should handle commands on and updates from {@link Node}s.
  *
  * <p>
- *     This is intended to decouple the handling of specific {@link Feature}s
- *     so it can be re-used by multiple {@link ThingHandler}s.
+ *     This is intended to decouple the handling of specific
+ *     {@link org.openhab.binding.hive.internal.client.feature.Feature}s
+ *     so it can be re-used by multiple
+ *     {@link org.eclipse.smarthome.core.thing.binding.ThingHandler}s.
  * </p>
  *
  * @author Ross Brown - Initial contribution
@@ -36,8 +35,8 @@ import org.openhab.binding.hive.internal.client.feature.Feature;
 @NonNullByDefault
 public interface ThingHandlerStrategy {
     /**
-     * Called when a {@link Channel} has received a command that needs
-     * to be handled.
+     * Called when a {@link org.eclipse.smarthome.core.thing.Channel}
+     * has received a command that needs to be handled.
      *
      * @param channelUID
      *      The UID of the channel that received the command.

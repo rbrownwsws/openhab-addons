@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.hive.internal.handler;
 
+import java.util.*;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.*;
@@ -23,10 +25,14 @@ import org.openhab.binding.hive.internal.handler.strategy.ThingHandlerStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-
 /**
+ * A base {@link org.eclipse.smarthome.core.thing.binding.ThingHandler} for
+ * Hive devices.
  *
+ * <p>
+ *     Delegates most functionality to a provided set of
+ *     {@link ThingHandlerStrategy}s.
+ * </p>
  *
  * @author Ross Brown - Initial contribution
  */
@@ -71,7 +77,8 @@ abstract class HiveHandlerBase extends BaseThingHandler {
             boolean commandHandled = false;
             final Iterator<ThingHandlerStrategy> strategyIterator = handlerStrategies.iterator();
             while (strategyIterator.hasNext() && !commandHandled) {
-                final ThingHandlerStrategy strategy = strategyIterator.next();
+                final @Nullable ThingHandlerStrategy strategy = strategyIterator.next();
+                assert strategy != null;
 
                 commandHandled = strategy.handleCommand(channelUID, command, hiveNode);
             }

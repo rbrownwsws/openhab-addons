@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.OnOffMode;
 
 /**
@@ -20,7 +21,7 @@ import org.openhab.binding.hive.internal.client.OnOffMode;
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class OnOffDeviceV1FeatureDto extends FeatureDtoBase {
-    public FeatureAttributeDto<OnOffMode> mode;
+    public @Nullable FeatureAttributeDto<OnOffMode> mode;
 }

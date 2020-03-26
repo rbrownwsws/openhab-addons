@@ -12,19 +12,20 @@
  */
 package org.openhab.binding.hive.internal.client.dto;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.math.BigDecimal;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  *
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class BatteryDeviceV1FeatureDto extends FeatureDtoBase {
-    public FeatureAttributeDto<Integer> batteryLevel;
-    public FeatureAttributeDto<String> batteryState;
-    public FeatureAttributeDto<BigDecimal> batteryVoltage;
-    public FeatureAttributeDto<String> notificationState;
+    public @Nullable FeatureAttributeDto<Integer> batteryLevel;
+    public @Nullable FeatureAttributeDto<String> batteryState;
+    public @Nullable FeatureAttributeDto<BigDecimal> batteryVoltage;
+    public @Nullable FeatureAttributeDto<String> notificationState;
 }

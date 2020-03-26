@@ -12,11 +12,11 @@
  */
 package org.openhab.binding.hive.internal.client.feature;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.OnOffMode;
 import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
-
-import java.util.Objects;
 
 /**
  *

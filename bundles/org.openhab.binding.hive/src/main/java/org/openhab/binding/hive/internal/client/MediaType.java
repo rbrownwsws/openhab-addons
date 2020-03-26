@@ -15,7 +15,7 @@ package org.openhab.binding.hive.internal.client;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- *
+ * Represents a media type used by the Hive API.
  *
  * @author Ross Brown - Initial contribution
  */

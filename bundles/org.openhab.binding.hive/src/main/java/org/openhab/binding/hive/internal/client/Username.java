@@ -15,7 +15,7 @@ package org.openhab.binding.hive.internal.client;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A username value type.
+ * Represents a Hive API username.
  *
  * @author Ross Brown - Initial contribution
  */

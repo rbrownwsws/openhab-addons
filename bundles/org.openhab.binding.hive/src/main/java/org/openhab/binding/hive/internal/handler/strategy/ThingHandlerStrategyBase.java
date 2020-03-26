@@ -12,19 +12,18 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Objects;
 
 /**
  * A base class that makes implementing {@link ThingHandlerStrategy}s easier.
@@ -38,7 +37,7 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
     /**
      * Represents a method that requires a nonnull {@link ChannelUID}.
      * 
-     * @see #useChannelSafely(Thing, String, DoWithChannelUid) 
+     * @see #useChannelSafely(Thing, String, DoWithChannelUid)
      */
     @FunctionalInterface
     protected interface DoWithChannelUid {
@@ -52,8 +51,8 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
      * @see #useFeatureSafely(Node, Class, DoWithFeatureAndReturn)
      */
     @FunctionalInterface
-    protected interface DoWithFeatureAndReturn<F extends Feature, R> {
-        R doStuff(F feature);
+    protected interface DoWithFeatureAndReturn<F extends Feature> {
+        boolean doStuff(F feature);
     }
 
     /**
@@ -111,8 +110,8 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
      * not have a {@link Feature} that you expect it to have.
      *
      * <p>
-     *     e.g. If an incorrect {@link ThingHandler} has been assigned to a
-     *     {@linkplain Node}.
+     *     e.g. If an incorrect {@link org.eclipse.smarthome.core.thing.binding.ThingHandler}
+     *     has been assigned to a {@linkplain Node}.
      * </p>
      *
      * @param hiveNode
@@ -127,17 +126,14 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
      * @param <F>
      *      The type of {@linkplain Feature} you want to use.
      *
-     * @param <R>
-     *      The type of thing you want to return from using the {@linkplain Feature}.
-     *
      * @return
      *      Either the result of {@code thingToDo.doStuff(F)} if the feature
      *      is available or {@code null} if the feature is not available.
      */
-    protected <F extends Feature, R> @Nullable R useFeatureSafely(
+    protected <F extends Feature> boolean useFeatureSafely(
             final Node hiveNode,
             final Class<F> featureClass,
-            final DoWithFeatureAndReturn<F, R> thingToDo
+            final DoWithFeatureAndReturn<F> thingToDo
     ) {
         Objects.requireNonNull(hiveNode);
         Objects.requireNonNull(featureClass);
@@ -149,7 +145,7 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
             return thingToDo.doStuff(feature);
         } else {
             this.logger.warn("Could not get feature {} for node {} ({}). Has it been given the wrong kind of handler?", featureClass.getName(), hiveNode.getName(), hiveNode.getId());
-            return null;
+            return false;
         }
     }
 
@@ -159,8 +155,8 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
      * not have a {@link Feature} that you expect it to have.
      *
      * <p>
-     *     e.g. If an incorrect {@link ThingHandler} has been assigned to a
-     *     {@linkplain Node}.
+     *     e.g. If an incorrect {@link org.eclipse.smarthome.core.thing.binding.ThingHandler}
+     *     has been assigned to a {@linkplain Node}.
      * </p>
      *
      * @param hiveNode
@@ -180,7 +176,7 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
             final Class<F> featureClass,
             final DoWithFeature<F> thingToDo
     ) {
-        useFeatureSafely(hiveNode, featureClass, (feature) -> { thingToDo.doStuff(feature); return null;});
+        useFeatureSafely(hiveNode, featureClass, (feature) -> { thingToDo.doStuff(feature); return false;});
     }
 
     // Default implementation that does nothing.

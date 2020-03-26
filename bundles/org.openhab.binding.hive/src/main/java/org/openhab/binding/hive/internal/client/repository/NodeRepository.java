@@ -12,12 +12,12 @@
  */
 package org.openhab.binding.hive.internal.client.repository;
 
+import java.util.Set;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.NodeId;
-
-import java.util.Set;
 
 /**
  *

@@ -12,11 +12,11 @@
  */
 package org.openhab.binding.hive.internal.client;
 
+import java.util.*;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.feature.Feature;
-
-import java.util.*;
 
 /**
  *

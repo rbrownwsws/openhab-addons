@@ -12,11 +12,11 @@
  */
 package org.openhab.binding.hive.internal.client;
 
+import java.util.Set;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.feature.Feature;
-
-import java.util.Set;
 
 /**
  *
@@ -26,12 +26,18 @@ import java.util.Set;
 @NonNullByDefault
 public interface Node {
     NodeId getId();
+
     NodeName getName();
+
     NodeType getNodeType();
+
     ProductType getProductType();
+
     Protocol getProtocol();
+
     NodeId getParentNodeId();
 
     Set<Feature> getFeatures();
+
     <T extends Feature> @Nullable T getFeature(Class<T> classOfFeature);
 }

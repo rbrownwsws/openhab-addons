@@ -12,16 +12,18 @@
  */
 package org.openhab.binding.hive.internal.handler;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.openhab.binding.hive.internal.handler.strategy.BatteryDeviceHandlerStrategy;
-import org.openhab.binding.hive.internal.handler.strategy.ZigbeeDeviceHandlerStrategy;
-
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.core.thing.Thing;
+import org.openhab.binding.hive.internal.handler.strategy.BatteryDeviceHandlerStrategy;
+import org.openhab.binding.hive.internal.handler.strategy.PhysicalDeviceHandlerStrategy;
+import org.openhab.binding.hive.internal.handler.strategy.ZigbeeDeviceHandlerStrategy;
+
 /**
- *
+ * A {@link org.eclipse.smarthome.core.thing.binding.ThingHandler} for
+ * Hive Thermostats
  *
  * @author Ross Brown - Initial contribution
  */
@@ -32,6 +34,7 @@ public final class HiveThermostatHandler extends HiveHandlerBase {
                 thing,
                 Stream.of(
                         BatteryDeviceHandlerStrategy.getInstance(),
+                        PhysicalDeviceHandlerStrategy.getInstance(),
                         ZigbeeDeviceHandlerStrategy.getInstance()
                 ).collect(Collectors.toSet())
         );

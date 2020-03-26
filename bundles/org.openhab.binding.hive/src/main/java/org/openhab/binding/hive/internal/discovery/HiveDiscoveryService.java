@@ -12,7 +12,12 @@
  */
 package org.openhab.binding.hive.internal.discovery;
 
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
@@ -24,10 +29,6 @@ import org.openhab.binding.hive.internal.client.NodeId;
 import org.openhab.binding.hive.internal.client.ProductType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *
@@ -48,9 +49,26 @@ public class HiveDiscoveryService extends AbstractDiscoveryService {
 
     private final Logger logger = LoggerFactory.getLogger(HiveDiscoveryService.class);
 
+    /**
+     * The {@linkplain ThingUID} of the
+     * {@linkplain org.eclipse.smarthome.core.thing.Bridge} this discovery
+     * service belongs to.
+     */
     private final ThingUID bridgeUid;
+
+    /**
+     * The collection of currently known {@linkplain Node}s from the Hive
+     * API.
+     */
     private final AtomicReference<Map<NodeId, Node>> lastKnownNodes = new AtomicReference<>(Collections.emptyMap());
 
+    /**
+     * Create a new {@linkplain HiveDiscoveryService}.
+     *
+     * @param bridgeUid
+     *      The {@linkplain ThingUID} of the bridge that owns this discovery
+     *      service.
+     */
     public HiveDiscoveryService(final ThingUID bridgeUid) {
         super(
                 HiveBindingConstants.DISCOVERABLE_THING_TYPES_UIDS,
@@ -62,6 +80,13 @@ public class HiveDiscoveryService extends AbstractDiscoveryService {
         this.bridgeUid = bridgeUid;
     }
 
+    /**
+     * Provide the discovery service with a new set of known nodes from the
+     * Hive API.
+     *
+     * @param knownNodes
+     *      The new {@linkplain Set} of known {@linkplain Node}s.
+     */
     public void updateKnownNodes(final Set<Node> knownNodes) {
         Objects.requireNonNull(knownNodes);
 
@@ -81,7 +106,9 @@ public class HiveDiscoveryService extends AbstractDiscoveryService {
     @Override
     protected void startScan() {
         // Get a local copy of nodes to prevent concurrency problems
-        final Map<NodeId, Node> nodes = this.lastKnownNodes.get();
+        final @Nullable Map<NodeId, Node> nodes = this.lastKnownNodes.get();
+        // I never allow lastKnownNodes to be set to null.
+        assert nodes != null;
 
         // Go through the set of nodes and report their discovery.
         for (final Node node : nodes.values()) {
@@ -118,9 +145,14 @@ public class HiveDiscoveryService extends AbstractDiscoveryService {
             } else if (node.getProductType().equals(ProductType.HEATING)) {
                 // If node is heating node use the parent name because
                 // the real name is just a generic Thermostat X.
-                final Node parentNode = nodes.get(node.getParentNodeId());
+                final @Nullable Node parentNode = nodes.get(node.getParentNodeId());
 
-                label = parentNode.getName().toString() + " (Thermostat Heating Zone)";
+                if (parentNode != null) {
+                    label = parentNode.getName().toString() + " (Thermostat Heating Zone)";
+                } else {
+                    logger.warn("Could not find parent node with id {}", node.getParentNodeId());
+                    label = node.getName().toString();
+                }
             } else if (node.getProductType().equals(ProductType.HOT_WATER)) {
                 label = "Hot Water";
             } else if (node.getProductType().equals(ProductType.THERMOSTAT_UI)) {

@@ -4,6 +4,12 @@
 	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
+	<channel-type id="mode-operating-override" advanced="true">
+		<item-type>Switch</item-type>
+		<label>Boost Active</label>
+		<category>Heating</category>
+	</channel-type>
+
 	<channel-type id="transient-duration">
 		<item-type>Number</item-type>
 		<label>Boost Duration</label>
@@ -22,17 +28,16 @@
 		<item-type>Switch</item-type>
 		<label>Boost Enabled</label>
 		<category>Heating</category>
-		<state readOnly="true" />
 	</channel-type>
 
-	<channel-type id="transient-start_time">
+	<channel-type id="transient-start_time" advanced="true">
 		<item-type>DateTime</item-type>
 		<label>Boost Start Time</label>
 		<category>Heating</category>
 		<state readOnly="true" />
 	</channel-type>
 
-	<channel-type id="transient-end_time">
+	<channel-type id="transient-end_time" advanced="true">
 		<item-type>DateTime</item-type>
 		<label>Boost End Time</label>
 		<category>Heating</category>

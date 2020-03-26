@@ -22,10 +22,12 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.BatteryDeviceFeature;
+
 import tec.uom.se.unit.Units;
 
 /**
- *
+ * A {@link ThingHandlerStrategy} for handling
+ * {@link BatteryDeviceFeature}.
  *
  * @author Ross Brown - Initial contribution
  */

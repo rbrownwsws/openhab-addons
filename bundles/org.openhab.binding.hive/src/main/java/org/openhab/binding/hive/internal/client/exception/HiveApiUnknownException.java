@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class HiveApiUnknownException extends HiveApiException {
-    public static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     public HiveApiUnknownException() {
         super();

@@ -13,16 +13,17 @@
 package org.openhab.binding.hive.internal.client.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  *
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class ZigbeeDeviceV1FeatureDto extends FeatureDtoBase {
-    public FeatureAttributeDto<Integer> averageLQI;
-    public FeatureAttributeDto<Integer> lastKnownLQI;
-    public FeatureAttributeDto<Integer> averageRSSI;
-    public FeatureAttributeDto<Integer> lastKnownRSSI;
+    public @Nullable FeatureAttributeDto<Integer> averageLQI;
+    public @Nullable FeatureAttributeDto<Integer> lastKnownLQI;
+    public @Nullable FeatureAttributeDto<Integer> averageRSSI;
+    public @Nullable FeatureAttributeDto<Integer> lastKnownRSSI;
 }

@@ -12,6 +12,10 @@
  */
 package org.openhab.binding.hive.internal;
 
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
@@ -28,10 +32,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
 
 /**
  * The {@link HiveHandlerFactory} is responsible for creating things and thing
@@ -55,7 +55,7 @@ public final class HiveHandlerFactory extends BaseThingHandlerFactory {
         super.activate(componentContext);
 
         // Help keep track of when openHAB reloads binding while debugging.
-        logger.debug("Handler has been activated");
+        logger.trace("Handler has been activated");
     }
 
     @Override
@@ -63,7 +63,7 @@ public final class HiveHandlerFactory extends BaseThingHandlerFactory {
         super.deactivate(componentContext);
 
         // Help keep track of when openHAB reloads binding while debugging.
-        logger.debug("Handler has been deactivated");
+        logger.trace("Handler has been deactivated");
     }
 
     @Override
@@ -111,14 +111,14 @@ public final class HiveHandlerFactory extends BaseThingHandlerFactory {
 
     @Override
     protected void removeHandler(final ThingHandler thingHandler) {
-        logger.debug("Removing handler");
+        logger.trace("Removing handler");
         if (thingHandler instanceof HiveAccountHandler) {
-            logger.debug("Handler is bridge");
+            logger.trace("Handler is bridge");
             // Clean up associated discovery service.
             final @Nullable ServiceRegistration<?> serviceReg = this.discoveryServices.remove(thingHandler.getThing().getUID());
 
             if (serviceReg != null) {
-                logger.debug("Unregistered service");
+                logger.trace("Unregistered service");
                 serviceReg.unregister();
             }
         }

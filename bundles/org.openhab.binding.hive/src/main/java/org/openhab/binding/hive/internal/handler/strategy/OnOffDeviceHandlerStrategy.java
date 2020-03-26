@@ -24,7 +24,8 @@ import org.openhab.binding.hive.internal.client.OnOffMode;
 import org.openhab.binding.hive.internal.client.feature.OnOffDeviceFeature;
 
 /**
- *
+ * A {@link ThingHandlerStrategy} for handling
+ * {@link OnOffDeviceFeature}.
  *
  * @author Ross Brown - Initial contribution
  */

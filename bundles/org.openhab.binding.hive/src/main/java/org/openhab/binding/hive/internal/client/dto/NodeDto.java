@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.NodeId;
 import org.openhab.binding.hive.internal.client.NodeName;
 import org.openhab.binding.hive.internal.client.NodeType;
@@ -25,7 +26,7 @@ import org.openhab.binding.hive.internal.client.UserId;
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class NodeDto {
     /**
      * address (string, optional): Internal node ID, read-only.
@@ -34,7 +35,7 @@ public final class NodeDto {
      * Node address conforms following pattern: ::([a-f0-9]{1,4}):([a-f0-9]{1,4}):([a-f0-9]{1,4}):([a-f0-9]{1,4}).
      * Admin access required.
      */
-    public String address;
+    public @Nullable String address;
 
     /*
      * brokers (inline_model_26, optional): Brokers address map
@@ -45,41 +46,41 @@ public final class NodeDto {
      * createdOn (integer, optional): Timestamp of when the node state was created.
      * UTC Unix timestamp (in milliseconds)
      */
-    public HiveApiInstant createdOn;
+    public @Nullable HiveApiInstant createdOn;
 
-    public FeaturesDto features;
+    public @Nullable FeaturesDto features;
 
     /**
      * firstInstall (integer, optional): Timestamp of when the device was discovered.
      * UTC Unix timestamp (in milliseconds)
      */
-    public HiveApiInstant firstInstall;
+    public @Nullable HiveApiInstant firstInstall;
 
     /**
      * homeId (string, optional): Home ID, read-only
      */
-    public String homeId;
+    public @Nullable String homeId;
 
     /**
      * href (string, optional, read only): URL of the API call for retrieving this object
      */
-    public String href;
+    public @Nullable String href;
 
     /**
      * id (string, optional): Object identifier
      */
-    public NodeId id;
+    public @Nullable NodeId id;
 
     /**
      * lastSeen (integer, optional): Timestamp of when the node was last seen.
      * UTC Unix timestamp (in milliseconds)
      */
-    public HiveApiInstant lastSeen;
+    public @Nullable HiveApiInstant lastSeen;
 
     /**
      * lastUpgradeSucceeded (boolean, optional): Last upgrade succeeded
      */
-    public Boolean lastUpgradeSucceeded;
+    public @Nullable Boolean lastUpgradeSucceeded;
 
     /*
      * links (inline_model_27, optional): URL Templates for links to other entities
@@ -89,28 +90,28 @@ public final class NodeDto {
     /**
      * name (string, optional): Node name
      */
-    public NodeName name;
+    public @Nullable NodeName name;
 
     /**
      * nodeType (string, optional): Node type
      */
-    public NodeType nodeType;
+    public @Nullable NodeType nodeType;
 
     /**
      * ownerId (string, optional): Original owner UUID
      */
-    public UserId ownerId;
+    public @Nullable UserId ownerId;
 
     /**
      * parentNodeId (string, optional): Parent node UUID
      */
-    public NodeId parentNodeId;
+    public @Nullable NodeId parentNodeId;
 
     /**
      * protocol (string, optional): Node protocol, optional, read-only
      * ['SYNTHETIC', 'ZIGBEE', 'PROXIED', 'MQTT', 'XMPP', 'VIRTUAL', 'any other provided by hub']
      */
-    public String protocol;
+    public @Nullable String protocol;
 
     /*
      * relationships (inline_model_28, optional): Node relationships
@@ -120,21 +121,21 @@ public final class NodeDto {
     /**
      * upgradeAvailable (boolean, optional): Is upgrade available
      */
-    public Boolean upgradeAvailable;
+    public @Nullable Boolean upgradeAvailable;
 
     /**
      * upgradeProgress (number, optional): Upgrade progress in percentages
      */
-    public Double upgradeProgress;
+    public @Nullable Double upgradeProgress;
 
     /**
      * upgradeStatus (string, optional): Upgrade status, read-only
      * ['PENDING', 'DEFERRED', 'STARTING', 'IN_PROGRESS', 'COMPLETE', 'FAILED', 'UNSUPPORTED', 'INVALID']
      */
-    public String upgradeStatus;
+    public @Nullable String upgradeStatus;
 
     /**
      * userId (string, optional): User UUID
      */
-    public UserId userId;
+    public @Nullable UserId userId;
 }

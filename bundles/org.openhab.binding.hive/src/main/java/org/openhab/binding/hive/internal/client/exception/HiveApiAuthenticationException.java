@@ -22,6 +22,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class HiveApiAuthenticationException extends HiveApiException {
+    private static final long serialVersionUID = 1L;
+
     public HiveApiAuthenticationException() {
         super();
     }

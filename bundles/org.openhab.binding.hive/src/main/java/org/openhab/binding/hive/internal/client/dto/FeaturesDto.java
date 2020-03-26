@@ -13,20 +13,22 @@
 package org.openhab.binding.hive.internal.client.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  *
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class FeaturesDto {
-    public BatteryDeviceV1FeatureDto battery_device_v1;
-    public DeviceManagementV1FeatureDto device_management_v1;
-    public HeatingThermostatV1FeatureDto heating_thermostat_v1;
-    public OnOffDeviceV1FeatureDto on_off_device_v1;
-    public TemperatureSensorV1FeatureDto temperature_sensor_v1;
-    public TransientModeV1FeatureDto transient_mode_v1;
-    public WaterHeaterV1FeatureDto water_heater_v1;
-    public ZigbeeDeviceV1FeatureDto zigbee_device_v1;
+    public @Nullable BatteryDeviceV1FeatureDto battery_device_v1;
+    public @Nullable DeviceManagementV1FeatureDto device_management_v1;
+    public @Nullable HeatingThermostatV1FeatureDto heating_thermostat_v1;
+    public @Nullable OnOffDeviceV1FeatureDto on_off_device_v1;
+    public @Nullable PhysicalDeviceV1FeatureDto physical_device_v1;
+    public @Nullable TemperatureSensorV1FeatureDto temperature_sensor_v1;
+    public @Nullable TransientModeV1FeatureDto transient_mode_v1;
+    public @Nullable WaterHeaterV1FeatureDto water_heater_v1;
+    public @Nullable ZigbeeDeviceV1FeatureDto zigbee_device_v1;
 }

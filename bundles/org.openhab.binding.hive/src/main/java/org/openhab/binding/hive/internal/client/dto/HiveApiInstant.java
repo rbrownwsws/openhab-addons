@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.hive.internal.client.dto;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.time.Instant;
 import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * A class representing absolute times returned by the Hive API.
@@ -43,8 +43,10 @@ public final class HiveApiInstant {
     @NonNullByDefault({})
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         final HiveApiInstant that = (HiveApiInstant) o;
         return instant.equals(that.instant);
     }

@@ -27,5 +27,24 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public interface JsonService {
     String toJson(Object object);
+
+    /**
+     *
+     * @param json
+     *      The json to parse.
+     *
+     * @param classOfT
+     *      The class of {@code T}.
+     *
+     * @param <T>
+     *      The type that you want the json to be parsed into.
+     *
+     * @return
+     *      The {@code T} representation of the provided json.
+     *
+     * @throws IllegalArgumentException
+     *      If the provided json is empty or does not represent an instance
+     *      of {@code T}.
+     */
     <T> T fromJson(String json, Class<T> classOfT);
 }

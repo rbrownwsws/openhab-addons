@@ -25,12 +25,14 @@ import org.openhab.binding.hive.internal.client.Temperature;
 import org.openhab.binding.hive.internal.client.feature.TransientModeHeatingActionsFeature;
 
 /**
- *
+ * A {@link ThingHandlerStrategy} for handling channels that interface with
+ * the "set targetTemperature action" for transient override (boost) of
+ * Hive Active Heating zones.
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class HeatingTransientModeHandlerStrategy extends ThingHandlerStrategyBase  {
+public final class HeatingTransientModeHandlerStrategy extends ThingHandlerStrategyBase {
     private static final HeatingTransientModeHandlerStrategy INSTANCE = new HeatingTransientModeHandlerStrategy();
 
     public static HeatingTransientModeHandlerStrategy getInstance() {

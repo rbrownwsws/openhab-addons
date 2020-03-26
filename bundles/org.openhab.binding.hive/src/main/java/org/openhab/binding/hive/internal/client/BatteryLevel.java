@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  *
@@ -40,8 +40,10 @@ public final class BatteryLevel {
     @NonNullByDefault({})
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         BatteryLevel that = (BatteryLevel) o;
         return value == that.value;
     }

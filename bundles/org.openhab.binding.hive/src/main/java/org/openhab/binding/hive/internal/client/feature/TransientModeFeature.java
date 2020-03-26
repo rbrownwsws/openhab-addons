@@ -12,13 +12,13 @@
  */
 package org.openhab.binding.hive.internal.client.feature;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.hive.internal.client.FeatureAttribute;
-import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
-
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.FeatureAttribute;
+import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
 
 /**
  *
@@ -28,13 +28,13 @@ import java.util.Objects;
 @NonNullByDefault
 public class TransientModeFeature implements Feature {
     private final SettableFeatureAttribute<Duration> duration;
-    private final FeatureAttribute<Boolean> isEnabled;
+    private final SettableFeatureAttribute<Boolean> isEnabled;
     private final FeatureAttribute<ZonedDateTime> startDatetime;
     private final FeatureAttribute<ZonedDateTime> endDatetime;
 
     public TransientModeFeature(
             final SettableFeatureAttribute<Duration> duration,
-            final FeatureAttribute<Boolean> isEnabled,
+            final SettableFeatureAttribute<Boolean> isEnabled,
             final FeatureAttribute<ZonedDateTime> startDatetime,
             final FeatureAttribute<ZonedDateTime> endDatetime
     ) {
@@ -63,12 +63,16 @@ public class TransientModeFeature implements Feature {
         this.duration.setTargetValue(duration);
     }
 
-    public final FeatureAttribute<Boolean> getIsEnabledAttribute() {
+    public final SettableFeatureAttribute<Boolean> getIsEnabledAttribute() {
         return this.isEnabled;
     }
 
     public final boolean getIsEnabled() {
         return this.isEnabled.getDisplayValue();
+    }
+
+    public final void setIsEnabled(final boolean isEnabled) {
+        this.isEnabled.setTargetValue(isEnabled);
     }
 
     public final FeatureAttribute<ZonedDateTime> getStartDatetimeAttribute() {

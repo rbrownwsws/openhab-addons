@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  *

@@ -12,27 +12,27 @@
  */
 package org.openhab.binding.hive.internal.client.dto;
 
-
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.hive.internal.client.OperatingMode;
-import org.openhab.binding.hive.internal.client.OverrideMode;
-
 import java.math.BigDecimal;
 import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.hive.internal.client.HeatingThermostatOperatingMode;
+import org.openhab.binding.hive.internal.client.OverrideMode;
 
 /**
  *
  *
  * @author Ross Brown - Initial contribution
  */
-@NonNullByDefault({})
+@NonNullByDefault
 public final class HeatingThermostatV1FeatureDto extends FeatureDtoBase {
-    public FeatureAttributeDto<OperatingMode> operatingMode;
-    public FeatureAttributeDto<String> operatingState;
-    public FeatureAttributeDto<OverrideMode> temporaryOperatingModeOverride;
-    public FeatureAttributeDto<BigDecimal> targetHeatTemperature;
-    public FeatureAttributeDto<BigDecimal> maxHeatTargetTemperature;
-    public FeatureAttributeDto<BigDecimal> minHeatTargetTemperature;
+    public @Nullable FeatureAttributeDto<HeatingThermostatOperatingMode> operatingMode;
+    public @Nullable FeatureAttributeDto<String> operatingState;
+    public @Nullable FeatureAttributeDto<OverrideMode> temporaryOperatingModeOverride;
+    public @Nullable FeatureAttributeDto<BigDecimal> targetHeatTemperature;
+    public @Nullable FeatureAttributeDto<BigDecimal> maxHeatTargetTemperature;
+    public @Nullable FeatureAttributeDto<BigDecimal> minHeatTargetTemperature;
 
-    public FeatureAttributeDto<List<ActionDto>> previousConfiguration;
+    public @Nullable FeatureAttributeDto<List<ActionDto>> previousConfiguration;
 }

@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.time.Instant;
 import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  *
@@ -30,7 +30,7 @@ public class FeatureAttribute<T> {
 
     private final T displayValue;
 
-    FeatureAttribute(
+    public FeatureAttribute(
             final T reportedValue,
             final Instant reportChangedTime,
             final Instant reportReceivedTime,

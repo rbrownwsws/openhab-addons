@@ -21,7 +21,8 @@ import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.ZigbeeDeviceFeature;
 
 /**
- *
+ * A {@link ThingHandlerStrategy} for handling
+ * {@link ZigbeeDeviceFeature}.
  *
  * @author Ross Brown - Initial contribution
  */
