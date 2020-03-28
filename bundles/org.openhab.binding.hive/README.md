@@ -133,7 +133,7 @@ No channels exposed in current version of binding.
 
 | Channel                    | Type                     | Read/Write   | Description                  |
 |----------------------------|--------------------------|--------------|------------------------------|
-| battery-level              | Number                   | Read Only    | The percentage of charge the device's battery has left. _N.B. This seems to be a very course measurement so don't expect to see it change very often._ |
+| battery-level              | Number                   | Read Only    | The percentage of charge the device's battery has left. _N.B. This seems to be a very coarse measurement so don't expect to see it change very often._ |
 | battery-low                | Switch                   | Read Only    | Turns "On" when the battery is low. |
 
 #### Advanced channels
@@ -155,7 +155,7 @@ No channels exposed in current version of binding.
 | Channel                    | Type                     | Read/Write   | Description                  |
 |----------------------------|--------------------------|--------------|------------------------------|
 | temperature-current        | Number:Temperature       | Read Only    | The current temperature of the zone.  Only in Celsius for now. |
-| battery-level              | Number                   | Read Only    | The percentage of charge the device's battery has left. _N.B. This seems to be a very course measurement so don't expect to see it change very often._ |
+| battery-level              | Number                   | Read Only    | The percentage of charge the device's battery has left. _N.B. This seems to be a very coarse measurement so don't expect to see it change very often._ |
 | battery-low                | Switch                   | Read Only    | Turns "On" when the battery is low. |
 
 #### Advanced channels
