@@ -15,6 +15,7 @@ package org.openhab.binding.hive.internal.client;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  *
@@ -23,7 +24,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class BatteryLevel {
-    private int value;
+    private final int value;
 
     public BatteryLevel(int value) {
         if (value < 0 || value > 100) {
@@ -37,9 +38,8 @@ public final class BatteryLevel {
         return value;
     }
 
-    @NonNullByDefault({})
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())

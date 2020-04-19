@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client.adapter;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.NodeType;
@@ -29,6 +30,6 @@ public final class NodeTypeGsonAdapter extends SimpleGsonTypeAdapterBase<NodeTyp
     @NonNullByDefault({})
     @Override
     public NodeType read(final JsonReader in) throws IOException {
-        return new NodeType(in.nextString());
+        return new NodeType(URI.create(in.nextString()));
     }
 }

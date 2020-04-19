@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client.adapter;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.FeatureType;
@@ -29,6 +30,6 @@ public final class FeatureTypeGsonAdapter extends SimpleGsonTypeAdapterBase<Feat
     @NonNullByDefault({})
     @Override
     public FeatureType read(final JsonReader in) throws IOException {
-        return new FeatureType(in.nextString());
+        return new FeatureType(URI.create(in.nextString()));
     }
 }

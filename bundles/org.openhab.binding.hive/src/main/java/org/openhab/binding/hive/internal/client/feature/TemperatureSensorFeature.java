@@ -14,9 +14,11 @@ package org.openhab.binding.hive.internal.client.feature;
 
 import java.util.Objects;
 
+import javax.measure.Quantity;
+import javax.measure.quantity.Temperature;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.FeatureAttribute;
-import org.openhab.binding.hive.internal.client.Temperature;
 
 /**
  *
@@ -25,21 +27,21 @@ import org.openhab.binding.hive.internal.client.Temperature;
  */
 @NonNullByDefault
 public final class TemperatureSensorFeature implements Feature {
-    private final FeatureAttribute<Temperature> temperature;
+    private final FeatureAttribute<Quantity<Temperature>> temperature;
 
     public TemperatureSensorFeature(
-            final FeatureAttribute<Temperature> temperature
+            final FeatureAttribute<Quantity<Temperature>> temperature
     ) {
         Objects.requireNonNull(temperature);
 
         this.temperature = temperature;
     }
 
-    public FeatureAttribute<Temperature> getTemperatureAttribute() {
+    public FeatureAttribute<Quantity<Temperature>> getTemperatureAttribute() {
         return this.temperature;
     }
 
-    public Temperature getTemperature() {
+    public Quantity<Temperature> getTemperature() {
         return this.temperature.getDisplayValue();
     }
 }

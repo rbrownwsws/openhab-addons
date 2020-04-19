@@ -12,13 +12,14 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Before;
@@ -38,9 +39,10 @@ public class GsonJsonServiceTest {
 
     @Before
     public void setUp() {
-        jsonService = new GsonJsonService();
+        this.jsonService = new GsonJsonService();
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testSessions() throws IOException {
         /* Given */
@@ -48,7 +50,7 @@ public class GsonJsonServiceTest {
 
         final SessionId sessionId = new SessionId("mytoken");
         final Username username = new Username("hiveuser@example.com");
-        final UserId userId = new UserId("deadbeef-dead-beef-dead-beefdeadbeef");
+        final UserId userId = new UserId(UUID.fromString("deadbeef-dead-beef-dead-beefdeadbeef"));
 
 
         /* When */
@@ -70,16 +72,17 @@ public class GsonJsonServiceTest {
         assertThat(sessionDto.latestSupportedApiVersion).isEqualTo("6");
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testNodesRoot() throws IOException {
         /* Given */
         String json = TestUtil.getResourceAsString("/exampleThermostatNode.json");
 
-        final NodeId nodeId = new NodeId("deadbeef-dead-beef-dead-beefdeadbeef");
+        final NodeId nodeId = new NodeId(UUID.fromString("deadbeef-dead-beef-dead-beefdeadbeef"));
         final NodeName nodeName = new NodeName("Thermostat 1");
         final HiveApiInstant createdOn = new HiveApiInstant(Instant.ofEpochMilli(1513173613796L));
         final HiveApiInstant firstInstall = new HiveApiInstant(Instant.ofEpochMilli(1513173925623L));
-        final UserId userId = new UserId("deadbeef-dead-beef-dead-beefdeadbeef");
+        final UserId userId = new UserId(UUID.fromString("deadbeef-dead-beef-dead-beefdeadbeef"));
 
 
         /* When */
@@ -107,6 +110,7 @@ public class GsonJsonServiceTest {
         assertThat(nodeDto.lastUpgradeSucceeded).isFalse();
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testNodesFeatureDeviceManagement() throws IOException {
         /* Given */
@@ -127,6 +131,7 @@ public class GsonJsonServiceTest {
         assertThat(nodeDto.features.device_management_v1.productType.reportedValue).isEqualTo(ProductType.HEATING);
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testNodesFeatureHeatingThermostat() throws IOException {
         /* Given */
@@ -149,6 +154,7 @@ public class GsonJsonServiceTest {
         assertThat(nodeDto.features.heating_thermostat_v1.targetHeatTemperature.reportedValue).isEqualTo(BigDecimal.valueOf(7));
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testNodesFeatureOnOffDevice() throws IOException {
         /* Given */
@@ -169,6 +175,7 @@ public class GsonJsonServiceTest {
         assertThat(nodeDto.features.on_off_device_v1.mode.reportedValue).isEqualTo(OnOffMode.ON);
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testNodesFeatureTemperatureSensor() throws IOException {
         /* Given */
@@ -189,6 +196,7 @@ public class GsonJsonServiceTest {
         assertThat(nodeDto.features.temperature_sensor_v1.temperature.reportedValue).isEqualTo(BigDecimal.valueOf(19));
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testNodesFeatureTransientMode() throws IOException {
         /* Given */
@@ -217,5 +225,31 @@ public class GsonJsonServiceTest {
         ));
 
         // TODO: Test more properties
+    }
+
+    @SuppressWarnings("null")
+    @Test
+    public void testNodesFeatureLinks() throws IOException {
+        /* Given */
+        String json = TestUtil.getResourceAsString("/exampleThermostatNode.json");
+
+
+        /* When */
+        final NodesDto nodesDto = jsonService.fromJson(json, NodesDto.class);
+        final NodeDto nodeDto = nodesDto.nodes.get(0);
+
+
+        /* Then */
+        assertThat(nodeDto.features).isNotNull();
+        assertThat(nodeDto.features.links_v1).isNotNull();
+        assertThat(nodeDto.features.links_v1.featureType).isNotNull();
+        assertThat(nodeDto.features.links_v1.featureType.reportedValue).isEqualTo(FeatureType.LINKS_V1);
+        assertThat(nodeDto.features.links_v1.links).isNull();
+        assertThat(nodeDto.features.links_v1.reverseLinks).isNotNull();
+
+        assertThat(nodeDto.features.links_v1.reverseLinks.reportedValue.size()).isEqualTo(2);
+        final ReverseLinkDto reverseLinkDto = nodeDto.features.links_v1.reverseLinks.reportedValue.iterator().next();
+        assertThat(reverseLinkDto.boundNode).isEqualTo(new NodeId(UUID.fromString("deadbeef-dead-beef-dead-beefdeadbeef")));
+        assertThat(reverseLinkDto.bindingGroupIds).containsExactly(GroupId.TRVBM);
     }
 }

@@ -1,0 +1,162 @@
+/**
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.binding.hive.internal.handler.strategy;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.eclipse.smarthome.core.library.types.QuantityType;
+import org.eclipse.smarthome.core.library.types.StringType;
+import org.eclipse.smarthome.core.library.unit.SIUnits;
+import org.eclipse.smarthome.core.thing.Channel;
+import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.TestUtil;
+import org.openhab.binding.hive.internal.client.*;
+import org.openhab.binding.hive.internal.client.feature.Feature;
+import org.openhab.binding.hive.internal.client.feature.HeatingThermostatFeature;
+import tec.uom.se.quantity.Quantities;
+import tec.uom.se.unit.Units;
+
+import javax.measure.Quantity;
+import javax.measure.quantity.Temperature;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+/**
+ *
+ *
+ * @author Ross Brown - Initial contribution
+ */
+@NonNullByDefault
+public class HeatingThermostatHandlerStrategyTest {
+    @NonNullByDefault({})
+    @Mock
+    private Channel operatingModeChannel;
+
+    @NonNullByDefault({})
+    @Mock
+    private ChannelUID operatingModeChannelUid;
+
+    @NonNullByDefault({})
+    @Mock
+    private Channel operatingStateChannel;
+
+    @NonNullByDefault({})
+    @Mock
+    private ChannelUID operatingStateChannelUid;
+
+    @NonNullByDefault({})
+    @Mock
+    private Channel targetHeatTemperatureChannel;
+
+    @NonNullByDefault({})
+    @Mock
+    private ChannelUID targetHeatTemperatureChannelUid;
+
+    @NonNullByDefault({})
+    @Mock
+    private Channel overrideModeChannel;
+
+    @NonNullByDefault({})
+    @Mock
+    private ChannelUID overrideModeChannelUid;
+
+    @NonNullByDefault({})
+    @Mock
+    private Thing thing;
+
+    @NonNullByDefault({})
+    @Mock
+    private ThingHandlerCallback thingHandlerCallback;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+
+        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_MODE_OPERATING)).thenReturn(this.operatingModeChannel);
+        when(this.operatingModeChannel.getUID()).thenReturn(this.operatingModeChannelUid);
+
+        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_STATE_OPERATING)).thenReturn(this.operatingStateChannel);
+        when(this.operatingStateChannel.getUID()).thenReturn(this.operatingStateChannelUid);
+
+        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET)).thenReturn(this.targetHeatTemperatureChannel);
+        when(this.targetHeatTemperatureChannel.getUID()).thenReturn(this.targetHeatTemperatureChannelUid);
+
+        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE)).thenReturn(this.overrideModeChannel);
+        when(this.overrideModeChannel.getUID()).thenReturn(this.overrideModeChannelUid);
+    }
+
+    @Test
+    public void testNormalUpdate() {
+        /* Given */
+        final HeatingThermostatHandlerStrategy strategy = HeatingThermostatHandlerStrategy.getInstance();
+
+        final HeatingThermostatOperatingMode operatingMode = HeatingThermostatOperatingMode.SCHEDULE;
+        final HeatingThermostatOperatingState operatingState = HeatingThermostatOperatingState.HEAT;
+        final Quantity<Temperature> targetHeatTemperature = Quantities.getQuantity(20, Units.CELSIUS);
+        final OverrideMode overrideMode = OverrideMode.NONE;
+
+        final HeatingThermostatFeature heatingThermostatFeature = new HeatingThermostatFeature(
+                TestUtil.createSimpleFeatureAttribute(operatingMode),
+                TestUtil.createSimpleFeatureAttribute(operatingState),
+                TestUtil.createSimpleFeatureAttribute(targetHeatTemperature),
+                TestUtil.createSimpleFeatureAttribute(overrideMode)
+        );
+        final Map<Class<? extends Feature>, Feature> features = new HashMap<>();
+        features.put(HeatingThermostatFeature.class, heatingThermostatFeature);
+
+        final Node node = TestUtil.getTestNodeWithFeatures(features);
+
+
+        /* When */
+        strategy.handleUpdate(
+                this.thing,
+                this.thingHandlerCallback,
+                node
+        );
+
+
+        /* Then */
+        verify(this.thingHandlerCallback).stateUpdated(
+                eq(this.operatingModeChannelUid),
+                eq(new StringType(operatingMode.toString()))
+        );
+
+        verify(this.thingHandlerCallback).stateUpdated(
+                eq(this.operatingStateChannelUid),
+                eq(new StringType(operatingState.toString()))
+        );
+
+        verify(this.thingHandlerCallback).stateUpdated(
+                eq(this.targetHeatTemperatureChannelUid),
+                eq(new QuantityType<>(targetHeatTemperature.getValue(), SIUnits.CELSIUS))
+        );
+
+        verify(this.thingHandlerCallback).stateUpdated(
+                eq(this.overrideModeChannelUid),
+                eq(OnOffType.OFF)
+        );
+    }
+}

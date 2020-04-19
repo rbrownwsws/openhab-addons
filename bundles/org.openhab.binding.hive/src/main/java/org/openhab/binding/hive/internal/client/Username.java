@@ -20,8 +20,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class Username extends StringTypeBase {
-    public Username(final String stringValue) {
-        super(stringValue);
+public final class Username extends SimpleValueTypeBase<String> {
+    public Username(final String username) {
+        super(username);
     }
 }

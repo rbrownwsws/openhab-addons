@@ -12,11 +12,12 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
+import javax.measure.quantity.Temperature;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
@@ -25,8 +26,9 @@ import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.client.HeatingThermostatOperatingMode;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.OverrideMode;
-import org.openhab.binding.hive.internal.client.Temperature;
 import org.openhab.binding.hive.internal.client.feature.HeatingThermostatFeature;
+
+import tec.uom.se.quantity.Quantities;
 
 /**
  * A {@link ThingHandlerStrategy} for handling
@@ -42,6 +44,7 @@ public final class HeatingThermostatHandlerStrategy extends ThingHandlerStrategy
         return INSTANCE;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean handleCommand(
             final ChannelUID channelUID,
@@ -53,8 +56,14 @@ public final class HeatingThermostatHandlerStrategy extends ThingHandlerStrategy
             if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET)
                     && command instanceof QuantityType
             ) {
-                final QuantityType<?> newTargetHeatTemperature = (QuantityType<?>) command;
-                heatingThermostatFeature.setTargetHeatTemperature(new Temperature(newTargetHeatTemperature.toBigDecimal()));
+                // N.B. Suppress unchecked because openHAB should hopefully only be passing us QuantityType<Temperature>
+                final QuantityType<Temperature> newTargetHeatTemperature = (QuantityType<Temperature>) command;
+                heatingThermostatFeature.setTargetHeatTemperature(
+                        Quantities.getQuantity(
+                                newTargetHeatTemperature.toBigDecimal(),
+                                newTargetHeatTemperature.getUnit()
+                        )
+                );
 
                 needUpdate = true;
             } else if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_MODE_OPERATING)
@@ -89,12 +98,17 @@ public final class HeatingThermostatHandlerStrategy extends ThingHandlerStrategy
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_STATE_OPERATING, operatingStateChannel -> {
-                thingHandlerCallback.stateUpdated(operatingStateChannel, new StringType(heatingThermostatFeature.getOperatingState()));
+                thingHandlerCallback.stateUpdated(operatingStateChannel, new StringType(heatingThermostatFeature.getOperatingState().toString()));
             });
 
-            // FIXME: Actually check temperature unit.
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET, targetHeatTemperatureChannel -> {
-                thingHandlerCallback.stateUpdated(targetHeatTemperatureChannel, new QuantityType<>(heatingThermostatFeature.getTargetHeatTemperature().getValue(), SIUnits.CELSIUS));
+                thingHandlerCallback.stateUpdated(
+                        targetHeatTemperatureChannel,
+                        new QuantityType<>(
+                                heatingThermostatFeature.getTargetHeatTemperature().getValue(),
+                                heatingThermostatFeature.getTargetHeatTemperature().getUnit()
+                        )
+                );
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE, operatingModeOverrideChannel -> {

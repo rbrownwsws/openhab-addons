@@ -94,7 +94,7 @@ public final class DefaultNode implements Node {
         return Collections.unmodifiableSet(new HashSet<>(this.features.values()));
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "cast.unsafe"})
     @Override
     public <T extends Feature> @Nullable T getFeature(final Class<T> classOfFeature) {
         // N.B. "Unchecked cast" warning suppressed because we should be

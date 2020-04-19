@@ -26,7 +26,7 @@ import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public class TransientModeFeature implements Feature {
+public final class TransientModeFeature implements Feature {
     private final SettableFeatureAttribute<Duration> duration;
     private final SettableFeatureAttribute<Boolean> isEnabled;
     private final FeatureAttribute<ZonedDateTime> startDatetime;

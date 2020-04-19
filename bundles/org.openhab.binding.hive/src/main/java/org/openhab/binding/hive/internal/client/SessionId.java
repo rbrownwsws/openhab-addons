@@ -20,8 +20,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class SessionId extends StringTypeBase {
-    public SessionId(final String stringValue) {
-        super(stringValue);
+public final class SessionId extends SimpleValueTypeBase<String> {
+    public SessionId(final String sessionId) {
+        super(sessionId);
     }
 }

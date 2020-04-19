@@ -104,6 +104,18 @@ public final class HiveBindingConstants {
 
     /* ######## Channel ids ######## */
     /**
+     * Name of the channel that represents how long an auto boost
+     * (heat-on-demand boost) should be in minutes.
+     */
+    public static final String CHANNEL_AUTO_BOOST_DURATION = "auto_boost-duration";
+
+    /**
+     * Name of the channel that represents the target heating temperature for a
+     * Hive heating zone when auto boost (heating-on-demand) is active.
+     */
+    public static final String CHANNEL_AUTO_BOOST_TEMPERATURE_TARGET = "auto_boost-temperature-target";
+
+    /**
      * Name of the channel that represents a simplified view of the heating/
      * hot water operating mode that matches the app (e.g. ON / SCHEDULE / OFF)
      */
@@ -250,6 +262,18 @@ public final class HiveBindingConstants {
      */
     public static final String CHANNEL_RADIO_RSSI_LAST_KNOWN = "radio-rssi-last_known";
 
+    /**
+     * Name of the channel that represents the last time a HiveAccount thing
+     * polled the Hive API.
+     */
+    public static final String CHANNEL_LAST_POLL_TIMESTAMP = "last_poll_timestamp";
+
+    /**
+     * Name of the channel used to trigger a dumping all the node information
+     * for the linked Hive Account.
+     */
+    public static final String CHANNEL_DUMP_NODES = "dump_nodes";
+
 
     /* ######## Config params ######## */
     /**
@@ -269,6 +293,8 @@ public final class HiveBindingConstants {
     public static final String HOT_WATER_EASY_MODE_OPERATING_ON = "ON";
     public static final String HOT_WATER_EASY_MODE_OPERATING_SCHEDULE = "SCHEDULE";
     public static final String HOT_WATER_EASY_MODE_OPERATING_OFF = "OFF";
+
+    public static final String PROPERTY_EUI64 = "EUI64";
 
     private HiveBindingConstants() {
         throw new AssertionError();

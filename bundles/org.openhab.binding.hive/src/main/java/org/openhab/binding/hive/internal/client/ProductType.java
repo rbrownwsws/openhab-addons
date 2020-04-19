@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class ProductType extends StringTypeBase {
+public final class ProductType extends SimpleValueTypeBase<String> {
     public static final ProductType BOILER_MODULE = new ProductType("BOILER_MODULE");
     public static final ProductType DAYLIGHT_SD = new ProductType("DAYLIGHT_SD");
     public static final ProductType HEATING = new ProductType("HEATING");
@@ -30,7 +30,9 @@ public final class ProductType extends StringTypeBase {
     public static final ProductType TRV = new ProductType("TRV");
     public static final ProductType TRV_GROUP = new ProductType("TRV_GROUP");
 
-    public ProductType(final String stringValue) {
-        super(stringValue);
+    public static final ProductType UNKNOWN = new ProductType("UNKNOWN");
+
+    public ProductType(final String productType) {
+        super(productType);
     }
 }

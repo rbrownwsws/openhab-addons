@@ -95,7 +95,8 @@ public final class FeatureAttributeFactory {
             final Adapter<F, T> adapter,
             final @Nullable FeatureAttributeDto<F> dto
     ) {
-        return createFeatureAttribute(
+        // N.B. Type parameter because Checker Framework needs a little help.
+        return FeatureAttributeFactory.<F, FeatureAttribute<T>, T>createFeatureAttribute(
                 adapter,
                 dto,
                 FeatureAttribute::new
@@ -110,7 +111,8 @@ public final class FeatureAttributeFactory {
             final Adapter<F, T> adapter,
             final @Nullable FeatureAttributeDto<F> dto
     ) {
-        return createFeatureAttribute(
+        // N.B. Type parameter because Checker Framework needs a little help.
+        return FeatureAttributeFactory.<F, SettableFeatureAttribute<T>, T>createFeatureAttribute(
                 adapter,
                 dto,
                 SettableFeatureAttribute::new

@@ -17,11 +17,23 @@ import java.net.URI;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
+ * A factory for creating new requests to the Hive API.
  *
+ * @see HiveApiRequest
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
 public interface HiveApiRequestFactory {
+    /**
+     * Create a new request to the Hive API.
+     *
+     * @param endpointPath
+     *      The relative URI of the endpoint to make the request to.
+     *      (relative to the Hive API base path).
+     *
+     * @return
+     *      The new request.
+     */
     HiveApiRequest newRequest(URI endpointPath);
 }

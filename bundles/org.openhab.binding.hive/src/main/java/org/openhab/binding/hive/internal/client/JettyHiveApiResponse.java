@@ -18,7 +18,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.api.ContentResponse;
 
 /**
- *
+ * An implementation of {@link HiveApiResponse} based around jetty's
+ * {@link org.eclipse.jetty.client.HttpClient}.
  *
  * @author Ross Brown - Initial contribution
  */
@@ -46,5 +47,10 @@ final class JettyHiveApiResponse implements HiveApiResponse {
     @Override
     public <T> T getContent(Class<T> contentType) {
         return this.jsonService.fromJson(this.response.getContentAsString(), contentType);
+    }
+
+    @Override
+    public String getRawContent() {
+        return this.response.getContentAsString();
     }
 }

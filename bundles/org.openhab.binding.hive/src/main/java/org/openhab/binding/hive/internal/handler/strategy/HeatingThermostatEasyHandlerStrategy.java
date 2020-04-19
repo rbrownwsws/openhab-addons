@@ -20,13 +20,9 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
-import org.openhab.binding.hive.internal.client.HeatingThermostatOperatingMode;
-import org.openhab.binding.hive.internal.client.Node;
-import org.openhab.binding.hive.internal.client.OnOffMode;
-import org.openhab.binding.hive.internal.client.OverrideMode;
+import org.openhab.binding.hive.internal.client.*;
 import org.openhab.binding.hive.internal.client.feature.HeatingThermostatFeature;
 import org.openhab.binding.hive.internal.client.feature.OnOffDeviceFeature;
-import org.openhab.binding.hive.internal.client.feature.TransientModeFeature;
 
 /**
  * A {@link ThingHandlerStrategy} that handles channels that provide a
@@ -50,16 +46,12 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
     ) {
         return useFeatureSafely(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
             return useFeatureSafely(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
-                return useFeatureSafely(hiveNode, TransientModeFeature.class, transientModeFeature -> {
-                    return handleCommand(
-                            channelUID,
-                            command,
-                            hiveNode,
-                            heatingThermostatFeature,
-                            onOffDeviceFeature,
-                            transientModeFeature
-                    );
-                });
+                return handleCommand(
+                        channelUID,
+                        command,
+                        heatingThermostatFeature,
+                        onOffDeviceFeature
+                );
             });
         });
     }
@@ -72,16 +64,12 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
     ) {
         useFeatureSafely(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
             useFeatureSafely(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
-                useFeatureSafely(hiveNode, TransientModeFeature.class, transientModeFeature -> {
-                    handleUpdate(
-                            thing,
-                            thingHandlerCallback,
-                            hiveNode,
-                            heatingThermostatFeature,
-                            onOffDeviceFeature,
-                            transientModeFeature
-                    );
-                });
+                handleUpdate(
+                        thing,
+                        thingHandlerCallback,
+                        heatingThermostatFeature,
+                        onOffDeviceFeature
+                );
             });
         });
     }
@@ -89,10 +77,8 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
     private boolean handleCommand(
             final ChannelUID channelUID,
             final Command command,
-            final Node hiveNode,
             final HeatingThermostatFeature heatingThermostatFeature,
-            final OnOffDeviceFeature onOffDeviceFeature,
-            final TransientModeFeature transientModeFeature
+            final OnOffDeviceFeature onOffDeviceFeature
     ) {
         boolean needUpdate = false;
         if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING)
@@ -126,10 +112,8 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
     private void handleUpdate(
             final Thing thing,
             final ThingHandlerCallback thingHandlerCallback,
-            final Node hiveNode,
             final HeatingThermostatFeature heatingThermostatFeature,
-            final OnOffDeviceFeature onOffDeviceFeature,
-            final TransientModeFeature transientModeFeature
+            final OnOffDeviceFeature onOffDeviceFeature
     ) {
         useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING, easyModeOperatingChannel -> {
             if (onOffDeviceFeature.getMode() == OnOffMode.OFF) {
@@ -147,7 +131,7 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
         });
 
         useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_STATE_IS_ON, easyStateIsOnChannel -> {
-            final OnOffType isOn = OnOffType.from(heatingThermostatFeature.getOperatingState().equals("HEAT"));
+            final OnOffType isOn = OnOffType.from(heatingThermostatFeature.getOperatingState().equals(HeatingThermostatOperatingState.HEAT));
             thingHandlerCallback.stateUpdated(easyStateIsOnChannel, isOn);
         });
     }

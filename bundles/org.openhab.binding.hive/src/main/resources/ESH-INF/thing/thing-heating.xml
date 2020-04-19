@@ -33,6 +33,9 @@
 			<channel id="transient-remaining" typeId="transient-remaining" />
 
 			<channel id="temperature-target-boost" typeId="temperature-target-boost" />
+
+			<channel id="auto_boost-temperature-target" typeId="auto_boost-temperature-target" />
+			<channel id="auto_boost-duration" typeId="auto_boost-duration" />
 		</channels>
 
 		<config-description-ref uri="thing-type:hive:node" />

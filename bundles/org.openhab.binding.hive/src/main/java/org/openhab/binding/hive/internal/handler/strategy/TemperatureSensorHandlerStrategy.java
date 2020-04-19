@@ -14,7 +14,6 @@ package org.openhab.binding.hive.internal.handler.strategy;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
@@ -42,9 +41,14 @@ public final class TemperatureSensorHandlerStrategy extends ThingHandlerStrategy
             final Node hiveNode
     ) {
         useFeatureSafely(hiveNode, TemperatureSensorFeature.class, temperatureSensorFeature -> {
-            // FIXME: Actually check temperature unit.
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_CURRENT, temperatureChannel -> {
-                thingHandlerCallback.stateUpdated(temperatureChannel, new QuantityType<>(temperatureSensorFeature.getTemperature().getValue(), SIUnits.CELSIUS));
+                thingHandlerCallback.stateUpdated(
+                        temperatureChannel,
+                        new QuantityType<>(
+                                temperatureSensorFeature.getTemperature().getValue(),
+                                temperatureSensorFeature.getTemperature().getUnit()
+                        )
+                );
             });
         });
     }

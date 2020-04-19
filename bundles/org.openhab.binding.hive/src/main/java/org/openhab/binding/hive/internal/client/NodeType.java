@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.hive.internal.client;
 
+import java.net.URI;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -20,13 +22,13 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class NodeType extends URITypeBase {
-    public static final NodeType HUB = new NodeType("http://alertme.com/schema/json/node.class.hub.json#");
-    public static final NodeType THERMOSTAT = new NodeType("http://alertme.com/schema/json/node.class.thermostat.json#");
-    public static final NodeType THERMOSTAT_UI = new NodeType("http://alertme.com/schema/json/node.class.thermostatui.json#");
-    public static final NodeType RADIATOR_VALVE = new NodeType("http://alertme.com/schema/json/node.class.trv.json#");
+public final class NodeType extends SimpleValueTypeBase<URI> {
+    public static final NodeType HUB = new NodeType(URI.create("http://alertme.com/schema/json/node.class.hub.json#"));
+    public static final NodeType THERMOSTAT = new NodeType(URI.create("http://alertme.com/schema/json/node.class.thermostat.json#"));
+    public static final NodeType THERMOSTAT_UI = new NodeType(URI.create("http://alertme.com/schema/json/node.class.thermostatui.json#"));
+    public static final NodeType RADIATOR_VALVE = new NodeType(URI.create("http://alertme.com/schema/json/node.class.trv.json#"));
 
-    public NodeType(final String stringValue) {
-        super(stringValue);
+    public NodeType(final URI nodeType) {
+        super(nodeType);
     }
 }

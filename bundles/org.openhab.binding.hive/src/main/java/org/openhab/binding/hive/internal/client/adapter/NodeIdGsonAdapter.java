@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client.adapter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.NodeId;
@@ -29,6 +30,6 @@ public final class NodeIdGsonAdapter extends SimpleGsonTypeAdapterBase<NodeId> {
     @NonNullByDefault({})
     @Override
     public NodeId read(final JsonReader in) throws IOException {
-        return new NodeId(in.nextString());
+        return new NodeId(UUID.fromString(in.nextString()));
     }
 }

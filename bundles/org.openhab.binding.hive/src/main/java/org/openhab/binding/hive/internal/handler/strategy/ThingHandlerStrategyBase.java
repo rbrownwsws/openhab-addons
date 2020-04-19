@@ -100,7 +100,10 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
 
             thingToDo.doStuff(channelUID);
         } else {
-            this.logger.warn("Tried to do something with the nonexistent channel \"{}\" of thing \"{}\". Do you need to update your thing?", channelName, thing.getLabel());
+            final @Nullable String thingLabel = thing.getLabel();
+            final String thingName = thingLabel != null ? thingLabel : thing.getUID().toString();
+
+            this.logger.warn("Tried to do something with the nonexistent channel \"{}\" of thing \"{}\". Do you need to update your thing?", channelName, thingName);
         }
     }
 

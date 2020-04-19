@@ -12,17 +12,19 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
+import javax.measure.quantity.Temperature;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.types.QuantityType;
-import org.eclipse.smarthome.core.library.unit.SIUnits;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.client.Node;
-import org.openhab.binding.hive.internal.client.Temperature;
 import org.openhab.binding.hive.internal.client.feature.TransientModeHeatingActionsFeature;
+
+import tec.uom.se.quantity.Quantities;
 
 /**
  * A {@link ThingHandlerStrategy} for handling channels that interface with
@@ -39,6 +41,7 @@ public final class HeatingTransientModeHandlerStrategy extends ThingHandlerStrat
         return INSTANCE;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean handleCommand(
             final ChannelUID channelUID,
@@ -49,8 +52,14 @@ public final class HeatingTransientModeHandlerStrategy extends ThingHandlerStrat
             if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST)
                     && command instanceof QuantityType
             ) {
-                final QuantityType<?> newTargetHeatTemperature = (QuantityType<?>) command;
-                transientModeFeature.setBoostTargetTemperature(new Temperature(newTargetHeatTemperature.toBigDecimal()));
+                // N.B. Suppress unchecked because openHAB should hopefully only be passing us QuantityType<Temperature>
+                final QuantityType<Temperature> newTargetHeatTemperature = (QuantityType<Temperature>) command;
+                transientModeFeature.setBoostTargetTemperature(
+                        Quantities.getQuantity(
+                                newTargetHeatTemperature.toBigDecimal(),
+                                newTargetHeatTemperature.getUnit()
+                        )
+                );
 
                 return true;
             }
@@ -66,9 +75,14 @@ public final class HeatingTransientModeHandlerStrategy extends ThingHandlerStrat
             final Node hiveNode
     ) {
         useFeatureSafely(hiveNode, TransientModeHeatingActionsFeature.class, transientModeFeature -> {
-            // FIXME: Actually check temperature unit.
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST, boostTargetHeatTemperatureChannel -> {
-                thingHandlerCallback.stateUpdated(boostTargetHeatTemperatureChannel, new QuantityType<>(transientModeFeature.getBoostTargetTemperature().getValue(), SIUnits.CELSIUS));
+                thingHandlerCallback.stateUpdated(
+                        boostTargetHeatTemperatureChannel,
+                        new QuantityType<>(
+                                transientModeFeature.getBoostTargetTemperature().getValue(),
+                                transientModeFeature.getBoostTargetTemperature().getUnit()
+                        )
+                );
             });
         });
     }

@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.hive.internal.client;
 
+import java.net.URI;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -20,10 +22,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class ActionType extends URITypeBase {
-    public static final ActionType GENERIC = new ActionType("http://alertme.com/schema/json/configuration/configuration.device.action.generic.v1.json#");
+public final class ActionType extends SimpleValueTypeBase<URI> {
+    public static final ActionType GENERIC = new ActionType(URI.create("http://alertme.com/schema/json/configuration/configuration.device.action.generic.v1.json#"));
 
-    public ActionType(final String stringValue) {
-        super(stringValue);
+    public ActionType(final URI actionType) {
+        super(actionType);
     }
 }

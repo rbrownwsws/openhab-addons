@@ -10,11 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.hive.internal.client;
+package org.openhab.binding.hive.internal.client.dto;
 
-import java.util.UUID;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  *
@@ -22,12 +23,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-abstract class UuidTypeBase extends FromStringTypeBase<UUID> {
-    public UuidTypeBase(final String stringValue) {
-        super(stringValue);
-    }
+public final class SetpointDto {
+    // TODO: Parse to DayOfWeek
+    public @Nullable Integer dayIndex;
 
-    protected UUID transform(final String stringValue) {
-        return UUID.fromString(stringValue);
-    }
+    // TODO: Parse to LocalTime
+    public @Nullable String time;
+
+    public @Nullable List<ActionDto> actions;
 }

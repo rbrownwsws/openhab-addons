@@ -138,16 +138,23 @@ final class DefaultHiveClient implements HiveClient {
     }
 
     @Override
+    public String getAllNodesJson() {
+        return makeAuthenticatedApiCall(this.nodeRepository::getAllNodesJson);
+    }
+
+    @Override
     public @Nullable Node getNode(final NodeId nodeId) {
         Objects.requireNonNull(nodeId);
 
-        return makeAuthenticatedApiCall(() -> this.nodeRepository.getNode(nodeId));
+        // N.B. Type parameter because Checker Framework needs a little help.
+        return this.<@Nullable Node>makeAuthenticatedApiCall(() -> this.nodeRepository.getNode(nodeId));
     }
 
     @Override
     public @Nullable Node updateNode(final Node node) {
         Objects.requireNonNull(node);
 
-        return makeAuthenticatedApiCall(() -> this.nodeRepository.updateNode(node));
+        // N.B. Type parameter because Checker Framework needs a little help.
+        return this.<@Nullable Node>makeAuthenticatedApiCall(() -> this.nodeRepository.updateNode(node));
     }
 }

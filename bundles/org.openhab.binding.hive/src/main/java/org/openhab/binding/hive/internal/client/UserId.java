@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.hive.internal.client;
 
+import java.util.UUID;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -20,8 +22,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class UserId extends UuidTypeBase {
-    public UserId(final String stringValue) {
-        super(stringValue);
+public final class UserId extends SimpleValueTypeBase<UUID> {
+    public UserId(final UUID userId) {
+        super(userId);
     }
 }

@@ -20,8 +20,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class Password extends StringTypeBase {
-    public Password(final String stringValue) {
-        super(stringValue);
+public final class Password extends SimpleValueTypeBase<String> {
+    public Password(final String password) {
+        super(password);
     }
 }

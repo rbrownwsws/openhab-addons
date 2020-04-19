@@ -10,13 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.hive.internal;
-
-import static org.mockito.Mockito.*;
+package org.openhab.binding.hive.internal.client.adapter;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Before;
 
 /**
  *
@@ -24,11 +20,9 @@ import org.junit.Before;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public class TestHiveHandlerFactory {
-    private @Nullable HiveHandlerFactory handlerFactory;
-
-    @Before
-    public void setUp() {
-        handlerFactory = new HiveHandlerFactory();
+public class GroupIdGsonAdapterTest extends GsonAdapterTestBase<GroupIdGsonAdapter> {
+    @Override
+    protected GroupIdGsonAdapter getAdapter() {
+        return new GroupIdGsonAdapter();
     }
 }

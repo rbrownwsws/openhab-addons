@@ -14,9 +14,11 @@ package org.openhab.binding.hive.internal.client.feature;
 
 import java.util.Objects;
 
+import javax.measure.Quantity;
+import javax.measure.quantity.Temperature;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
-import org.openhab.binding.hive.internal.client.Temperature;
 
 /**
  *
@@ -25,25 +27,25 @@ import org.openhab.binding.hive.internal.client.Temperature;
  */
 @NonNullByDefault
 public final class TransientModeHeatingActionsFeature implements Feature {
-    private final SettableFeatureAttribute<Temperature> boostTargetTemperature;
+    private final SettableFeatureAttribute<Quantity<Temperature>> boostTargetTemperature;
 
     public TransientModeHeatingActionsFeature(
-            final SettableFeatureAttribute<Temperature> boostTargetTemperature
+            final SettableFeatureAttribute<Quantity<Temperature>> boostTargetTemperature
     ) {
         Objects.requireNonNull(boostTargetTemperature);
 
         this.boostTargetTemperature = boostTargetTemperature;
     }
 
-    public final SettableFeatureAttribute<Temperature> getBoostTargetTemperatureAttribute() {
+    public final SettableFeatureAttribute<Quantity<Temperature>> getBoostTargetTemperatureAttribute() {
         return this.boostTargetTemperature;
     }
 
-    public final Temperature getBoostTargetTemperature() {
+    public final Quantity<Temperature> getBoostTargetTemperature() {
         return this.boostTargetTemperature.getDisplayValue();
     }
 
-    public final void setBoostTargetTemperature(final Temperature boostTargetTemperature) {
+    public final void setBoostTargetTemperature(final Quantity<Temperature> boostTargetTemperature) {
         Objects.requireNonNull(boostTargetTemperature);
 
         this.boostTargetTemperature.setTargetValue(boostTargetTemperature);

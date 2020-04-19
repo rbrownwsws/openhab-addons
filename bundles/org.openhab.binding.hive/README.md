@@ -58,7 +58,13 @@ _N.B. You can only get the nodeId of things by querying the Hive API.  This is w
 
 ### Hive Account
 
-No channels (just acts as a bridge)
+#### Advanced channels
+
+| Channel                    | Type                     | Read/Write   | Description                  |
+|----------------------------|--------------------------|--------------|------------------------------|
+| last_poll_timestamp        | DateTime                 | Read Only    | The last time this Hive Account thing polled the Hive API. (Mainly for debugging) |
+| dump_nodes                 | Switch                   | Read/Write   | Turning this on triggers dumping the nodes reported by the Hive API for this account to a file in the "userdata" directory. (For debugging) |
+
 
 ### Hive Boiler Module
 
@@ -76,16 +82,17 @@ No channels (just acts as a bridge)
 
 #### Basic channels
 
-| Channel                  | Type               | Read/Write   | Description                  |
-|--------------------------|--------------------|--------------|------------------------------|
-| temperature-current      | Number:Temperature | Read Only    | The current temperature of the zone.  Only in Celsius for now. |
-| temperature-target       | Number:Temperature | Read/Write   | The temperature you want the zone to be heated to.  Only in Celsius for now. |
-| easy-mode-operating      | String             | Read/Write   | The operating mode of heating in this zone as in app (Manual / Schedule/ Off). |
-| easy-mode-boost          | Switch             | Read/Write   | Is the transient override (boost) active for this zone. (Handles API trickiness for you). |
-| easy-state-is_on         | Switch             | Read Only    | Is the heating currently active in this zone? |
-| temperature-target-boost | Number:Temperature | Read/Write   | The temperature you want the zone to be heated to when the transient override (boost) is active.  Only in Celsius for now. |
-| transient-duration       | Number             | Read/Write   | How long in minutes the transient override (boost) should be active for once started. |
-| transient-remaining      | Number             | Read Only    | If `transient-end_time` is in the future and the transient override (boost) is active: the time between now and `transient-end_time` in minutes, otherwise 0. |
+| Channel                       | Type               | Read/Write   | Description                  |
+|-------------------------------|--------------------|--------------|------------------------------|
+| temperature-current           | Number:Temperature | Read Only    | The current temperature of the zone.  Only in Celsius for now. |
+| temperature-target            | Number:Temperature | Read/Write   | The temperature you want the zone to be heated to.  Only in Celsius for now. |
+| easy-mode-operating           | String             | Read/Write   | The operating mode of heating in this zone as in app (Manual / Schedule/ Off). |
+| easy-mode-boost               | Switch             | Read/Write   | Is the transient override (boost) active for this zone. (Handles API trickiness for you). |
+| easy-state-is_on              | Switch             | Read Only    | Is the heating currently active in this zone? |
+| temperature-target-boost      | Number:Temperature | Read/Write   | The temperature you want the zone to be heated to when the transient override (boost) is active.  Only in Celsius for now. |
+| transient-duration            | Number             | Read/Write   | How long in minutes the transient override (boost) should be active for once started. |
+| transient-remaining           | Number             | Read Only    | If `transient-end_time` is in the future and the transient override (boost) is active: the time between now and `transient-end_time` in minutes, otherwise 0. |
+| auto_boost-temperature-target | Number:Temperature | Read/Write   | The max temperature you want the zone to be heated to when auto boost (heating-on-demand) is active.  Only in Celsius for now. |
 
 #### Advanced Channels
 
@@ -98,6 +105,7 @@ No channels (just acts as a bridge)
 | transient-enabled        | Switch             | Read/Write   | Is the transient override (boost) enabled for this zone. |
 | transient-start_time     | DateTime           | Read Only    | The last time the transient override (boost) was started. |
 | transient-end_time       | DateTime           | Read Only    | The last time the transient override (boost) was scheduled to end (even if it was cancelled). |
+| auto_boost-duration      | Number             | Read/Write   | How long in minutes the auto boost (heating-on-demand boost) should be active for once started. |
 
 ### Hive Hot Water
 

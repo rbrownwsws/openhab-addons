@@ -24,7 +24,8 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.openhab.binding.hive.internal.client.exception.HiveClientRequestException;
 
 /**
- *
+ * An implementation of {@link HiveApiRequest} based around jetty's
+ * {@link org.eclipse.jetty.client.HttpClient}.
  *
  * @author Ross Brown - Initial contribution
  */

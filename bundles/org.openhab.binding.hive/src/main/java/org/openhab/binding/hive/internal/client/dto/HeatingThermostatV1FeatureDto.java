@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.HeatingThermostatOperatingMode;
+import org.openhab.binding.hive.internal.client.HeatingThermostatOperatingState;
 import org.openhab.binding.hive.internal.client.OverrideMode;
 
 /**
@@ -28,11 +29,12 @@ import org.openhab.binding.hive.internal.client.OverrideMode;
 @NonNullByDefault
 public final class HeatingThermostatV1FeatureDto extends FeatureDtoBase {
     public @Nullable FeatureAttributeDto<HeatingThermostatOperatingMode> operatingMode;
-    public @Nullable FeatureAttributeDto<String> operatingState;
+    public @Nullable FeatureAttributeDto<HeatingThermostatOperatingState> operatingState;
     public @Nullable FeatureAttributeDto<OverrideMode> temporaryOperatingModeOverride;
     public @Nullable FeatureAttributeDto<BigDecimal> targetHeatTemperature;
     public @Nullable FeatureAttributeDto<BigDecimal> maxHeatTargetTemperature;
     public @Nullable FeatureAttributeDto<BigDecimal> minHeatTargetTemperature;
-
+    public @Nullable FeatureAttributeDto<ScheduleDto> heatSchedule;
+    public @Nullable FeatureAttributeDto<String> operatingStateReason;
     public @Nullable FeatureAttributeDto<List<ActionDto>> previousConfiguration;
 }

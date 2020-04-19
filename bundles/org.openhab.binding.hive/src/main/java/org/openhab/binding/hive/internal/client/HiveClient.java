@@ -35,6 +35,16 @@ public interface HiveClient extends AutoCloseable {
     Set<Node> getAllNodes();
 
     /**
+     * Get the raw JSON returned by the Hive API for a get all nodes request.
+     *
+     * <p>This is meant to be used for debugging purposes only</p>
+     *
+     * @return
+     *      The raw JSON string returned by the Hive API.
+     */
+    String getAllNodesJson();
+
+    /**
      * Get a node with a given {@link NodeId}.
      *
      * @param nodeId

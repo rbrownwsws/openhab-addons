@@ -28,6 +28,16 @@ import org.openhab.binding.hive.internal.client.NodeId;
 public interface NodeRepository {
     Set<Node> getAllNodes();
 
+    /**
+     * Get the raw JSON returned by the Hive API for a get all nodes request.
+     *
+     * <p>This is meant to be used for debugging purposes only</p>
+     *
+     * @return
+     *      The raw JSON string returned by the Hive API.
+     */
+    String getAllNodesJson();
+
     @Nullable Node getNode(NodeId nodeId);
     @Nullable Node updateNode(Node node);
 }

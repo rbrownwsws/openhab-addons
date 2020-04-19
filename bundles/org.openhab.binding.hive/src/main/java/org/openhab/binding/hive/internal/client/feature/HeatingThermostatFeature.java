@@ -14,6 +14,9 @@ package org.openhab.binding.hive.internal.client.feature;
 
 import java.util.Objects;
 
+import javax.measure.Quantity;
+import javax.measure.quantity.Temperature;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.*;
 
@@ -25,14 +28,14 @@ import org.openhab.binding.hive.internal.client.*;
 @NonNullByDefault
 public final class HeatingThermostatFeature implements Feature {
     private final SettableFeatureAttribute<HeatingThermostatOperatingMode> operatingMode;
-    private final FeatureAttribute<String> operatingState;
-    private final SettableFeatureAttribute<Temperature> targetHeatTemperature;
+    private final FeatureAttribute<HeatingThermostatOperatingState> operatingState;
+    private final SettableFeatureAttribute<Quantity<Temperature>> targetHeatTemperature;
     private final SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride;
 
     public HeatingThermostatFeature(
             final SettableFeatureAttribute<HeatingThermostatOperatingMode> operatingMode,
-            final FeatureAttribute<String> operatingState,
-            final SettableFeatureAttribute<Temperature> targetHeatTemperature,
+            final FeatureAttribute<HeatingThermostatOperatingState> operatingState,
+            final SettableFeatureAttribute<Quantity<Temperature>> targetHeatTemperature,
             final SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride
     ) {
         Objects.requireNonNull(operatingMode);
@@ -60,23 +63,23 @@ public final class HeatingThermostatFeature implements Feature {
         this.operatingMode.setTargetValue(operatingMode);
     }
 
-    public FeatureAttribute<String> getOperatingStateAttribute() {
+    public FeatureAttribute<HeatingThermostatOperatingState> getOperatingStateAttribute() {
         return this.operatingState;
     }
 
-    public String getOperatingState() {
+    public HeatingThermostatOperatingState getOperatingState() {
         return this.operatingState.getDisplayValue();
     }
 
-    public SettableFeatureAttribute<Temperature> getTargetHeatTemperatureAttribute() {
+    public SettableFeatureAttribute<Quantity<Temperature>> getTargetHeatTemperatureAttribute() {
         return this.targetHeatTemperature;
     }
 
-    public Temperature getTargetHeatTemperature() {
+    public Quantity<Temperature> getTargetHeatTemperature() {
         return this.targetHeatTemperature.getDisplayValue();
     }
 
-    public void setTargetHeatTemperature(final Temperature targetHeatTemperature) {
+    public void setTargetHeatTemperature(final Quantity<Temperature> targetHeatTemperature) {
         Objects.requireNonNull(targetHeatTemperature);
 
         this.targetHeatTemperature.setTargetValue(targetHeatTemperature);

@@ -21,29 +21,66 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public interface HiveApiRequest {
+    /**
+     * Sets the media type this request accepts (expects in response).
+     *
+     * @param mediaType
+     *      The media type this request accepts.
+     *
+     * @return
+     *      This request.
+     */
     HiveApiRequest accept(MediaType mediaType);
 
     /**
+     * Make the request to the Hive API using the method GET.
+     *
+     * @return
+     *      The response to this request.
      *
      * @throws org.openhab.binding.hive.internal.client.exception.HiveClientRequestException
+     *      If something goes wrong with making the request to the Hive API
+     *      (before the Hive API has a chance to respond)
+     *      e.g. The connection times out.
      */
     HiveApiResponse get();
 
     /**
+     * Make the request to the Hive API using the method POST.
+     *
+     * @return
+     *      The response to this request.
      *
      * @throws org.openhab.binding.hive.internal.client.exception.HiveClientRequestException
+     *      If something goes wrong with making the request to the Hive API
+     *      (before the Hive API has a chance to respond)
+     *      e.g. The connection times out.
      */
     HiveApiResponse post(Object requestBody);
 
     /**
+     * Make the request to the Hive API using the method PUT.
+     *
+     * @return
+     *      The response to this request.
      *
      * @throws org.openhab.binding.hive.internal.client.exception.HiveClientRequestException
+     *      If something goes wrong with making the request to the Hive API
+     *      (before the Hive API has a chance to respond)
+     *      e.g. The connection times out.
      */
     HiveApiResponse put(Object requestBody);
 
     /**
+     * Make the request to the Hive API using the method DELETE.
+     *
+     * @return
+     *      The response to this request.
      *
      * @throws org.openhab.binding.hive.internal.client.exception.HiveClientRequestException
+     *      If something goes wrong with making the request to the Hive API
+     *      (before the Hive API has a chance to respond)
+     *      e.g. The connection times out.
      */
     HiveApiResponse delete();
 }

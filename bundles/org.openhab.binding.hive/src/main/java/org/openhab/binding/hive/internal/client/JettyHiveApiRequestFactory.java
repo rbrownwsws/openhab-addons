@@ -22,7 +22,8 @@ import org.eclipse.jetty.client.WWWAuthenticationProtocolHandler;
 import org.eclipse.jetty.client.api.Request;
 
 /**
- *
+ * An implementation of {@link HiveApiRequestFactory} that uses Jetty's
+ * {@link HttpClient}.
  *
  * @author Ross Brown - Initial contribution
  */
@@ -36,9 +37,24 @@ final class JettyHiveApiRequestFactory implements HiveApiRequestFactory, Session
     private final JsonService jsonService;
     private final String clientId;
 
-    @Nullable
-    private Session session = null;
+    private @Nullable Session session = null;
 
+    /**
+     * Create a new {@link JettyHiveApiRequestFactory}.
+     *
+     * @param httpClient
+     *      The {@link HttpClient} that should be used to make requests to the
+     *      Hive API. N.B. This should not be reused elsewhere.
+     *
+     * @param apiBasePath
+     *      The base path the Hive API.
+     *
+     * @param jsonService
+     *      The {@link JsonService} to use.
+     *
+     * @param clientId
+     *      The Client ID to identify as to the Hive API.
+     */
     public JettyHiveApiRequestFactory(
             final HttpClient httpClient,
             final URI apiBasePath,

@@ -15,6 +15,7 @@ package org.openhab.binding.hive.internal.client;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Represents a session with the Hive API.
@@ -23,8 +24,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class Session {
-    private SessionId sessionId;
-    private UserId userId;
+    private final SessionId sessionId;
+    private final UserId userId;
 
     public Session(
             final SessionId sessionId,
@@ -45,9 +46,8 @@ public final class Session {
         return userId;
     }
 
-    @NonNullByDefault({})
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final Session session = (Session) o;

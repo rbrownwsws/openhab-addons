@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * A class representing absolute times returned by the Hive API.
@@ -40,9 +41,8 @@ public final class HiveApiInstant {
         return this.instant;
     }
 
-    @NonNullByDefault({})
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())

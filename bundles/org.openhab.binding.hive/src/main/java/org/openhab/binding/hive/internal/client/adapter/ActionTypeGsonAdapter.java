@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client.adapter;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.ActionType;
@@ -29,6 +30,6 @@ public final class ActionTypeGsonAdapter extends SimpleGsonTypeAdapterBase<Actio
     @NonNullByDefault({})
     @Override
     public ActionType read(final JsonReader in) throws IOException {
-        return new ActionType(in.nextString());
+        return new ActionType(URI.create(in.nextString()));
     }
 }

@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class MediaType extends StringTypeBase {
+public final class MediaType extends SimpleValueTypeBase<String> {
     public static final MediaType JSON = new MediaType("application/json");
     public static final MediaType API_V6_0_0_JSON = new MediaType("application/vnd.alertme.zoo-6.0.0+json");
     public static final MediaType API_V6_1_0_JSON = new MediaType("application/vnd.alertme.zoo-6.1.0+json");
@@ -30,7 +30,7 @@ public final class MediaType extends StringTypeBase {
     public static final MediaType API_V6_5_0_JSON = new MediaType("application/vnd.alertme.zoo-6.5.0+json");
     public static final MediaType API_V6_6_0_JSON = new MediaType("application/vnd.alertme.zoo-6.6.0+json");
 
-    public MediaType(final String stringValue) {
-        super(stringValue);
+    public MediaType(final String mediaType) {
+        super(mediaType);
     }
 }

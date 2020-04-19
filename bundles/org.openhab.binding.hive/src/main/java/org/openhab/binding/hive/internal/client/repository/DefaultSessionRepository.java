@@ -22,7 +22,10 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.*;
 import org.openhab.binding.hive.internal.client.dto.SessionDto;
 import org.openhab.binding.hive.internal.client.dto.SessionsDto;
-import org.openhab.binding.hive.internal.client.exception.*;
+import org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException;
+import org.openhab.binding.hive.internal.client.exception.HiveApiNotAuthorisedException;
+import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
+import org.openhab.binding.hive.internal.client.exception.HiveClientResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +92,7 @@ public final class DefaultSessionRepository implements SessionRepository {
         final @Nullable UserId userId = sessionDto.userId;
 
         if (sessionId != null && userId != null) {
-            logger.trace("Created new Hive API session with sessionId: {}", sessionDto.sessionId);
+            logger.trace("Created new Hive API session with sessionId: {}", sessionId);
 
             return new Session(
                     sessionId,

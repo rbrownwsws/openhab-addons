@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class Protocol extends StringTypeBase {
+public final class Protocol extends SimpleValueTypeBase<String> {
     public static final Protocol SYNTHETIC = new Protocol("SYNTHETIC");
     public static final Protocol ZIGBEE = new Protocol("ZIGBEE");
     public static final Protocol PROXIED = new Protocol("PROXIED");
@@ -30,7 +30,7 @@ public final class Protocol extends StringTypeBase {
 
     public static final Protocol NONE = new Protocol("NONE");
 
-    public Protocol(String stringValue) {
-        super(stringValue);
+    public Protocol(final String protocol) {
+        super(protocol);
     }
 }

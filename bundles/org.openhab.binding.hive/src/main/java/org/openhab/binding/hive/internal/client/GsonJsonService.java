@@ -25,7 +25,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
 /**
- *
+ * An implementation of {@link JsonService} using {@link Gson}.
  *
  * @author Ross Brown - Initial contribution
  */
@@ -48,6 +48,9 @@ final class GsonJsonService implements JsonService {
                 .registerTypeAdapter(ActionType.class, new ActionTypeGsonAdapter())
                 .registerTypeAdapter(AttributeName.class, new AttributeNameGsonAdapter())
                 .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeGsonAdapter())
+                .registerTypeAdapter(Eui64.class, new Eui64GsonAdapter())
+                .registerTypeAdapter(GroupId.class, new GroupIdGsonAdapter())
+                .registerTypeAdapter(ScheduleType.class, new ScheduleTypeGsonAdapter())
                 .create();
     }
 

@@ -26,9 +26,19 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public interface JsonService {
+    /**
+     * Serialise a given object into json.
+     *
+     * @param object
+     *      The object you want to be serialised into json.
+     *
+     * @return
+     *      A string containing a json representation of {@code object}.
+     */
     String toJson(Object object);
 
     /**
+     * Parse a given json string into an object of a given type.
      *
      * @param json
      *      The json to parse.

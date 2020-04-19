@@ -21,7 +21,32 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public interface HiveApiResponse {
+    /**
+     * The HTTP response code of this response.
+     */
     int getStatusCode();
 
+    /**
+     * Get the content of the response.
+     *
+     * @param contentType
+     *      The class of the response content.
+     *
+     * @param <T>
+     *      The type of response content.
+     *
+     * @return
+     *
+     * @throws IllegalArgumentException
+     *      If the content of the response does not represent an instance
+     *      of {@code T}.
+     */
     <T> T getContent(Class<T> contentType);
+
+    /**
+     * Get the raw content of the response.
+     *
+     * @return
+     */
+    String getRawContent();
 }

@@ -20,16 +20,20 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-abstract class StringTypeBase extends FromStringTypeBase<String> {
-    public StringTypeBase(final String stringValue) {
-        super(stringValue);
-    }
+public final class GroupId extends SimpleValueTypeBase<String> {
+    /**
+     * Group that links
+     * Synthetic TRV Heating Zone --> Physical TRV Device
+     */
+    public static final GroupId TRVS = new GroupId("trvs");
 
-    protected String transform(final String stringValue) {
-        if (stringValue.isEmpty()) {
-            throw new IllegalArgumentException("Value must not be empty");
-        }
+    /**
+     * Group that links
+     * Synthetic TRV Heating Zone --> Parent Synthetic Thermostat Heating Zone
+     */
+    public static final GroupId TRVBM = new GroupId("trvbm");
 
-        return stringValue;
+    public GroupId(final String groupId) {
+        super(groupId);
     }
 }

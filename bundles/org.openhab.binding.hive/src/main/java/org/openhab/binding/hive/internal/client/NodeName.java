@@ -20,8 +20,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class NodeName extends StringTypeBase {
-    public NodeName(final String stringValue) {
-        super(stringValue);
+public final class NodeName extends SimpleValueTypeBase<String> {
+    public NodeName(final String nodeName) {
+        super(nodeName);
     }
 }

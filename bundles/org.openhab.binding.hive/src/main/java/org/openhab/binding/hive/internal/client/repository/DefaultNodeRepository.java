@@ -13,10 +13,14 @@
 package org.openhab.binding.hive.internal.client.repository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+
+import javax.measure.Quantity;
+import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -47,11 +51,38 @@ public final class DefaultNodeRepository implements NodeRepository {
         this.requestFactory = requestFactory;
     }
 
-    private URI getEndpointPathForNode(final NodeId nodeId) {
+    private static URI getEndpointPathForNode(final NodeId nodeId) {
         return HiveApiConstants.ENDPOINT_NODE.resolve(nodeId.toString());
     }
 
-    private BatteryDeviceFeature getBatteryDeviceFeatureFromDto(
+    private static BigDecimal temperatureToDtoValue(final Quantity<Temperature> temperature) {
+        // Convert temperature to celsius
+        final Quantity<Temperature> celsiusTemperature = temperature.to(Units.CELSIUS);
+
+        // Convert to BigDecimal
+        final BigDecimal celsiusTemperatureDecimal = new BigDecimal(celsiusTemperature.getValue().toString());
+
+        // Round temperature to 1 decimal place and return
+        return celsiusTemperatureDecimal.setScale(1, RoundingMode.HALF_UP);
+    }
+
+    private static AutoBoostFeature getAutoBoostFeatureFromDto(
+            final AutoBoostV1FeatureDto autoBoostV1FeatureDto
+    ) {
+        // FIXME: temperature-units: Actually check temperature unit.
+        return new AutoBoostFeature(
+                FeatureAttributeFactory.getSettableFromDtoWithAdapter(
+                        Duration::ofMinutes,
+                        autoBoostV1FeatureDto.autoBoostDuration
+                ),
+                FeatureAttributeFactory.getSettableFromDtoWithAdapter(
+                        (val) -> Quantities.getQuantity(val, Units.CELSIUS),
+                        autoBoostV1FeatureDto.autoBoostTargetHeatTemperature
+                )
+        );
+    }
+
+    private static BatteryDeviceFeature getBatteryDeviceFeatureFromDto(
             final BatteryDeviceV1FeatureDto batteryDeviceV1FeatureDto
     ) {
         return new BatteryDeviceFeature(
@@ -68,7 +99,64 @@ public final class DefaultNodeRepository implements NodeRepository {
         );
     }
 
-    private OnOffDeviceFeature getOnOffDeviceFeatureFromDto(
+    private static LinksFeature getLinksFeatureFromDto(
+            final LinksV1FeatureDto linksV1FeatureDto
+    ) {
+        final FeatureAttributeFactory.Adapter<Set<LinkDto>, Set<Link>> linksAdapter = (list) -> {
+            final Set<Link> links = new HashSet<>();
+
+            for (final LinkDto linkDto : list) {
+                final @Nullable NodeId boundNode = linkDto.boundNode;
+                final @Nullable GroupId bindingGroupId = linkDto.bindingGroupId;
+
+                if (boundNode == null) {
+                    throw new HiveClientResponseException("Link bound node is unexpectedly null.");
+                }
+
+                if (bindingGroupId == null) {
+                    throw new HiveClientResponseException("Link binding group id is unexpectedly null.");
+                }
+
+                links.add(new Link(boundNode, bindingGroupId));
+            }
+
+            return Collections.unmodifiableSet(links);
+        };
+
+        final FeatureAttributeFactory.Adapter<Set<ReverseLinkDto>, Set<ReverseLink>> reverseLinksAdapter = (list) -> {
+            final Set<ReverseLink> reverseLinks = new HashSet<>();
+
+            for (final ReverseLinkDto reverseLinkDto : list) {
+                final @Nullable NodeId boundNode = reverseLinkDto.boundNode;
+                final @Nullable Set<GroupId> bindingGroupId = reverseLinkDto.bindingGroupIds;
+
+                if (boundNode == null) {
+                    throw new HiveClientResponseException("Reverse link bound node is unexpectedly null.");
+                }
+
+                if (bindingGroupId == null) {
+                    throw new HiveClientResponseException("Reverse link binding group id is unexpectedly null.");
+                }
+
+                reverseLinks.add(new ReverseLink(boundNode, bindingGroupId));
+            }
+
+            return Collections.unmodifiableSet(reverseLinks);
+        };
+
+        return new LinksFeature(
+                linksV1FeatureDto.links != null ? FeatureAttributeFactory.getReadOnlyFromDtoWithAdapter(
+                        linksAdapter,
+                        linksV1FeatureDto.links
+                ) : null,
+                linksV1FeatureDto.reverseLinks != null ? FeatureAttributeFactory.getReadOnlyFromDtoWithAdapter(
+                        reverseLinksAdapter,
+                        linksV1FeatureDto.reverseLinks
+                ) : null
+        );
+    }
+
+    private static OnOffDeviceFeature getOnOffDeviceFeatureFromDto(
             final OnOffDeviceV1FeatureDto onOffDeviceV1FeatureDto
     ) {
         return new OnOffDeviceFeature(
@@ -76,7 +164,7 @@ public final class DefaultNodeRepository implements NodeRepository {
         );
     }
 
-    private PhysicalDeviceFeature getPhysicalDeviceFeatureFromDto(
+    private static PhysicalDeviceFeature getPhysicalDeviceFeatureFromDto(
             final PhysicalDeviceV1FeatureDto physicalDeviceV1FeatureDto
     ) {
         final FeatureAttribute<String> hardwareIdentifier;
@@ -123,32 +211,34 @@ public final class DefaultNodeRepository implements NodeRepository {
         );
     }
 
-    private HeatingThermostatFeature getHeatingThermostatFeatureFromDto(
+    private static HeatingThermostatFeature getHeatingThermostatFeatureFromDto(
             final HeatingThermostatV1FeatureDto heatingThermostatV1FeatureDto
     ) {
+        // FIXME: temperature-units: Actually check temperature unit.
         return new HeatingThermostatFeature(
                 FeatureAttributeFactory.getSettableFromDto(heatingThermostatV1FeatureDto.operatingMode),
                 FeatureAttributeFactory.getReadOnlyFromDto(heatingThermostatV1FeatureDto.operatingState),
                 FeatureAttributeFactory.getSettableFromDtoWithAdapter(
-                        Temperature::new,
+                        (val) -> Quantities.getQuantity(val, Units.CELSIUS),
                         heatingThermostatV1FeatureDto.targetHeatTemperature
                 ),
                 FeatureAttributeFactory.getSettableFromDto(heatingThermostatV1FeatureDto.temporaryOperatingModeOverride)
         );
     }
 
-    private TemperatureSensorFeature getTemperatureSensorFeatureFromDto(
+    private static TemperatureSensorFeature getTemperatureSensorFeatureFromDto(
             final TemperatureSensorV1FeatureDto temperatureSensorV1FeatureDto
     ) {
+        // FIXME: temperature-units: Actually check temperature unit.
         return new TemperatureSensorFeature(
                 FeatureAttributeFactory.getReadOnlyFromDtoWithAdapter(
-                        Temperature::new,
+                        (val) -> Quantities.getQuantity(val, Units.CELSIUS),
                         temperatureSensorV1FeatureDto.temperature
                 )
         );
     }
 
-    private TransientModeFeature getTransientModeFeatureFromDto(
+    private static TransientModeFeature getTransientModeFeatureFromDto(
             final TransientModeV1FeatureDto transientModeV1FeatureDto
     ) {
         return new TransientModeFeature(
@@ -162,7 +252,7 @@ public final class DefaultNodeRepository implements NodeRepository {
         );
     }
 
-    private TransientModeHeatingActionsFeature getTransientModeHeatingActionsFeatureFromDto(
+    private static TransientModeHeatingActionsFeature getTransientModeHeatingActionsFeatureFromDto(
             final TransientModeV1FeatureDto transientModeV1FeatureDto
     ) {
         final @Nullable FeatureAttributeDto<List<ActionDto>> actionsAttribute = transientModeV1FeatureDto.actions;
@@ -188,7 +278,8 @@ public final class DefaultNodeRepository implements NodeRepository {
             throw new HiveClientResponseException("Transient Target Temperature is unexpectedly null.");
         }
 
-        final Temperature targetHeatTemperature = new Temperature(new BigDecimal(targetTempString));
+        // FIXME: temperature-units: Actually check temperature unit.
+        final Quantity<Temperature> targetHeatTemperature = Quantities.getQuantity(new BigDecimal(targetTempString), Units.CELSIUS);
 
         return new TransientModeHeatingActionsFeature(
                 FeatureAttributeFactory.getSettableFromDtoWithAdapter(
@@ -198,7 +289,7 @@ public final class DefaultNodeRepository implements NodeRepository {
         );
     }
 
-    private WaterHeaterFeature getWaterHeaterFeatureFromDto(
+    private static WaterHeaterFeature getWaterHeaterFeatureFromDto(
             final WaterHeaterV1FeatureDto waterHeaterV1FeatureDto
     ) {
         return new WaterHeaterFeature(
@@ -208,10 +299,11 @@ public final class DefaultNodeRepository implements NodeRepository {
         );
     }
 
-    private ZigbeeDeviceFeature getZigbeeDeviceFeatureFromDto(
+    private static ZigbeeDeviceFeature getZigbeeDeviceFeatureFromDto(
             final ZigbeeDeviceV1FeatureDto zigbeeDeviceV1FeatureDto
     ) {
         return new ZigbeeDeviceFeature(
+                FeatureAttributeFactory.getReadOnlyFromDto(zigbeeDeviceV1FeatureDto.eui64),
                 FeatureAttributeFactory.getReadOnlyFromDto(zigbeeDeviceV1FeatureDto.averageLQI),
                 FeatureAttributeFactory.getReadOnlyFromDto(zigbeeDeviceV1FeatureDto.lastKnownLQI),
                 FeatureAttributeFactory.getReadOnlyFromDto(zigbeeDeviceV1FeatureDto.averageRSSI),
@@ -219,7 +311,35 @@ public final class DefaultNodeRepository implements NodeRepository {
         );
     }
 
-    private void updateFeaturesDtoWithOnOffDeviceFeature(
+    private static void updateFeaturesDtoWithAutoBoostFeature(
+            final FeaturesDto featuresDto,
+            final AutoBoostFeature autoBoostFeature
+    ) {
+        final @Nullable Duration autoBoostDurationTarget = autoBoostFeature.getAutoBoostDurationAttribute().getTargetValue();
+        final @Nullable Quantity<Temperature> autoBoostTargetHeatTemperatureTarget = autoBoostFeature.getAutoBoostTargetHeatTemperatureAttribute().getTargetValue();
+
+        if (autoBoostDurationTarget != null
+                || autoBoostTargetHeatTemperatureTarget != null
+        ) {
+            final AutoBoostV1FeatureDto autoBoostV1FeatureDto = new AutoBoostV1FeatureDto();
+            featuresDto.autoboost_v1 = autoBoostV1FeatureDto;
+
+            if (autoBoostDurationTarget != null) {
+                final FeatureAttributeDto<Long> autoBoostDurationAttribute = new FeatureAttributeDto<>();
+                autoBoostV1FeatureDto.autoBoostDuration = autoBoostDurationAttribute;
+                // N.B. Unlike transient override we use minutes here.
+                autoBoostDurationAttribute.targetValue = Math.max(1, autoBoostDurationTarget.toMinutes());
+            }
+
+            if (autoBoostTargetHeatTemperatureTarget != null) {
+                final FeatureAttributeDto<BigDecimal> autoBoostTargetHeatTemperatureAttribute = new FeatureAttributeDto<>();
+                autoBoostV1FeatureDto.autoBoostTargetHeatTemperature = autoBoostTargetHeatTemperatureAttribute;
+                autoBoostTargetHeatTemperatureAttribute.targetValue = temperatureToDtoValue(autoBoostTargetHeatTemperatureTarget);
+            }
+        }
+    }
+
+    private static void updateFeaturesDtoWithOnOffDeviceFeature(
             final FeaturesDto featuresDto,
             final OnOffDeviceFeature onOffDeviceFeature
     ) {
@@ -234,12 +354,12 @@ public final class DefaultNodeRepository implements NodeRepository {
         }
     }
 
-    private void updateFeaturesDtoWithHeatingThermostatFeature(
+    private static void updateFeaturesDtoWithHeatingThermostatFeature(
             final FeaturesDto featuresDto,
             final HeatingThermostatFeature heatingThermostatFeature
     ) {
         final @Nullable HeatingThermostatOperatingMode operatingModeTarget = heatingThermostatFeature.getOperatingModeAttribute().getTargetValue();
-        final @Nullable Temperature targetHeatTemperatureTarget = heatingThermostatFeature.getTargetHeatTemperatureAttribute().getTargetValue();
+        final @Nullable Quantity<Temperature> targetHeatTemperatureTarget = heatingThermostatFeature.getTargetHeatTemperatureAttribute().getTargetValue();
         final @Nullable OverrideMode temporaryOperatingModeOverrideTarget = heatingThermostatFeature.getTemporaryOperatingModeOverrideAttribute().getTargetValue();
 
         // If one of the HeatingThermostatFeature attributes has been set...
@@ -257,10 +377,9 @@ public final class DefaultNodeRepository implements NodeRepository {
             }
 
             if (targetHeatTemperatureTarget != null) {
-                // FIXME: Check temperature units.
                 final FeatureAttributeDto<BigDecimal> targetHeatTemperatureAttribute = new FeatureAttributeDto<>();
                 heatingThermostatV1FeatureDto.targetHeatTemperature = targetHeatTemperatureAttribute;
-                targetHeatTemperatureAttribute.targetValue = targetHeatTemperatureTarget.getValue();
+                targetHeatTemperatureAttribute.targetValue = temperatureToDtoValue(targetHeatTemperatureTarget);
             }
 
             if (temporaryOperatingModeOverrideTarget != null) {
@@ -271,7 +390,7 @@ public final class DefaultNodeRepository implements NodeRepository {
         }
     }
 
-    private void updateFeaturesDtoWithTransientModeFeature(
+    private static void updateFeaturesDtoWithTransientModeFeature(
             final FeaturesDto featuresDto,
             final TransientModeFeature transientModeFeature
     ) {
@@ -299,11 +418,11 @@ public final class DefaultNodeRepository implements NodeRepository {
         }
     }
 
-    private void updateFeaturesDtoWithTransientModeHeatingActionsFeature(
+    private static void updateFeaturesDtoWithTransientModeHeatingActionsFeature(
             final FeaturesDto featuresDto,
             final TransientModeHeatingActionsFeature transientModeHeatingActionsFeature
     ) {
-        final @Nullable Temperature boostTargetTemperatureTarget = transientModeHeatingActionsFeature.getBoostTargetTemperatureAttribute().getTargetValue();
+        final @Nullable Quantity<Temperature> boostTargetTemperatureTarget = transientModeHeatingActionsFeature.getBoostTargetTemperatureAttribute().getTargetValue();
         if (boostTargetTemperatureTarget != null) {
             @Nullable TransientModeV1FeatureDto transientModeV1FeatureDto = featuresDto.transient_mode_v1;
             if (transientModeV1FeatureDto == null) {
@@ -315,7 +434,7 @@ public final class DefaultNodeRepository implements NodeRepository {
             actionDto.actionType = ActionType.GENERIC;
             actionDto.featureType = FeatureType.HEATING_THERMOSTAT_V1;
             actionDto.attribute = AttributeName.ATTRIBUTE_NAME_TARGET_HEAT_TEMPERATURE;
-            actionDto.value = boostTargetTemperatureTarget.getValue().toString();
+            actionDto.value = temperatureToDtoValue(boostTargetTemperatureTarget).toString();
 
             final FeatureAttributeDto<List<ActionDto>> actionsDto = new FeatureAttributeDto<>();
             transientModeV1FeatureDto.actions = actionsDto;
@@ -323,7 +442,7 @@ public final class DefaultNodeRepository implements NodeRepository {
         }
     }
 
-    private void updateFeaturesDtoWithWaterHeaterFeature(
+    private static void updateFeaturesDtoWithWaterHeaterFeature(
             final FeaturesDto featuresDto,
             final WaterHeaterFeature waterHeaterFeature
     ) {
@@ -348,7 +467,7 @@ public final class DefaultNodeRepository implements NodeRepository {
         }
     }
 
-    private Set<Node> parseNodesDto(
+    private static Set<Node> parseNodesDto(
             final NodesDto nodesDto
     ) {
         final @Nullable List<@Nullable NodeDto> nodeDtos = nodesDto.nodes;
@@ -398,8 +517,11 @@ public final class DefaultNodeRepository implements NodeRepository {
                 throw new HiveClientResponseException("Node features unexpectedly null.");
             }
 
+            final @Nullable AutoBoostV1FeatureDto autoBoostV1FeatureDto = featuresDto.autoboost_v1;
             final @Nullable BatteryDeviceV1FeatureDto batteryDeviceV1FeatureDto = featuresDto.battery_device_v1;
+            final @Nullable DeviceManagementV1FeatureDto deviceManagementV1FeatureDto = featuresDto.device_management_v1;
             final @Nullable HeatingThermostatV1FeatureDto heatingThermostatV1FeatureDto = featuresDto.heating_thermostat_v1;
+            final @Nullable LinksV1FeatureDto linksV1FeatureDto = featuresDto.links_v1;
             final @Nullable OnOffDeviceV1FeatureDto onOffDeviceV1FeatureDto = featuresDto.on_off_device_v1;
             final @Nullable PhysicalDeviceV1FeatureDto physicalDeviceV1FeatureDto = featuresDto.physical_device_v1;
             final @Nullable TemperatureSensorV1FeatureDto temperatureSensorV1FeatureDto = featuresDto.temperature_sensor_v1;
@@ -407,13 +529,17 @@ public final class DefaultNodeRepository implements NodeRepository {
             final @Nullable WaterHeaterV1FeatureDto waterHeaterV1FeatureDto = featuresDto.water_heater_v1;
             final @Nullable ZigbeeDeviceV1FeatureDto zigbeeDeviceV1FeatureDto = featuresDto.zigbee_device_v1;
 
-            final @Nullable DeviceManagementV1FeatureDto deviceManagementV1FeatureDto = featuresDto.device_management_v1;
-
+            if (autoBoostV1FeatureDto != null) {
+                features.put(AutoBoostFeature.class, getAutoBoostFeatureFromDto(autoBoostV1FeatureDto));
+            }
             if (batteryDeviceV1FeatureDto != null) {
                 features.put(BatteryDeviceFeature.class, getBatteryDeviceFeatureFromDto(batteryDeviceV1FeatureDto));
             }
             if (heatingThermostatV1FeatureDto != null) {
                 features.put(HeatingThermostatFeature.class, getHeatingThermostatFeatureFromDto(heatingThermostatV1FeatureDto));
+            }
+            if (linksV1FeatureDto != null) {
+                features.put(LinksFeature.class, getLinksFeatureFromDto(linksV1FeatureDto));
             }
             if (onOffDeviceV1FeatureDto != null) {
                 features.put(OnOffDeviceFeature.class, getOnOffDeviceFeatureFromDto(onOffDeviceV1FeatureDto));
@@ -485,6 +611,22 @@ public final class DefaultNodeRepository implements NodeRepository {
     }
 
     @Override
+    public String getAllNodesJson() {
+        /* Send our get nodes request to the Hive API. */
+        final HiveApiResponse response = this.requestFactory.newRequest(HiveApiConstants.ENDPOINT_NODES)
+                .accept(MediaType.API_V6_5_0_JSON)
+                .get();
+
+        if (response.getStatusCode() == 401) {
+            throw new HiveApiNotAuthorisedException();
+        } else if (response.getStatusCode() != 200) {
+            throw new HiveApiUnknownException("Getting nodes failed for an unknown reason");
+        }
+
+        return response.getRawContent();
+    }
+
+    @Override
     public @Nullable Node getNode(final NodeId nodeId) {
         /* Send our get node request to the Hive API. */
         final HiveApiResponse response = this.requestFactory.newRequest(getEndpointPathForNode(nodeId))
@@ -522,7 +664,9 @@ public final class DefaultNodeRepository implements NodeRepository {
         for (final Feature feature : node.getFeatures()) {
             final Class<? extends Feature> featureClass = feature.getClass();
 
-            if (featureClass.equals(OnOffDeviceFeature.class)) {
+            if (featureClass.equals(AutoBoostFeature.class)) {
+                updateFeaturesDtoWithAutoBoostFeature(featuresDto, (AutoBoostFeature) feature);
+            } else if (featureClass.equals(OnOffDeviceFeature.class)) {
                 updateFeaturesDtoWithOnOffDeviceFeature(featuresDto, (OnOffDeviceFeature) feature);
             } else if (featureClass.equals(HeatingThermostatFeature.class)) {
                 updateFeaturesDtoWithHeatingThermostatFeature(featuresDto, (HeatingThermostatFeature) feature);

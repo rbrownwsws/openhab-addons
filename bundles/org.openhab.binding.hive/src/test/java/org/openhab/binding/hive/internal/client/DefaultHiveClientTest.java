@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -20,13 +20,16 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.openhab.binding.hive.internal.client.exception.*;
-import org.openhab.binding.hive.internal.client.repository.*;
+import org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException;
+import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
+import org.openhab.binding.hive.internal.client.repository.NodeRepository;
+import org.openhab.binding.hive.internal.client.repository.SessionRepository;
 
 /**
  *
@@ -63,7 +66,7 @@ public class DefaultHiveClientTest {
         this.password = new Password("password123");
         this.session = new Session(
                 new SessionId("deadbeef-dead-beef-dead-beefdeadbeef"),
-                new UserId("deadbeef-dead-beef-dead-beefdeadbeef")
+                new UserId(UUID.fromString("deadbeef-dead-beef-dead-beefdeadbeef"))
         );
     }
 

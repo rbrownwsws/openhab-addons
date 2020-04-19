@@ -15,6 +15,7 @@ package org.openhab.binding.hive.internal.client.feature;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.Eui64;
 import org.openhab.binding.hive.internal.client.FeatureAttribute;
 
 /**
@@ -24,26 +25,38 @@ import org.openhab.binding.hive.internal.client.FeatureAttribute;
  */
 @NonNullByDefault
 public final class ZigbeeDeviceFeature implements Feature {
+    private final FeatureAttribute<Eui64> eui64;
     private final FeatureAttribute<Integer> averageLQI;
     private final FeatureAttribute<Integer> lastKnownLQI;
     private final FeatureAttribute<Integer> averageRSSI;
     private final FeatureAttribute<Integer> lastKnownRSSI;
 
     public ZigbeeDeviceFeature(
+            final FeatureAttribute<Eui64> eui64,
             final FeatureAttribute<Integer> averageLQI,
             final FeatureAttribute<Integer> lastKnownLQI,
             final FeatureAttribute<Integer> averageRSSI,
             final FeatureAttribute<Integer> lastKnownRSSI
     ) {
+        Objects.requireNonNull(eui64);
         Objects.requireNonNull(averageLQI);
         Objects.requireNonNull(lastKnownLQI);
         Objects.requireNonNull(averageRSSI);
         Objects.requireNonNull(lastKnownRSSI);
 
+        this.eui64 = eui64;
         this.averageLQI = averageLQI;
         this.lastKnownLQI = lastKnownLQI;
         this.averageRSSI = averageRSSI;
         this.lastKnownRSSI = lastKnownRSSI;
+    }
+
+    public FeatureAttribute<Eui64> getEui64Attribute() {
+        return this.eui64;
+    }
+
+    public Eui64 getEui64() {
+        return this.eui64.getDisplayValue();
     }
 
     public FeatureAttribute<Integer> getAverageLQIAttribute() {

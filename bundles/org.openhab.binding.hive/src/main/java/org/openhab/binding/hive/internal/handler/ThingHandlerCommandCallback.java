@@ -10,12 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.hive.internal.client;
-
-import java.net.URI;
-import java.net.URISyntaxException;
+package org.openhab.binding.hive.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.types.Command;
 
 /**
  *
@@ -23,16 +22,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-abstract class URITypeBase extends FromStringTypeBase<URI> {
-    public URITypeBase(final String stringValue) {
-        super(stringValue);
-    }
-
-    protected URI transform(final String stringValue) {
-        try {
-            return new URI(stringValue);
-        } catch (final URISyntaxException ex) {
-            throw new IllegalArgumentException(ex);
-        }
-    }
+public interface ThingHandlerCommandCallback {
+    void handleCommand(final ChannelUID channelUID, final Command command);
 }

@@ -14,44 +14,44 @@ package org.openhab.binding.hive.internal.client;
 
 import java.util.Objects;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * A base class for simple value types constructed from strings.
+ *
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-abstract class FromStringTypeBase<@NonNull T> {
-    private final T value;
+public final class Eui64 {
+    private final String value;
 
-    public FromStringTypeBase(final String stringValue) {
-        Objects.requireNonNull(stringValue);
+    public Eui64(final String eui64) {
+        Objects.requireNonNull(eui64);
 
-        this.value = transform(stringValue);
+        if (eui64.length() != 16) {
+            throw new IllegalArgumentException("Provided string is the wrong length.");
+        }
 
-        validate(this.value);
+        this.value = eui64;
     }
 
-    protected abstract T transform(final String stringValue);
-
-    protected void validate(final T value) {}
 
     @Override
     public String toString() {
-        return value.toString();
+        return value;
     }
 
-    @NonNullByDefault({})
     @Override
-    public boolean equals(final Object o) {
-        if (this == o)
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
             return true;
-        if (o == null || this.getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        final FromStringTypeBase<?> other = (FromStringTypeBase<?>) o;
-        return value.equals(other.value);
+        }
+        final Eui64 eui64 = (Eui64) o;
+        return this.value.equals(eui64.value);
     }
 
     @Override

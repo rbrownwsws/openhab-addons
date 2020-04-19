@@ -41,6 +41,11 @@ public final class ZigbeeDeviceHandlerStrategy extends ThingHandlerStrategyBase 
             final Node hiveNode
     ) {
         useFeatureSafely(hiveNode, ZigbeeDeviceFeature.class, zigbeeDeviceFeature -> {
+            thing.setProperty(HiveBindingConstants.PROPERTY_EUI64, zigbeeDeviceFeature.getEui64().toString());
+
+            // TODO: Extract MAC address from EUI64?
+            //thing.setProperty(Thing.PROPERTY_MAC_ADDRESS, xxx);
+
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_RADIO_LQI_AVERAGE, averageLqiChannel -> {
                 thingHandlerCallback.stateUpdated(averageLqiChannel, new DecimalType(zigbeeDeviceFeature.getAverageLQI()));
             });

@@ -27,7 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
 public final class SettableFeatureAttribute<T> extends FeatureAttribute<T> {
     private @Nullable T targetValue = null;
 
-    SettableFeatureAttribute(
+    public SettableFeatureAttribute(
             final T reportedValue,
             final Instant changedTime,
             final Instant receivedTime,
