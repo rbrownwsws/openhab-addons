@@ -17,6 +17,7 @@ import java.time.Duration;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -37,44 +38,42 @@ import tec.uom.se.quantity.Quantities;
  */
 @NonNullByDefault
 public final class AutoBoostHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final AutoBoostHandlerStrategy INSTANCE = new AutoBoostHandlerStrategy();
-
-    public static AutoBoostHandlerStrategy getInstance() {
-        return INSTANCE;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
-    public boolean handleCommand(
+    public @Nullable Node handleCommand(
             final ChannelUID channelUID,
             final Command command,
             final Node hiveNode
     ) {
         return useFeatureSafely(hiveNode, AutoBoostFeature.class, autoBoostFeature -> {
-            boolean needUpdate = false;
+            @Nullable AutoBoostFeature updatedAutoBoostFeature = null;
             if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_AUTO_BOOST_DURATION)
                     && command instanceof DecimalType
             ) {
                 final DecimalType newAutoBoostDuration = (DecimalType) command;
-                autoBoostFeature.setAutoBoostDuration(Duration.ofMinutes(newAutoBoostDuration.longValue()));
 
-                needUpdate = true;
+                updatedAutoBoostFeature = autoBoostFeature.withTargetAutoBoostDuration(
+                        Duration.ofMinutes(newAutoBoostDuration.longValue())
+                );
             } else if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_AUTO_BOOST_TEMPERATURE_TARGET)
                     && command instanceof QuantityType
             ) {
                 // N.B. Suppress unchecked because openHAB should hopefully only be passing us QuantityType<Temperature>
                 final QuantityType<Temperature> newTargetHeatTemperature = (QuantityType<Temperature>) command;
-                autoBoostFeature.setAutoBoostTargetHeatTemperature(
+
+                updatedAutoBoostFeature = autoBoostFeature.withTargetAutoBoostTargetHeatTemperature(
                         Quantities.getQuantity(
                                 newTargetHeatTemperature.toBigDecimal(),
                                 newTargetHeatTemperature.getUnit()
                         )
                 );
-
-                needUpdate = true;
             }
 
-            return needUpdate;
+            if (updatedAutoBoostFeature != null) {
+                return hiveNode.withFeature(AutoBoostFeature.class, updatedAutoBoostFeature);
+            } else {
+                return null;
+            }
         });
     }
 
@@ -86,15 +85,15 @@ public final class AutoBoostHandlerStrategy extends ThingHandlerStrategyBase {
     ) {
         useFeatureSafely(hiveNode, AutoBoostFeature.class, autoBoostFeature -> {
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_AUTO_BOOST_DURATION, autoBoostDurationChannel -> {
-                thingHandlerCallback.stateUpdated(autoBoostDurationChannel, new DecimalType(autoBoostFeature.getAutoBoostDuration().toMinutes()));
+                thingHandlerCallback.stateUpdated(autoBoostDurationChannel, new DecimalType(autoBoostFeature.getAutoBoostDuration().getDisplayValue().toMinutes()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_AUTO_BOOST_TEMPERATURE_TARGET, autoBoostTargetHeatTemperatureChannel -> {
                 thingHandlerCallback.stateUpdated(
                         autoBoostTargetHeatTemperatureChannel,
                         new QuantityType<>(
-                                autoBoostFeature.getAutoBoostTargetHeatTemperature().getValue(),
-                                autoBoostFeature.getAutoBoostTargetHeatTemperature().getUnit()
+                                autoBoostFeature.getAutoBoostTargetHeatTemperature().getDisplayValue().getValue(),
+                                autoBoostFeature.getAutoBoostTargetHeatTemperature().getDisplayValue().getUnit()
                         )
                 );
             });

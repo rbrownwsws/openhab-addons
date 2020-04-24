@@ -15,6 +15,8 @@ package org.openhab.binding.hive.internal.client.feature;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.hive.internal.client.BuilderUtil;
 import org.openhab.binding.hive.internal.client.FeatureAttribute;
 
 /**
@@ -29,7 +31,7 @@ public final class PhysicalDeviceFeature implements Feature {
     private final FeatureAttribute<String> manufacturer;
     private final FeatureAttribute<String> softwareVersion;
 
-    public PhysicalDeviceFeature(
+    private PhysicalDeviceFeature(
             final FeatureAttribute<String> hardwareIdentifier,
             final FeatureAttribute<String> model,
             final FeatureAttribute<String> manufacturer,
@@ -46,35 +48,85 @@ public final class PhysicalDeviceFeature implements Feature {
         this.softwareVersion = softwareVersion;
     }
 
-    public FeatureAttribute<String> getHardwareIdentifierAttribute() {
+    public FeatureAttribute<String> getHardwareIdentifier() {
         return this.hardwareIdentifier;
     }
 
-    public String getHardwareIdentifier() {
-        return this.hardwareIdentifier.getDisplayValue();
-    }
-
-    public FeatureAttribute<String> getModelAttribute() {
+    public FeatureAttribute<String> getModel() {
         return this.model;
     }
 
-    public String getModel() {
-        return this.model.getDisplayValue();
-    }
-
-    public FeatureAttribute<String> getManufacturerAttribute() {
+    public FeatureAttribute<String> getManufacturer() {
         return this.manufacturer;
     }
 
-    public String getManufacturer() {
-        return this.manufacturer.getDisplayValue();
-    }
-
-    public FeatureAttribute<String> getSoftwareVersionAttribute() {
+    public FeatureAttribute<String> getSoftwareVersion() {
         return this.softwareVersion;
     }
+    
+    public static Builder builder() {
+        return new Builder();
+    }
+    
+    public static final class Builder {
+        private @Nullable FeatureAttribute<String> hardwareIdentifier;
+        private @Nullable FeatureAttribute<String> model;
+        private @Nullable FeatureAttribute<String> manufacturer;
+        private @Nullable FeatureAttribute<String> softwareVersion;
 
-    public String getSoftwareVersion() {
-        return this.softwareVersion.getDisplayValue();
+        public Builder from(final PhysicalDeviceFeature physicalDeviceFeature) {
+            Objects.requireNonNull(physicalDeviceFeature);
+
+            return this.hardwareIdentifier(physicalDeviceFeature.getHardwareIdentifier())
+                    .model(physicalDeviceFeature.getModel())
+                    .manufacturer(physicalDeviceFeature.getManufacturer())
+                    .softwareVersion(physicalDeviceFeature.getSoftwareVersion());
+        }
+
+        public Builder hardwareIdentifier(final FeatureAttribute<String> hardwareIdentifier) {
+            this.hardwareIdentifier = Objects.requireNonNull(hardwareIdentifier);
+
+            return this;
+        }
+
+        public Builder model(final FeatureAttribute<String> model) {
+            this.model = Objects.requireNonNull(model);
+
+            return this;
+        }
+
+        public Builder manufacturer(final FeatureAttribute<String> manufacturer) {
+            this.manufacturer = Objects.requireNonNull(manufacturer);
+
+            return this;
+        }
+
+        public Builder softwareVersion(final FeatureAttribute<String> softwareVersion) {
+            this.softwareVersion = Objects.requireNonNull(softwareVersion);
+
+            return this;
+        }
+        
+        public PhysicalDeviceFeature build() {
+            final @Nullable FeatureAttribute<String> hardwareIdentifier = this.hardwareIdentifier;
+            final @Nullable FeatureAttribute<String> model = this.model;
+            final @Nullable FeatureAttribute<String> manufacturer = this.manufacturer;
+            final @Nullable FeatureAttribute<String> softwareVersion = this.softwareVersion;
+
+            if (hardwareIdentifier == null
+                    || model == null
+                    || manufacturer == null
+                    || softwareVersion == null
+            ) {
+                throw new IllegalStateException(BuilderUtil.REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE);
+            }
+
+            return new PhysicalDeviceFeature(
+                    hardwareIdentifier,
+                    model,
+                    manufacturer,
+                    softwareVersion
+            );
+        }
     }
 }

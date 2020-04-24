@@ -13,9 +13,14 @@
 package org.openhab.binding.hive.internal.discovery;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -101,10 +106,9 @@ public class DefaultHiveDiscoveryService extends AbstractDiscoveryService implem
 
         this.scheduler.execute(() -> {
             // Create a map from NodeId -> Node to help with following links later.
-            final Map<NodeId, Node> nodeMap = new HashMap<>();
-            for (final Node node : knownNodes) {
-                nodeMap.put(node.getId(), node);
-            }
+            final Map<NodeId, Node> nodeMap = Collections.unmodifiableMap(
+                    knownNodes.stream().collect(Collectors.toMap(Node::getId, Function.identity()))
+            );
             this.lastKnownNodes.set(nodeMap);
 
             // Trigger a new scan with the updated information.
@@ -142,7 +146,8 @@ public class DefaultHiveDiscoveryService extends AbstractDiscoveryService implem
                 thingTypeUID = HiveBindingConstants.THING_TYPE_TRV;
             } else if (node.getProductType().equals(ProductType.TRV_GROUP)) {
                 thingTypeUID = HiveBindingConstants.THING_TYPE_TRV_GROUP;
-            } else if (node.getProductType().equals(ProductType.DAYLIGHT_SD)
+            } else if (node.getProductType().equals(ProductType.ACTIONS)
+                    || node.getProductType().equals(ProductType.DAYLIGHT_SD)
                     || node.getProductType().equals(ProductType.UNKNOWN)
             ) {
                 // We do not care about these so skip.

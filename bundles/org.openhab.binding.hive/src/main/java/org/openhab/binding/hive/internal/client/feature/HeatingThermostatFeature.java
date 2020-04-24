@@ -18,6 +18,7 @@ import javax.measure.Quantity;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.*;
 
 /**
@@ -32,7 +33,7 @@ public final class HeatingThermostatFeature implements Feature {
     private final SettableFeatureAttribute<Quantity<Temperature>> targetHeatTemperature;
     private final SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride;
 
-    public HeatingThermostatFeature(
+    private HeatingThermostatFeature(
             final SettableFeatureAttribute<HeatingThermostatOperatingMode> operatingMode,
             final FeatureAttribute<HeatingThermostatOperatingState> operatingState,
             final SettableFeatureAttribute<Quantity<Temperature>> targetHeatTemperature,
@@ -49,53 +50,121 @@ public final class HeatingThermostatFeature implements Feature {
         this.temporaryOperatingModeOverride = temporaryOperatingModeOverride;
     }
 
-    public SettableFeatureAttribute<HeatingThermostatOperatingMode> getOperatingModeAttribute() {
+    public SettableFeatureAttribute<HeatingThermostatOperatingMode> getOperatingMode() {
         return this.operatingMode;
     }
 
-    public HeatingThermostatOperatingMode getOperatingMode() {
-        return this.operatingMode.getDisplayValue();
+    public HeatingThermostatFeature withTargetOperatingMode(final HeatingThermostatOperatingMode targetOperatingMode) {
+        return HeatingThermostatFeature.builder()
+                .from(this)
+                .operatingMode(
+                        DefaultFeatureAttribute.<HeatingThermostatOperatingMode>builder()
+                                .from(this.operatingMode)
+                                .targetValue(targetOperatingMode)
+                                .build()
+                )
+                .build();
     }
 
-    public void setOperatingMode(final HeatingThermostatOperatingMode operatingMode) {
-        Objects.requireNonNull(operatingMode);
-
-        this.operatingMode.setTargetValue(operatingMode);
-    }
-
-    public FeatureAttribute<HeatingThermostatOperatingState> getOperatingStateAttribute() {
+    public FeatureAttribute<HeatingThermostatOperatingState> getOperatingState() {
         return this.operatingState;
     }
 
-    public HeatingThermostatOperatingState getOperatingState() {
-        return this.operatingState.getDisplayValue();
-    }
-
-    public SettableFeatureAttribute<Quantity<Temperature>> getTargetHeatTemperatureAttribute() {
+    public SettableFeatureAttribute<Quantity<Temperature>> getTargetHeatTemperature() {
         return this.targetHeatTemperature;
     }
 
-    public Quantity<Temperature> getTargetHeatTemperature() {
-        return this.targetHeatTemperature.getDisplayValue();
+    public HeatingThermostatFeature withTargetTargetHeatTemperature(final Quantity<Temperature> targetTargetHeatTemperature) {
+        return HeatingThermostatFeature.builder()
+                .from(this)
+                .targetHeatTemperature(
+                        DefaultFeatureAttribute.<Quantity<Temperature>>builder()
+                                .from(this.targetHeatTemperature)
+                                .targetValue(targetTargetHeatTemperature)
+                                .build()
+                )
+                .build();
     }
 
-    public void setTargetHeatTemperature(final Quantity<Temperature> targetHeatTemperature) {
-        Objects.requireNonNull(targetHeatTemperature);
-
-        this.targetHeatTemperature.setTargetValue(targetHeatTemperature);
-    }
-
-    public SettableFeatureAttribute<OverrideMode> getTemporaryOperatingModeOverrideAttribute() {
+    public SettableFeatureAttribute<OverrideMode> getTemporaryOperatingModeOverride() {
         return this.temporaryOperatingModeOverride;
     }
 
-    public OverrideMode getTemporaryOperatingModeOverride() {
-        return this.temporaryOperatingModeOverride.getDisplayValue();
+    public HeatingThermostatFeature withTargetTemporaryOperatingModeOverride(final OverrideMode targetOverrideMode) {
+        return HeatingThermostatFeature.builder()
+                .from(this)
+                .temporaryOperatingModeOverride(
+                        DefaultFeatureAttribute.<OverrideMode>builder()
+                                .from(this.temporaryOperatingModeOverride)
+                                .targetValue(targetOverrideMode)
+                                .build()
+                )
+                .build();
     }
 
-    public void setTemporaryOperatingModeOverride(final OverrideMode overrideMode) {
-        Objects.requireNonNull(overrideMode);
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        this.temporaryOperatingModeOverride.setTargetValue(overrideMode);
+    public static final class Builder {
+        private @Nullable SettableFeatureAttribute<HeatingThermostatOperatingMode> operatingMode;
+        private @Nullable FeatureAttribute<HeatingThermostatOperatingState> operatingState;
+        private @Nullable SettableFeatureAttribute<Quantity<Temperature>> targetHeatTemperature;
+        private @Nullable SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride;
+
+        public Builder from(final HeatingThermostatFeature heatingThermostatFeature) {
+            Objects.requireNonNull(heatingThermostatFeature);
+
+            return this.operatingMode(heatingThermostatFeature.getOperatingMode())
+                    .operatingState(heatingThermostatFeature.getOperatingState())
+                    .targetHeatTemperature(heatingThermostatFeature.getTargetHeatTemperature())
+                    .temporaryOperatingModeOverride(heatingThermostatFeature.getTemporaryOperatingModeOverride());
+        }
+
+        public Builder operatingMode(final SettableFeatureAttribute<HeatingThermostatOperatingMode> operatingMode) {
+            this.operatingMode = Objects.requireNonNull(operatingMode);
+
+            return this;
+        }
+
+        public Builder operatingState(final FeatureAttribute<HeatingThermostatOperatingState> operatingState) {
+            this.operatingState = Objects.requireNonNull(operatingState);
+
+            return this;
+        }
+
+        public Builder targetHeatTemperature(final SettableFeatureAttribute<Quantity<Temperature>> targetHeatTemperature) {
+            this.targetHeatTemperature = Objects.requireNonNull(targetHeatTemperature);
+
+            return this;
+        }
+
+        public Builder temporaryOperatingModeOverride(final SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride) {
+            this.temporaryOperatingModeOverride = Objects.requireNonNull(temporaryOperatingModeOverride);
+
+            return this;
+        }
+
+        public HeatingThermostatFeature build() {
+            final @Nullable SettableFeatureAttribute<HeatingThermostatOperatingMode> operatingMode = this.operatingMode;
+            final @Nullable FeatureAttribute<HeatingThermostatOperatingState> operatingState = this.operatingState;
+            final @Nullable SettableFeatureAttribute<Quantity<Temperature>> targetHeatTemperature = this.targetHeatTemperature;
+            final @Nullable SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride = this.temporaryOperatingModeOverride;
+
+            if (operatingMode == null
+                    || operatingState == null
+                    || targetHeatTemperature == null
+                    || temporaryOperatingModeOverride == null
+            ) {
+                throw new IllegalStateException(BuilderUtil.REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE);
+            }
+
+            return new HeatingThermostatFeature(
+                    operatingMode,
+                    operatingState,
+                    targetHeatTemperature,
+                    temporaryOperatingModeOverride
+            );
+        }
     }
 }

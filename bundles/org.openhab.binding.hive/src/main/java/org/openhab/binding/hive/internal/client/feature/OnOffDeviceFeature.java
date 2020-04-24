@@ -15,6 +15,9 @@ package org.openhab.binding.hive.internal.client.feature;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.hive.internal.client.BuilderUtil;
+import org.openhab.binding.hive.internal.client.DefaultFeatureAttribute;
 import org.openhab.binding.hive.internal.client.OnOffMode;
 import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
 
@@ -27,7 +30,7 @@ import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
 public final class OnOffDeviceFeature implements Feature {
     private final SettableFeatureAttribute<OnOffMode> mode;
 
-    public OnOffDeviceFeature(
+    private OnOffDeviceFeature(
             final SettableFeatureAttribute<OnOffMode> mode
     ) {
         Objects.requireNonNull(mode);
@@ -35,17 +38,50 @@ public final class OnOffDeviceFeature implements Feature {
         this.mode = mode;
     }
 
-    public SettableFeatureAttribute<OnOffMode> getModeAttribute() {
+    public SettableFeatureAttribute<OnOffMode> getMode() {
         return this.mode;
     }
 
-    public OnOffMode getMode() {
-        return this.mode.getDisplayValue();
+    public OnOffDeviceFeature withTargetMode(final OnOffMode targetMode) {
+        Objects.requireNonNull(targetMode);
+
+        return OnOffDeviceFeature.builder()
+                .from(this)
+                .mode(DefaultFeatureAttribute.<OnOffMode>builder()
+                        .from(this.mode)
+                        .targetValue(targetMode)
+                        .build()
+                )
+                .build();
     }
 
-    public void setMode(final OnOffMode mode) {
-        Objects.requireNonNull(mode);
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        this.mode.setTargetValue(mode);
+    public static final class Builder {
+        private @Nullable SettableFeatureAttribute<OnOffMode> mode;
+
+        public Builder from(final OnOffDeviceFeature onOffDeviceFeature) {
+            Objects.requireNonNull(onOffDeviceFeature);
+
+            return this.mode(onOffDeviceFeature.getMode());
+        }
+
+        public Builder mode(final SettableFeatureAttribute<OnOffMode> mode) {
+            this.mode = Objects.requireNonNull(mode);
+
+            return this;
+        }
+
+        public OnOffDeviceFeature build() {
+            final @Nullable SettableFeatureAttribute<OnOffMode> mode = this.mode;
+
+            if (mode == null) {
+                throw new IllegalStateException(BuilderUtil.REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE);
+            }
+
+            return new OnOffDeviceFeature(mode);
+        }
     }
 }

@@ -19,6 +19,9 @@ import javax.measure.Quantity;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.hive.internal.client.BuilderUtil;
+import org.openhab.binding.hive.internal.client.DefaultFeatureAttribute;
 import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
 
 /**
@@ -31,7 +34,7 @@ public final class AutoBoostFeature implements Feature {
     private final SettableFeatureAttribute<Duration> autoBoostDuration;
     private final SettableFeatureAttribute<Quantity<Temperature>> autoBoostTargetHeatTemperature;
 
-    public AutoBoostFeature(
+    private AutoBoostFeature(
             final SettableFeatureAttribute<Duration> autoBoostDuration,
             final SettableFeatureAttribute<Quantity<Temperature>> autoBoostTargetHeatTemperature
     ) {
@@ -42,29 +45,85 @@ public final class AutoBoostFeature implements Feature {
         this.autoBoostTargetHeatTemperature = autoBoostTargetHeatTemperature;
     }
 
-    public final SettableFeatureAttribute<Duration> getAutoBoostDurationAttribute() {
+    public SettableFeatureAttribute<Duration> getAutoBoostDuration() {
         return this.autoBoostDuration;
     }
 
-    public final Duration getAutoBoostDuration() {
-        return this.autoBoostDuration.getDisplayValue();
+    public AutoBoostFeature withTargetAutoBoostDuration(final Duration targetAutoBoostDuration) {
+        Objects.requireNonNull(targetAutoBoostDuration);
+
+        return AutoBoostFeature.builder()
+                .from(this)
+                .autoBoostDuration(
+                        DefaultFeatureAttribute.<Duration>builder()
+                                .from(this.autoBoostDuration)
+                                .targetValue(targetAutoBoostDuration)
+                                .build()
+                )
+                .build();
     }
 
-    public final void setAutoBoostDuration(final Duration duration) {
-        Objects.requireNonNull(duration);
-
-        this.autoBoostDuration.setTargetValue(duration);
-    }
-
-    public final SettableFeatureAttribute<Quantity<Temperature>> getAutoBoostTargetHeatTemperatureAttribute() {
+    public SettableFeatureAttribute<Quantity<Temperature>> getAutoBoostTargetHeatTemperature() {
         return this.autoBoostTargetHeatTemperature;
     }
 
-    public final Quantity<Temperature> getAutoBoostTargetHeatTemperature() {
-        return this.autoBoostTargetHeatTemperature.getDisplayValue();
+    public AutoBoostFeature withTargetAutoBoostTargetHeatTemperature(final Quantity<Temperature> targetAutoBoostTargetHeatTemperature) {
+        Objects.requireNonNull(targetAutoBoostTargetHeatTemperature);
+
+        return AutoBoostFeature.builder()
+                .from(this)
+                .autoBoostTargetHeatTemperature(
+                        DefaultFeatureAttribute.<Quantity<Temperature>>builder()
+                                .from(this.autoBoostTargetHeatTemperature)
+                                .targetValue(targetAutoBoostTargetHeatTemperature)
+                                .build()
+                )
+                .build();
     }
 
-    public final void setAutoBoostTargetHeatTemperature(final Quantity<Temperature> targetHeatTemperature) {
-        this.autoBoostTargetHeatTemperature.setTargetValue(targetHeatTemperature);
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private @Nullable SettableFeatureAttribute<Duration> autoBoostDuration;
+        private @Nullable SettableFeatureAttribute<Quantity<Temperature>> autoBoostTargetHeatTemperature;
+
+        public Builder from(final AutoBoostFeature autoBoostFeature) {
+            Objects.requireNonNull(autoBoostFeature);
+
+            this.autoBoostDuration(autoBoostFeature.autoBoostDuration);
+            this.autoBoostTargetHeatTemperature(autoBoostFeature.autoBoostTargetHeatTemperature);
+
+            return this;
+        }
+
+        public Builder autoBoostDuration(final SettableFeatureAttribute<Duration> autoBoostDuration) {
+            this.autoBoostDuration = Objects.requireNonNull(autoBoostDuration);
+
+            return this;
+        }
+
+        public Builder autoBoostTargetHeatTemperature(final SettableFeatureAttribute<Quantity<Temperature>> autoBoostTargetHeatTemperature) {
+            this.autoBoostTargetHeatTemperature = Objects.requireNonNull(autoBoostTargetHeatTemperature);
+
+            return this;
+        }
+
+        public AutoBoostFeature build() {
+            final @Nullable SettableFeatureAttribute<Duration> autoBoostDuration = this.autoBoostDuration;
+            final @Nullable SettableFeatureAttribute<Quantity<Temperature>> autoBoostTargetHeatTemperature = this.autoBoostTargetHeatTemperature;
+
+            if (autoBoostDuration == null
+                    || autoBoostTargetHeatTemperature == null
+            ) {
+                throw new IllegalStateException(BuilderUtil.REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE);
+            }
+
+            return new AutoBoostFeature(
+                    autoBoostDuration,
+                    autoBoostTargetHeatTemperature
+            );
+        }
     }
 }

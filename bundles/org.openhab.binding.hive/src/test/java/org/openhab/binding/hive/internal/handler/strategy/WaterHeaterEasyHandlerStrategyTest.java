@@ -18,11 +18,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.measure.Quantity;
-import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -38,13 +38,14 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.TestUtil;
-import org.openhab.binding.hive.internal.client.*;
+import org.openhab.binding.hive.internal.client.Node;
+import org.openhab.binding.hive.internal.client.OnOffMode;
+import org.openhab.binding.hive.internal.client.OverrideMode;
+import org.openhab.binding.hive.internal.client.WaterHeaterOperatingMode;
 import org.openhab.binding.hive.internal.client.feature.Feature;
-import org.openhab.binding.hive.internal.client.feature.HeatingThermostatFeature;
 import org.openhab.binding.hive.internal.client.feature.OnOffDeviceFeature;
-
-import tec.uom.se.quantity.Quantities;
-import tec.uom.se.unit.Units;
+import org.openhab.binding.hive.internal.client.feature.TransientModeFeature;
+import org.openhab.binding.hive.internal.client.feature.WaterHeaterFeature;
 
 /**
  *
@@ -52,7 +53,7 @@ import tec.uom.se.unit.Units;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public class HeatingThermostatEasyHandlerStrategyTest {
+public class WaterHeaterEasyHandlerStrategyTest {
     @NonNullByDefault({})
     @Mock
     private Channel easyOperatingModeChannel;
@@ -103,19 +104,19 @@ public class HeatingThermostatEasyHandlerStrategyTest {
     }
 
     @Test
-    public void testNormalUpdateScheduleHeatNoneOn() {
+    public void testNormalUpdateScheduleOnNoneOn() {
         /* Given */
-        final HeatingThermostatEasyHandlerStrategy strategy = new HeatingThermostatEasyHandlerStrategy();
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
 
-        final HeatingThermostatOperatingMode operatingMode = HeatingThermostatOperatingMode.SCHEDULE;
-        final HeatingThermostatOperatingState operatingState = HeatingThermostatOperatingState.HEAT;
+        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.SCHEDULE;
+        final boolean isOn = true;
         final OverrideMode overrideMode = OverrideMode.NONE;
         final OnOffMode onOffMode = OnOffMode.ON;
 
         // Create the test node
         final Node node = getGoodNode(
                 operatingMode,
-                operatingState,
+                isOn,
                 overrideMode,
                 onOffMode
         );
@@ -132,34 +133,29 @@ public class HeatingThermostatEasyHandlerStrategyTest {
         /* Then */
         verify(this.thingHandlerCallback).stateUpdated(
                 eq(this.easyOperatingModeChannelUid),
-                eq(new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_SCHEDULE))
+                eq(new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_SCHEDULE))
         );
 
         verify(this.thingHandlerCallback).stateUpdated(
                 eq(this.easyBoostModeChannelUid),
                 eq(OnOffType.OFF)
         );
-
-        verify(this.thingHandlerCallback).stateUpdated(
-                eq(this.easyIsOnStateChannelUid),
-                eq(OnOffType.ON)
-        );
     }
 
     @Test
-    public void testNormalUpdateManualHeatNoneOn() {
+    public void testNormalUpdateOnOnNoneOn() {
         /* Given */
-        final HeatingThermostatEasyHandlerStrategy strategy = new HeatingThermostatEasyHandlerStrategy();
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
 
-        final HeatingThermostatOperatingMode operatingMode = HeatingThermostatOperatingMode.MANUAL;
-        final HeatingThermostatOperatingState operatingState = HeatingThermostatOperatingState.HEAT;
+        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.ON;
+        final boolean isOn = true;
         final OverrideMode overrideMode = OverrideMode.NONE;
         final OnOffMode onOffMode = OnOffMode.ON;
 
         // Create the test node
         final Node node = getGoodNode(
                 operatingMode,
-                operatingState,
+                isOn,
                 overrideMode,
                 onOffMode
         );
@@ -176,34 +172,29 @@ public class HeatingThermostatEasyHandlerStrategyTest {
         /* Then */
         verify(this.thingHandlerCallback).stateUpdated(
                 eq(this.easyOperatingModeChannelUid),
-                eq(new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_MANUAL))
+                eq(new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_ON))
         );
 
         verify(this.thingHandlerCallback).stateUpdated(
                 eq(this.easyBoostModeChannelUid),
                 eq(OnOffType.OFF)
         );
-
-        verify(this.thingHandlerCallback).stateUpdated(
-                eq(this.easyIsOnStateChannelUid),
-                eq(OnOffType.ON)
-        );
     }
 
     @Test
-    public void testNormalUpdateScheduleOffNoneOff() {
+    public void testNormalUpdateOnOffNoneOff() {
         /* Given */
-        final HeatingThermostatEasyHandlerStrategy strategy = new HeatingThermostatEasyHandlerStrategy();
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
 
-        final HeatingThermostatOperatingMode operatingMode = HeatingThermostatOperatingMode.SCHEDULE;
-        final HeatingThermostatOperatingState operatingState = HeatingThermostatOperatingState.OFF;
+        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.ON;
+        final boolean isOn = false;
         final OverrideMode overrideMode = OverrideMode.NONE;
         final OnOffMode onOffMode = OnOffMode.OFF;
 
         // Create the test node
         final Node node = getGoodNode(
                 operatingMode,
-                operatingState,
+                isOn,
                 overrideMode,
                 onOffMode
         );
@@ -220,34 +211,29 @@ public class HeatingThermostatEasyHandlerStrategyTest {
         /* Then */
         verify(this.thingHandlerCallback).stateUpdated(
                 eq(this.easyOperatingModeChannelUid),
-                eq(new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_OFF))
+                eq(new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_OFF))
         );
 
         verify(this.thingHandlerCallback).stateUpdated(
                 eq(this.easyBoostModeChannelUid),
                 eq(OnOffType.OFF)
         );
-
-        verify(this.thingHandlerCallback).stateUpdated(
-                eq(this.easyIsOnStateChannelUid),
-                eq(OnOffType.OFF)
-        );
     }
 
     @Test
-    public void testNormalUpdateScheduleHeatTransientOn() {
+    public void testNormalUpdateScheduleOnTransientOn() {
         /* Given */
-        final HeatingThermostatEasyHandlerStrategy strategy = new HeatingThermostatEasyHandlerStrategy();
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
 
-        final HeatingThermostatOperatingMode operatingMode = HeatingThermostatOperatingMode.SCHEDULE;
-        final HeatingThermostatOperatingState operatingState = HeatingThermostatOperatingState.HEAT;
+        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.SCHEDULE;
+        final boolean isOn = true;
         final OverrideMode overrideMode = OverrideMode.TRANSIENT;
         final OnOffMode onOffMode = OnOffMode.ON;
 
         // Create the test node
         final Node node = getGoodNode(
                 operatingMode,
-                operatingState,
+                isOn,
                 overrideMode,
                 onOffMode
         );
@@ -264,98 +250,21 @@ public class HeatingThermostatEasyHandlerStrategyTest {
         /* Then */
         verify(this.thingHandlerCallback).stateUpdated(
                 eq(this.easyOperatingModeChannelUid),
-                eq(new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_SCHEDULE))
+                eq(new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_SCHEDULE))
         );
 
         verify(this.thingHandlerCallback).stateUpdated(
                 eq(this.easyBoostModeChannelUid),
                 eq(OnOffType.ON)
         );
-
-        verify(this.thingHandlerCallback).stateUpdated(
-                eq(this.easyIsOnStateChannelUid),
-                eq(OnOffType.ON)
-        );
     }
 
     @Test
-    public void testNormalCommandOperatingModeManual() {
+    public void testNormalCommandOperatingModeOnFromSchedule() {
         /* Given */
-        final HeatingThermostatEasyHandlerStrategy strategy = new HeatingThermostatEasyHandlerStrategy();
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
 
-        final HeatingThermostatOperatingMode operatingMode = HeatingThermostatOperatingMode.SCHEDULE;
-        final OnOffMode onOffMode = OnOffMode.OFF;
-
-        // Create the test node
-        final Node node = getGoodNodeForOperatingModeCommandTest(
-                operatingMode,
-                onOffMode
-        );
-
-
-        /* When */
-        final @Nullable Node updatedNode = strategy.handleCommand(
-                this.easyOperatingModeChannelUid,
-                new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_MANUAL),
-                node
-        );
-
-
-        /* Then */
-        assertThat(updatedNode).isNotNull();
-
-        final @Nullable HeatingThermostatFeature heatingThermostatFeature = updatedNode.getFeature(HeatingThermostatFeature.class);
-        assertThat(heatingThermostatFeature).isNotNull();
-
-        final @Nullable OnOffDeviceFeature onOffDeviceFeature = updatedNode.getFeature(OnOffDeviceFeature.class);
-        assertThat(onOffDeviceFeature).isNotNull();
-
-        assertThat(heatingThermostatFeature.getOperatingMode().getTargetValue()).isEqualTo(HeatingThermostatOperatingMode.MANUAL);
-        assertThat(onOffDeviceFeature.getMode().getTargetValue()).isEqualTo(OnOffMode.ON);
-    }
-
-    @Test
-    public void testNormalCommandOperatingModeSchedule() {
-        /* Given */
-        final HeatingThermostatEasyHandlerStrategy strategy = new HeatingThermostatEasyHandlerStrategy();
-
-        final HeatingThermostatOperatingMode operatingMode = HeatingThermostatOperatingMode.MANUAL;
-        final OnOffMode onOffMode = OnOffMode.OFF;
-
-        // Create the test node
-        final Node node = getGoodNodeForOperatingModeCommandTest(
-                operatingMode,
-                onOffMode
-        );
-
-
-        /* When */
-        final @Nullable Node updatedNode = strategy.handleCommand(
-                this.easyOperatingModeChannelUid,
-                new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_SCHEDULE),
-                node
-        );
-
-
-        /* Then */
-        assertThat(updatedNode).isNotNull();
-
-        final @Nullable HeatingThermostatFeature heatingThermostatFeature = updatedNode.getFeature(HeatingThermostatFeature.class);
-        assertThat(heatingThermostatFeature).isNotNull();
-
-        final @Nullable OnOffDeviceFeature onOffDeviceFeature = updatedNode.getFeature(OnOffDeviceFeature.class);
-        assertThat(onOffDeviceFeature).isNotNull();
-
-        assertThat(heatingThermostatFeature.getOperatingMode().getTargetValue()).isEqualTo(HeatingThermostatOperatingMode.SCHEDULE);
-        assertThat(onOffDeviceFeature.getMode().getTargetValue()).isEqualTo(OnOffMode.ON);
-    }
-
-    @Test
-    public void testNormalCommandOperatingModeOff() {
-        /* Given */
-        final HeatingThermostatEasyHandlerStrategy strategy = new HeatingThermostatEasyHandlerStrategy();
-
-        final HeatingThermostatOperatingMode operatingMode = HeatingThermostatOperatingMode.MANUAL;
+        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.SCHEDULE;
         final OnOffMode onOffMode = OnOffMode.ON;
 
         // Create the test node
@@ -368,13 +277,124 @@ public class HeatingThermostatEasyHandlerStrategyTest {
         /* When */
         final @Nullable Node updatedNode = strategy.handleCommand(
                 this.easyOperatingModeChannelUid,
-                new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_OFF),
+                new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_ON),
                 node
         );
 
 
         /* Then */
         assertThat(updatedNode).isNotNull();
+
+        final @Nullable WaterHeaterFeature waterHeaterFeature = updatedNode.getFeature(WaterHeaterFeature.class);
+        assertThat(waterHeaterFeature).isNotNull();
+
+        final @Nullable OnOffDeviceFeature onOffDeviceFeature = updatedNode.getFeature(OnOffDeviceFeature.class);
+        assertThat(onOffDeviceFeature).isNotNull();
+
+        assertThat(waterHeaterFeature.getOperatingMode().getTargetValue()).isEqualTo(WaterHeaterOperatingMode.ON);
+        assertThat(onOffDeviceFeature.getMode().getTargetValue()).isEqualTo(OnOffMode.ON);
+    }
+
+    @Test
+    public void testNormalCommandOperatingModeOnFromOff() {
+        /* Given */
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
+
+        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.ON;
+        final OnOffMode onOffMode = OnOffMode.OFF;
+
+        // Create the test node
+        final Node node = getGoodNodeForOperatingModeCommandTest(
+                operatingMode,
+                onOffMode
+        );
+
+
+        /* When */
+        final @Nullable Node updatedNode = strategy.handleCommand(
+                this.easyOperatingModeChannelUid,
+                new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_ON),
+                node
+        );
+
+
+        /* Then */
+        assertThat(updatedNode).isNotNull();
+
+        final @Nullable WaterHeaterFeature waterHeaterFeature = updatedNode.getFeature(WaterHeaterFeature.class);
+        assertThat(waterHeaterFeature).isNotNull();
+
+        final @Nullable OnOffDeviceFeature onOffDeviceFeature = updatedNode.getFeature(OnOffDeviceFeature.class);
+        assertThat(onOffDeviceFeature).isNotNull();
+
+        assertThat(waterHeaterFeature.getOperatingMode().getTargetValue()).isEqualTo(WaterHeaterOperatingMode.ON);
+        assertThat(onOffDeviceFeature.getMode().getTargetValue()).isEqualTo(OnOffMode.ON);
+    }
+
+    @Test
+    public void testNormalCommandOperatingModeSchedule() {
+        /* Given */
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
+
+        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.ON;
+        final OnOffMode onOffMode = OnOffMode.OFF;
+
+        // Create the test node
+        final Node node = getGoodNodeForOperatingModeCommandTest(
+                operatingMode,
+                onOffMode
+        );
+
+
+        /* When */
+        final @Nullable Node updatedNode = strategy.handleCommand(
+                this.easyOperatingModeChannelUid,
+                new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_SCHEDULE),
+                node
+        );
+
+
+        /* Then */
+        assertThat(updatedNode).isNotNull();
+
+        final @Nullable WaterHeaterFeature waterHeaterFeature = updatedNode.getFeature(WaterHeaterFeature.class);
+        assertThat(waterHeaterFeature).isNotNull();
+
+        final @Nullable OnOffDeviceFeature onOffDeviceFeature = updatedNode.getFeature(OnOffDeviceFeature.class);
+        assertThat(onOffDeviceFeature).isNotNull();
+
+        assertThat(waterHeaterFeature.getOperatingMode().getTargetValue()).isEqualTo(WaterHeaterOperatingMode.SCHEDULE);
+        assertThat(onOffDeviceFeature.getMode().getTargetValue()).isEqualTo(OnOffMode.ON);
+    }
+
+    @Test
+    public void testNormalCommandOperatingModeOff() {
+        /* Given */
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
+
+        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.ON;
+        final OnOffMode onOffMode = OnOffMode.ON;
+
+        // Create the test node
+        final Node node = getGoodNodeForOperatingModeCommandTest(
+                operatingMode,
+                onOffMode
+        );
+
+
+        /* When */
+        final @Nullable Node updatedNode = strategy.handleCommand(
+                this.easyOperatingModeChannelUid,
+                new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_OFF),
+                node
+        );
+
+
+        /* Then */
+        assertThat(updatedNode).isNotNull();
+
+        final @Nullable WaterHeaterFeature waterHeaterFeature = updatedNode.getFeature(WaterHeaterFeature.class);
+        assertThat(waterHeaterFeature).isNotNull();
 
         final @Nullable OnOffDeviceFeature onOffDeviceFeature = updatedNode.getFeature(OnOffDeviceFeature.class);
         assertThat(onOffDeviceFeature).isNotNull();
@@ -385,7 +405,7 @@ public class HeatingThermostatEasyHandlerStrategyTest {
     @Test
     public void testNormalCommandBoostOn() {
         /* Given */
-        final HeatingThermostatEasyHandlerStrategy strategy = new HeatingThermostatEasyHandlerStrategy();
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
 
 
         // Create the test node
@@ -403,16 +423,20 @@ public class HeatingThermostatEasyHandlerStrategyTest {
         /* Then */
         assertThat(updatedNode).isNotNull();
 
-        final @Nullable HeatingThermostatFeature heatingThermostatFeature = updatedNode.getFeature(HeatingThermostatFeature.class);
-        assertThat(heatingThermostatFeature).isNotNull();
+        final @Nullable WaterHeaterFeature waterHeaterFeature = updatedNode.getFeature(WaterHeaterFeature.class);
+        assertThat(waterHeaterFeature).isNotNull();
 
-        assertThat(heatingThermostatFeature.getTemporaryOperatingModeOverride().getTargetValue()).isEqualTo(OverrideMode.TRANSIENT);
+        final @Nullable TransientModeFeature transientModeFeature = updatedNode.getFeature(TransientModeFeature.class);
+        assertThat(transientModeFeature).isNotNull();
+
+        assertThat(waterHeaterFeature.getTemporaryOperatingModeOverride().getTargetValue()).isEqualTo(OverrideMode.TRANSIENT);
+        assertThat(transientModeFeature.getIsEnabled().getTargetValue()).isEqualTo(true);
     }
 
     @Test
     public void testNormalCommandBoostOff() {
         /* Given */
-        final HeatingThermostatEasyHandlerStrategy strategy = new HeatingThermostatEasyHandlerStrategy();
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
 
 
         // Create the test node
@@ -430,16 +454,20 @@ public class HeatingThermostatEasyHandlerStrategyTest {
         /* Then */
         assertThat(updatedNode).isNotNull();
 
-        final @Nullable HeatingThermostatFeature heatingThermostatFeature = updatedNode.getFeature(HeatingThermostatFeature.class);
-        assertThat(heatingThermostatFeature).isNotNull();
+        final @Nullable WaterHeaterFeature waterHeaterFeature = updatedNode.getFeature(WaterHeaterFeature.class);
+        assertThat(waterHeaterFeature).isNotNull();
 
-        assertThat(heatingThermostatFeature.getTemporaryOperatingModeOverride().getTargetValue()).isEqualTo(OverrideMode.NONE);
+        final @Nullable TransientModeFeature transientModeFeature = updatedNode.getFeature(TransientModeFeature.class);
+        assertThat(transientModeFeature).isNotNull();
+
+        assertThat(waterHeaterFeature.getTemporaryOperatingModeOverride().getTargetValue()).isEqualTo(OverrideMode.NONE);
+        assertThat(transientModeFeature.getIsEnabled().getTargetValue()).isEqualTo(false);
     }
 
     @Test
     public void testNormalRefreshOperatingMode() {
         /* Given */
-        final HeatingThermostatEasyHandlerStrategy strategy = new HeatingThermostatEasyHandlerStrategy();
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
 
 
         // Create the test node
@@ -461,7 +489,7 @@ public class HeatingThermostatEasyHandlerStrategyTest {
     @Test
     public void testNormalRefreshBoost() {
         /* Given */
-        final HeatingThermostatEasyHandlerStrategy strategy = new HeatingThermostatEasyHandlerStrategy();
+        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
 
 
         // Create the test node
@@ -477,13 +505,13 @@ public class HeatingThermostatEasyHandlerStrategyTest {
 
 
         /* Then */
-        assertThat(updatedNode).isNull();
+        assertThat(updatedNode).isNull();;
     }
 
     private static Node getGoodNodeForRefreshTest() {
         return getGoodNode(
-                HeatingThermostatOperatingMode.SCHEDULE,
-                HeatingThermostatOperatingState.OFF,
+                WaterHeaterOperatingMode.SCHEDULE,
+                false,
                 OverrideMode.NONE,
                 OnOffMode.ON
         );
@@ -493,50 +521,55 @@ public class HeatingThermostatEasyHandlerStrategyTest {
             final OverrideMode overrideMode
     ) {
         return getGoodNode(
-                HeatingThermostatOperatingMode.SCHEDULE,
-                HeatingThermostatOperatingState.OFF,
+                WaterHeaterOperatingMode.SCHEDULE,
+                false,
                 overrideMode,
                 OnOffMode.ON
         );
     }
 
     private static Node getGoodNodeForOperatingModeCommandTest(
-            final HeatingThermostatOperatingMode operatingMode,
+            final WaterHeaterOperatingMode operatingMode,
             final OnOffMode onOffMode
     ) {
         return getGoodNode(
                 operatingMode,
-                HeatingThermostatOperatingState.OFF,
+                false,
                 OverrideMode.NONE,
                 onOffMode
         );
     }
 
     private static Node getGoodNode(
-            final HeatingThermostatOperatingMode operatingMode,
-            final HeatingThermostatOperatingState operatingState,
+            final WaterHeaterOperatingMode operatingMode,
+            final boolean isOn,
             final OverrideMode overrideMode,
             final OnOffMode onOffMode
     ) {
         final Map<Class<? extends Feature>, Feature> features = new HashMap<>();
 
-        // Create HeatingThermostatFeature
-        final Quantity<Temperature> targetHeatTemperature = Quantities.getQuantity(20, Units.CELSIUS);
-        final HeatingThermostatFeature heatingThermostatFeature = HeatingThermostatFeature.builder()
+        // Create WaterHeaterFeature
+        final WaterHeaterFeature waterHeaterFeature = WaterHeaterFeature.builder()
                 .operatingMode(TestUtil.createSimpleFeatureAttribute(operatingMode))
-                .operatingState(TestUtil.createSimpleFeatureAttribute(operatingState))
-                .targetHeatTemperature(TestUtil.createSimpleFeatureAttribute(targetHeatTemperature))
+                .isOn(TestUtil.createSimpleFeatureAttribute(isOn))
                 .temporaryOperatingModeOverride(TestUtil.createSimpleFeatureAttribute(overrideMode))
                 .build();
-
-        features.put(HeatingThermostatFeature.class, heatingThermostatFeature);
+        features.put(WaterHeaterFeature.class, waterHeaterFeature);
 
         // Create OnOffDeviceFeature
         final OnOffDeviceFeature onOffDeviceFeature = OnOffDeviceFeature.builder()
                 .mode(TestUtil.createSimpleFeatureAttribute(onOffMode))
                 .build();
-
         features.put(OnOffDeviceFeature.class, onOffDeviceFeature);
+
+        // Create TransientModeFeature
+        final TransientModeFeature transientModeFeature = TransientModeFeature.builder()
+                .duration(TestUtil.createSimpleFeatureAttribute(Duration.ofMinutes(30)))
+                .isEnabled(TestUtil.createSimpleFeatureAttribute(overrideMode == OverrideMode.TRANSIENT))
+                .startDatetime(TestUtil.createSimpleFeatureAttribute(Instant.now().atZone(ZoneId.systemDefault())))
+                .endDatetime(TestUtil.createSimpleFeatureAttribute(Instant.now().plus(Duration.ofMinutes(30)).atZone(ZoneId.systemDefault())))
+                .build();
+        features.put(TransientModeFeature.class, transientModeFeature);
 
         return TestUtil.getTestNodeWithFeatures(features);
     }

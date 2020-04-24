@@ -13,7 +13,6 @@
 package org.openhab.binding.hive.internal.client;
 
 import java.time.Instant;
-import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -23,43 +22,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public class FeatureAttribute<T> {
-    private final T reportedValue;
-    private final Instant reportReceivedTime;
-    private final Instant reportChangedTime;
-
-    private final T displayValue;
-
-    public FeatureAttribute(
-            final T reportedValue,
-            final Instant reportChangedTime,
-            final Instant reportReceivedTime,
-            final T displayValue
-    ) {
-        Objects.requireNonNull(reportedValue);
-        Objects.requireNonNull(reportChangedTime);
-        Objects.requireNonNull(reportReceivedTime);
-        Objects.requireNonNull(displayValue);
-
-        this.reportedValue = reportedValue;
-        this.reportChangedTime = reportChangedTime;
-        this.reportReceivedTime = reportReceivedTime;
-        this.displayValue = displayValue;
-    }
-
-    public final T getReportedValue() {
-        return this.reportedValue;
-    }
-
-    public final Instant getReportReceivedTime() {
-        return this.reportReceivedTime;
-    }
-
-    public final Instant getReportChangedTime() {
-        return this.reportChangedTime;
-    }
-
-    public final T getDisplayValue() {
-        return this.displayValue;
-    }
+public interface FeatureAttribute<T> {
+    T getDisplayValue();
+    T getReportedValue();
+    Instant getReportReceivedTime();
+    Instant getReportChangedTime();
 }

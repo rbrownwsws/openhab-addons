@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.handler.strategy;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -33,39 +34,42 @@ import org.openhab.binding.hive.internal.client.feature.WaterHeaterFeature;
  */
 @NonNullByDefault
 public final class WaterHeaterHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final WaterHeaterHandlerStrategy INSTANCE = new WaterHeaterHandlerStrategy();
-
-    public static WaterHeaterHandlerStrategy getInstance() {
-        return INSTANCE;
-    }
-
     @Override
-    public boolean handleCommand(
+    public @Nullable Node handleCommand(
             final ChannelUID channelUID,
             final Command command,
             final Node hiveNode
     ) {
         return useFeatureSafely(hiveNode, WaterHeaterFeature.class, waterHeaterFeature -> {
-            boolean needUpdate = false;
+            @Nullable WaterHeaterFeature newWaterHeaterFeature = null;
 
             if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_MODE_OPERATING)
                     && command instanceof StringType
             ) {
                 final StringType newOperatingMode = (StringType) command;
 
-                waterHeaterFeature.setOperatingMode(WaterHeaterOperatingMode.valueOf(newOperatingMode.toString()));
-
-                needUpdate = true;
+                newWaterHeaterFeature = waterHeaterFeature.withTargetOperatingMode(
+                        WaterHeaterOperatingMode.valueOf(newOperatingMode.toString())
+                );
             } else if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE)
                     && command instanceof OnOffType
             ) {
                 final OnOffType newOverrideMode = (OnOffType) command;
-                waterHeaterFeature.setTemporaryOperatingModeOverride(newOverrideMode == OnOffType.ON ? OverrideMode.TRANSIENT : OverrideMode.NONE);
-
-                needUpdate = true;
+                newWaterHeaterFeature = waterHeaterFeature.withTargetTemporaryOperatingModeOverride(
+                        newOverrideMode == OnOffType.ON ? OverrideMode.TRANSIENT : OverrideMode.NONE
+                );
             }
 
-            return needUpdate;
+            if (newWaterHeaterFeature != null) {
+                final Node.Builder nodeBuilder = Node.builder();
+                nodeBuilder.from(hiveNode);
+
+                nodeBuilder.putFeature(WaterHeaterFeature.class, newWaterHeaterFeature);
+
+                return nodeBuilder.build();
+            } else {
+                return null;
+            }
         });
     }
 
@@ -77,15 +81,18 @@ public final class WaterHeaterHandlerStrategy extends ThingHandlerStrategyBase {
     ) {
         useFeatureSafely(hiveNode, WaterHeaterFeature.class, waterHeaterFeature -> {
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING, operatingModeChannel -> {
-                thingHandlerCallback.stateUpdated(operatingModeChannel, new StringType(waterHeaterFeature.getOperatingMode().toString()));
+                thingHandlerCallback.stateUpdated(operatingModeChannel, new StringType(waterHeaterFeature.getOperatingMode().getDisplayValue().toString()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_STATE_IS_ON, isOnChannel -> {
-                thingHandlerCallback.stateUpdated(isOnChannel, OnOffType.from(waterHeaterFeature.isOn()));
+                thingHandlerCallback.stateUpdated(isOnChannel, OnOffType.from(waterHeaterFeature.getIsOn().getDisplayValue()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE, operatingModeOverrideChannel -> {
-                thingHandlerCallback.stateUpdated(operatingModeOverrideChannel, OnOffType.from(waterHeaterFeature.getTemporaryOperatingModeOverride() == OverrideMode.TRANSIENT));
+                thingHandlerCallback.stateUpdated(
+                        operatingModeOverrideChannel,
+                        OnOffType.from(waterHeaterFeature.getTemporaryOperatingModeOverride().getDisplayValue() == OverrideMode.TRANSIENT)
+                );
             });
         });
     }

@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class ProductType extends SimpleValueTypeBase<String> {
+    public static final ProductType ACTIONS = new ProductType("ACTIONS");
     public static final ProductType BOILER_MODULE = new ProductType("BOILER_MODULE");
     public static final ProductType DAYLIGHT_SD = new ProductType("DAYLIGHT_SD");
     public static final ProductType HEATING = new ProductType("HEATING");

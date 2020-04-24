@@ -28,12 +28,6 @@ import org.openhab.binding.hive.internal.client.feature.ZigbeeDeviceFeature;
  */
 @NonNullByDefault
 public final class ZigbeeDeviceHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final ZigbeeDeviceHandlerStrategy INSTANCE = new ZigbeeDeviceHandlerStrategy();
-
-    public static ZigbeeDeviceHandlerStrategy getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public void handleUpdate(
             final Thing thing,
@@ -47,19 +41,19 @@ public final class ZigbeeDeviceHandlerStrategy extends ThingHandlerStrategyBase 
             //thing.setProperty(Thing.PROPERTY_MAC_ADDRESS, xxx);
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_RADIO_LQI_AVERAGE, averageLqiChannel -> {
-                thingHandlerCallback.stateUpdated(averageLqiChannel, new DecimalType(zigbeeDeviceFeature.getAverageLQI()));
+                thingHandlerCallback.stateUpdated(averageLqiChannel, new DecimalType(zigbeeDeviceFeature.getAverageLQI().getDisplayValue()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_RADIO_LQI_LAST_KNOWN, lastKnownLqiChannel -> {
-                thingHandlerCallback.stateUpdated(lastKnownLqiChannel, new DecimalType(zigbeeDeviceFeature.getLastKnownLQI()));
+                thingHandlerCallback.stateUpdated(lastKnownLqiChannel, new DecimalType(zigbeeDeviceFeature.getLastKnownLQI().getDisplayValue()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_RADIO_RSSI_AVERAGE, averageRssiChannel -> {
-                thingHandlerCallback.stateUpdated(averageRssiChannel, new DecimalType(zigbeeDeviceFeature.getAverageRSSI()));
+                thingHandlerCallback.stateUpdated(averageRssiChannel, new DecimalType(zigbeeDeviceFeature.getAverageRSSI().getDisplayValue()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_RADIO_RSSI_LAST_KNOWN, lastKnownRssiChannel -> {
-                thingHandlerCallback.stateUpdated(lastKnownRssiChannel, new DecimalType(zigbeeDeviceFeature.getLastKnownRSSI()));
+                thingHandlerCallback.stateUpdated(lastKnownRssiChannel, new DecimalType(zigbeeDeviceFeature.getLastKnownRSSI().getDisplayValue()));
             });
         });
     }

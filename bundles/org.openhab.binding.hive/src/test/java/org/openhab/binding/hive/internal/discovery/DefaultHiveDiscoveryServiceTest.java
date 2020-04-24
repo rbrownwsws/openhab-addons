@@ -13,9 +13,13 @@
 package org.openhab.binding.hive.internal.discovery;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.discovery.DiscoveryListener;
@@ -25,10 +29,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.MultithreadedTestBase;
-
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 
 /**

@@ -33,12 +33,6 @@ import tec.uom.se.unit.Units;
  */
 @NonNullByDefault
 public final class BatteryDeviceHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final BatteryDeviceHandlerStrategy INSTANCE = new BatteryDeviceHandlerStrategy();
-
-    public static BatteryDeviceHandlerStrategy getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public void handleUpdate(
             final Thing thing,
@@ -47,24 +41,24 @@ public final class BatteryDeviceHandlerStrategy extends ThingHandlerStrategyBase
     ) {
         useFeatureSafely(hiveNode, BatteryDeviceFeature.class,  batteryDeviceFeature -> {
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_BATTERY_LEVEL, batteryLevelChannel -> {
-                thingHandlerCallback.stateUpdated(batteryLevelChannel, new DecimalType(batteryDeviceFeature.getBatteryLevel().intValue()));
+                thingHandlerCallback.stateUpdated(batteryLevelChannel, new DecimalType(batteryDeviceFeature.getBatteryLevel().getDisplayValue().intValue()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_BATTERY_LOW, batteryLowChannel -> {
-                final boolean batteryLow = batteryDeviceFeature.getBatteryState().equals("LOW");
+                final boolean batteryLow = batteryDeviceFeature.getBatteryState().getDisplayValue().equals("LOW");
                 thingHandlerCallback.stateUpdated(batteryLowChannel, OnOffType.from(batteryLow));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_BATTERY_STATE, batteryStateChannel -> {
-                thingHandlerCallback.stateUpdated(batteryStateChannel, new StringType(batteryDeviceFeature.getBatteryState()));
+                thingHandlerCallback.stateUpdated(batteryStateChannel, new StringType(batteryDeviceFeature.getBatteryState().getDisplayValue()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_BATTERY_VOLTAGE, batteryVoltageChannel -> {
-                thingHandlerCallback.stateUpdated(batteryVoltageChannel, new QuantityType<>(batteryDeviceFeature.getBatteryVoltage().getValue(), Units.VOLT));
+                thingHandlerCallback.stateUpdated(batteryVoltageChannel, new QuantityType<>(batteryDeviceFeature.getBatteryVoltage().getDisplayValue().getValue(), Units.VOLT));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_BATTERY_NOTIFICATION_STATE, batteryNotificationStateChannel -> {
-                thingHandlerCallback.stateUpdated(batteryNotificationStateChannel, new StringType(batteryDeviceFeature.getBatteryNotificationState()));
+                thingHandlerCallback.stateUpdated(batteryNotificationStateChannel, new StringType(batteryDeviceFeature.getBatteryNotificationState().getDisplayValue()));
             });
         });
     }

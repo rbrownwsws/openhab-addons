@@ -18,6 +18,9 @@ import javax.measure.Quantity;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.hive.internal.client.BuilderUtil;
+import org.openhab.binding.hive.internal.client.DefaultFeatureAttribute;
 import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
 
 /**
@@ -29,7 +32,7 @@ import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
 public final class TransientModeHeatingActionsFeature implements Feature {
     private final SettableFeatureAttribute<Quantity<Temperature>> boostTargetTemperature;
 
-    public TransientModeHeatingActionsFeature(
+    private TransientModeHeatingActionsFeature(
             final SettableFeatureAttribute<Quantity<Temperature>> boostTargetTemperature
     ) {
         Objects.requireNonNull(boostTargetTemperature);
@@ -37,17 +40,53 @@ public final class TransientModeHeatingActionsFeature implements Feature {
         this.boostTargetTemperature = boostTargetTemperature;
     }
 
-    public final SettableFeatureAttribute<Quantity<Temperature>> getBoostTargetTemperatureAttribute() {
+    public SettableFeatureAttribute<Quantity<Temperature>> getBoostTargetTemperature() {
         return this.boostTargetTemperature;
     }
 
-    public final Quantity<Temperature> getBoostTargetTemperature() {
-        return this.boostTargetTemperature.getDisplayValue();
+    public TransientModeHeatingActionsFeature withTargetBoostTargetTemperature(final Quantity<Temperature> targetBoostTargetTemperature) {
+        Objects.requireNonNull(targetBoostTargetTemperature);
+
+        return TransientModeHeatingActionsFeature.builder()
+                .from(this)
+                .boostTargetTemperature(
+                        DefaultFeatureAttribute.<Quantity<Temperature>>builder()
+                                .from(this.boostTargetTemperature)
+                                .targetValue(targetBoostTargetTemperature)
+                                .build()
+                )
+                .build();
     }
 
-    public final void setBoostTargetTemperature(final Quantity<Temperature> boostTargetTemperature) {
-        Objects.requireNonNull(boostTargetTemperature);
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        this.boostTargetTemperature.setTargetValue(boostTargetTemperature);
+    public static final class Builder {
+        private @Nullable SettableFeatureAttribute<Quantity<Temperature>> boostTargetTemperature;
+
+        public Builder from(final TransientModeHeatingActionsFeature transientModeHeatingActionsFeature) {
+            Objects.requireNonNull(transientModeHeatingActionsFeature);
+
+            return this.boostTargetTemperature(transientModeHeatingActionsFeature.getBoostTargetTemperature());
+        }
+
+        public Builder boostTargetTemperature(final SettableFeatureAttribute<Quantity<Temperature>> boostTargetTemperature) {
+            this.boostTargetTemperature = Objects.requireNonNull(boostTargetTemperature);
+
+            return this;
+        }
+
+        public TransientModeHeatingActionsFeature build() {
+            final @Nullable SettableFeatureAttribute<Quantity<Temperature>> boostTargetTemperature = this.boostTargetTemperature;
+
+            if (boostTargetTemperature == null) {
+                throw new IllegalStateException(BuilderUtil.REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE);
+            }
+
+            return new TransientModeHeatingActionsFeature(
+                    boostTargetTemperature
+            );
+        }
     }
 }

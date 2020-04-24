@@ -26,12 +26,6 @@ import org.openhab.binding.hive.internal.client.feature.PhysicalDeviceFeature;
  */
 @NonNullByDefault
 public final class PhysicalDeviceHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final PhysicalDeviceHandlerStrategy INSTANCE = new PhysicalDeviceHandlerStrategy();
-
-    public static PhysicalDeviceHandlerStrategy getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public void handleUpdate(
             final Thing thing,
@@ -39,10 +33,10 @@ public final class PhysicalDeviceHandlerStrategy extends ThingHandlerStrategyBas
             final Node hiveNode
     ) {
         useFeatureSafely(hiveNode, PhysicalDeviceFeature.class, physicalDeviceFeature -> {
-            thing.setProperty(Thing.PROPERTY_VENDOR, physicalDeviceFeature.getManufacturer());
-            thing.setProperty(Thing.PROPERTY_MODEL_ID, physicalDeviceFeature.getModel());
-            thing.setProperty(Thing.PROPERTY_FIRMWARE_VERSION, physicalDeviceFeature.getSoftwareVersion());
-            thing.setProperty(Thing.PROPERTY_SERIAL_NUMBER, physicalDeviceFeature.getHardwareIdentifier());
+            thing.setProperty(Thing.PROPERTY_VENDOR, physicalDeviceFeature.getManufacturer().getDisplayValue());
+            thing.setProperty(Thing.PROPERTY_MODEL_ID, physicalDeviceFeature.getModel().getDisplayValue());
+            thing.setProperty(Thing.PROPERTY_FIRMWARE_VERSION, physicalDeviceFeature.getSoftwareVersion().getDisplayValue());
+            thing.setProperty(Thing.PROPERTY_SERIAL_NUMBER, physicalDeviceFeature.getHardwareIdentifier().getDisplayValue());
         });
     }
 }

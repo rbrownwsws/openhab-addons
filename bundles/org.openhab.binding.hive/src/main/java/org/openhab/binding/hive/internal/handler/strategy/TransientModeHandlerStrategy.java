@@ -15,6 +15,7 @@ package org.openhab.binding.hive.internal.handler.strategy;
 import java.time.Duration;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
@@ -34,32 +35,33 @@ import org.openhab.binding.hive.internal.client.feature.TransientModeFeature;
  */
 @NonNullByDefault
 public final class TransientModeHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final int SECONDS_PER_MINUTE = 60;
-
-    private static final TransientModeHandlerStrategy INSTANCE = new TransientModeHandlerStrategy();
-
-    public static TransientModeHandlerStrategy getInstance() {
-        return INSTANCE;
-    }
-
     @Override
-    public boolean handleCommand(
+    public @Nullable Node handleCommand(
             final ChannelUID channelUID,
             final Command command,
             final Node hiveNode
     ) {
         return useFeatureSafely(hiveNode, TransientModeFeature.class, transientModeFeature -> {
+            @Nullable TransientModeFeature newTransientModeFeature = null;
+
             if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TRANSIENT_DURATION)
                     && command instanceof DecimalType
             ) {
                 final DecimalType newDurationMins = (DecimalType) command;
 
-                transientModeFeature.setDuration(Duration.ofSeconds(newDurationMins.longValue() * SECONDS_PER_MINUTE));
-
-                return true;
+                newTransientModeFeature = transientModeFeature.withTargetDuration(Duration.ofMinutes(newDurationMins.longValue()));
             }
 
-            return false;
+            if (newTransientModeFeature != null) {
+                final Node.Builder nodeBuilder = Node.builder();
+                nodeBuilder.from(hiveNode);
+
+                nodeBuilder.putFeature(TransientModeFeature.class, newTransientModeFeature);
+
+                return nodeBuilder.build();
+            } else {
+                return null;
+            }
         });
     }
 
@@ -71,20 +73,20 @@ public final class TransientModeHandlerStrategy extends ThingHandlerStrategyBase
     ) {
         useFeatureSafely(hiveNode, TransientModeFeature.class, transientModeFeature -> {
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_DURATION, transientDurationChannel -> {
-                final long durationMins = transientModeFeature.getDuration().getSeconds() / SECONDS_PER_MINUTE;
+                final long durationMins = transientModeFeature.getDuration().getDisplayValue().toMinutes();
                 thingHandlerCallback.stateUpdated(transientDurationChannel, new DecimalType(durationMins));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_ENABLED, transientEnabledChannel -> {
-                thingHandlerCallback.stateUpdated(transientEnabledChannel, OnOffType.from(transientModeFeature.getIsEnabled()));
+                thingHandlerCallback.stateUpdated(transientEnabledChannel, OnOffType.from(transientModeFeature.getIsEnabled().getDisplayValue()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_START_TIME, transientStartTimeChannel -> {
-                thingHandlerCallback.stateUpdated(transientStartTimeChannel, new DateTimeType(transientModeFeature.getStartDatetime()));
+                thingHandlerCallback.stateUpdated(transientStartTimeChannel, new DateTimeType(transientModeFeature.getStartDatetime().getDisplayValue()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_END_TIME, transientEndTimeChannel -> {
-                thingHandlerCallback.stateUpdated(transientEndTimeChannel, new DateTimeType(transientModeFeature.getEndDatetime()));
+                thingHandlerCallback.stateUpdated(transientEndTimeChannel, new DateTimeType(transientModeFeature.getEndDatetime().getDisplayValue()));
             });
         });
     }

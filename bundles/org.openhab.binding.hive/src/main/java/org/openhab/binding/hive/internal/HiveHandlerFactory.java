@@ -51,58 +51,15 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(configurationPid = "binding.hive", service = ThingHandlerFactory.class)
 public final class HiveHandlerFactory extends BaseThingHandlerFactory {
-    private static final Set<ThingHandlerStrategy> STRATEGIES_BOILER_MODULE = Collections.unmodifiableSet(Stream.of(
-            PhysicalDeviceHandlerStrategy.getInstance(),
-            ZigbeeDeviceHandlerStrategy.getInstance()
-    ).collect(Collectors.toSet()));
-
-    private static final Set<ThingHandlerStrategy> STRATEGIES_HEATING = Collections.unmodifiableSet(Stream.of(
-            AutoBoostHandlerStrategy.getInstance(),
-            BoostTimeRemainingHandlerStrategy.getInstance(),
-            HeatingThermostatHandlerStrategy.getInstance(),
-            OnOffDeviceHandlerStrategy.getInstance(),
-            TemperatureSensorHandlerStrategy.getInstance(),
-            TransientModeHandlerStrategy.getInstance(),
-            HeatingTransientModeHandlerStrategy.getInstance(),
-            HeatingThermostatEasyHandlerStrategy.getInstance()
-    ).collect(Collectors.toSet()));
-
-    private static final Set<ThingHandlerStrategy> STRATEGIES_HOT_WATER = Collections.unmodifiableSet(Stream.of(
-            BoostTimeRemainingHandlerStrategy.getInstance(),
-            OnOffDeviceHandlerStrategy.getInstance(),
-            TransientModeHandlerStrategy.getInstance(),
-            WaterHeaterHandlerStrategy.getInstance(),
-            WaterHeaterEasyHandlerStrategy.getInstance()
-    ).collect(Collectors.toSet()));
-
-    private static final Set<ThingHandlerStrategy> STRATEGIES_HUB = Collections.unmodifiableSet(Stream.of(
-            PhysicalDeviceHandlerStrategy.getInstance()
-    ).collect(Collectors.toSet()));
-
-    private static final Set<ThingHandlerStrategy> STRATEGIES_THERMOSTAT = Collections.unmodifiableSet(Stream.of(
-            BatteryDeviceHandlerStrategy.getInstance(),
-            PhysicalDeviceHandlerStrategy.getInstance(),
-            ZigbeeDeviceHandlerStrategy.getInstance()
-    ).collect(Collectors.toSet()));
-
-    private static final Set<ThingHandlerStrategy> STRATEGIES_TRV_GROUP = Collections.unmodifiableSet(Stream.of(
-            BoostTimeRemainingHandlerStrategy.getInstance(),
-            HeatingThermostatHandlerStrategy.getInstance(),
-            OnOffDeviceHandlerStrategy.getInstance(),
-            TemperatureSensorHandlerStrategy.getInstance(),
-            TransientModeHandlerStrategy.getInstance(),
-            HeatingTransientModeHandlerStrategy.getInstance(),
-            HeatingThermostatEasyHandlerStrategy.getInstance()
-    ).collect(Collectors.toSet()));
-
-    private static final Set<ThingHandlerStrategy> STRATEGIES_TRV = Collections.unmodifiableSet(Stream.of(
-            BatteryDeviceHandlerStrategy.getInstance(),
-            PhysicalDeviceHandlerStrategy.getInstance(),
-            TemperatureSensorHandlerStrategy.getInstance(),
-            ZigbeeDeviceHandlerStrategy.getInstance()
-    ).collect(Collectors.toSet()));
-
     private final Logger logger = LoggerFactory.getLogger(HiveHandlerFactory.class);
+
+    private final Set<ThingHandlerStrategy> strategiesForBoilerModule;
+    private final Set<ThingHandlerStrategy> strategiesForHeating;
+    private final Set<ThingHandlerStrategy> strategiesForHotWater;
+    private final Set<ThingHandlerStrategy> strategiesForHub;
+    private final Set<ThingHandlerStrategy> strategiesForThermostat;
+    private final Set<ThingHandlerStrategy> strategiesForTrvGroup;
+    private final Set<ThingHandlerStrategy> strategiesForTrv;
 
     private final Map<ThingUID, ServiceRegistration<?>> discoveryServices = new HashMap<>();
 
@@ -123,6 +80,73 @@ public final class HiveHandlerFactory extends BaseThingHandlerFactory {
         // Keep a copy of HttpClient so we can clean up later
         this.httpClient = httpClient;
         this.hiveClientFactory = new DefaultHiveClientFactory(httpClient);
+        
+        // Create all the ThingHandlerStrategies we will need.
+        final AutoBoostHandlerStrategy autoBoostHandlerStrategy = new AutoBoostHandlerStrategy();
+        final BatteryDeviceHandlerStrategy batteryDeviceHandlerStrategy = new BatteryDeviceHandlerStrategy();
+        final BoostTimeRemainingHandlerStrategy boostTimeRemainingHandlerStrategy = new BoostTimeRemainingHandlerStrategy();
+        final HeatingThermostatEasyHandlerStrategy heatingThermostatEasyHandlerStrategy = new HeatingThermostatEasyHandlerStrategy();
+        final HeatingThermostatHandlerStrategy heatingThermostatHandlerStrategy = new HeatingThermostatHandlerStrategy();
+        final HeatingTransientModeHandlerStrategy heatingTransientModeHandlerStrategy = new HeatingTransientModeHandlerStrategy();
+        final OnOffDeviceHandlerStrategy onOffDeviceHandlerStrategy = new OnOffDeviceHandlerStrategy();
+        final PhysicalDeviceHandlerStrategy physicalDeviceHandlerStrategy = new PhysicalDeviceHandlerStrategy();
+        final TemperatureSensorHandlerStrategy temperatureSensorHandlerStrategy = new TemperatureSensorHandlerStrategy();
+        final TransientModeHandlerStrategy transientModeHandlerStrategy = new TransientModeHandlerStrategy();
+        final WaterHeaterEasyHandlerStrategy waterHeaterEasyHandlerStrategy = new WaterHeaterEasyHandlerStrategy();
+        final WaterHeaterHandlerStrategy waterHeaterHandlerStrategy = new WaterHeaterHandlerStrategy();
+        final ZigbeeDeviceHandlerStrategy zigbeeDeviceHandlerStrategy = new ZigbeeDeviceHandlerStrategy();
+        
+        // Create the sets of ThingHandlerStrategies needed for each kind of thing.
+        this.strategiesForBoilerModule = Collections.unmodifiableSet(Stream.of(
+                physicalDeviceHandlerStrategy,
+                zigbeeDeviceHandlerStrategy
+        ).collect(Collectors.toSet()));
+
+        this.strategiesForHeating = Collections.unmodifiableSet(Stream.of(
+                autoBoostHandlerStrategy,
+                boostTimeRemainingHandlerStrategy,
+                heatingThermostatHandlerStrategy,
+                onOffDeviceHandlerStrategy,
+                temperatureSensorHandlerStrategy,
+                transientModeHandlerStrategy,
+                heatingTransientModeHandlerStrategy,
+                heatingThermostatEasyHandlerStrategy
+        ).collect(Collectors.toSet()));
+
+        this.strategiesForHotWater = Collections.unmodifiableSet(Stream.of(
+                boostTimeRemainingHandlerStrategy,
+                onOffDeviceHandlerStrategy,
+                transientModeHandlerStrategy,
+                waterHeaterHandlerStrategy,
+                waterHeaterEasyHandlerStrategy
+        ).collect(Collectors.toSet()));
+
+        this.strategiesForHub = Collections.unmodifiableSet(Stream.of(
+                physicalDeviceHandlerStrategy
+        ).collect(Collectors.toSet()));
+
+        this.strategiesForThermostat = Collections.unmodifiableSet(Stream.of(
+                batteryDeviceHandlerStrategy,
+                physicalDeviceHandlerStrategy,
+                zigbeeDeviceHandlerStrategy
+        ).collect(Collectors.toSet()));
+
+        this.strategiesForTrvGroup = Collections.unmodifiableSet(Stream.of(
+                boostTimeRemainingHandlerStrategy,
+                heatingThermostatHandlerStrategy,
+                onOffDeviceHandlerStrategy,
+                temperatureSensorHandlerStrategy,
+                transientModeHandlerStrategy,
+                heatingTransientModeHandlerStrategy,
+                heatingThermostatEasyHandlerStrategy
+        ).collect(Collectors.toSet()));
+
+        this.strategiesForTrv = Collections.unmodifiableSet(Stream.of(
+                batteryDeviceHandlerStrategy,
+                physicalDeviceHandlerStrategy,
+                temperatureSensorHandlerStrategy,
+                zigbeeDeviceHandlerStrategy
+        ).collect(Collectors.toSet()));
     }
 
     @Override
@@ -177,19 +201,19 @@ public final class HiveHandlerFactory extends BaseThingHandlerFactory {
 
             return handler;
         } else if (HiveBindingConstants.THING_TYPE_BOILER_MODULE.equals(thingTypeUID)) {
-            return new DefaultHiveThingHandler(thing, STRATEGIES_BOILER_MODULE);
+            return new DefaultHiveThingHandler(thing, this.strategiesForBoilerModule);
         } else if (HiveBindingConstants.THING_TYPE_HEATING.equals(thingTypeUID)) {
-            return new DefaultHiveThingHandler(thing, STRATEGIES_HEATING);
+            return new DefaultHiveThingHandler(thing, this.strategiesForHeating);
         } else if (HiveBindingConstants.THING_TYPE_HOT_WATER.equals(thingTypeUID)) {
-            return new DefaultHiveThingHandler(thing, STRATEGIES_HOT_WATER);
+            return new DefaultHiveThingHandler(thing, this.strategiesForHotWater);
         } else if (HiveBindingConstants.THING_TYPE_HUB.equals(thingTypeUID)) {
-            return new DefaultHiveThingHandler(thing, STRATEGIES_HUB);
+            return new DefaultHiveThingHandler(thing, this.strategiesForHub);
         } else if (HiveBindingConstants.THING_TYPE_THERMOSTAT.equals(thingTypeUID)) {
-            return new DefaultHiveThingHandler(thing, STRATEGIES_THERMOSTAT);
+            return new DefaultHiveThingHandler(thing, this.strategiesForThermostat);
         } else if (HiveBindingConstants.THING_TYPE_TRV.equals(thingTypeUID)) {
-            return new DefaultHiveThingHandler(thing, STRATEGIES_TRV);
+            return new DefaultHiveThingHandler(thing, this.strategiesForTrv);
         } else if (HiveBindingConstants.THING_TYPE_TRV_GROUP.equals(thingTypeUID)) {
-            return new DefaultHiveThingHandler(thing, STRATEGIES_TRV_GROUP);
+            return new DefaultHiveThingHandler(thing, this.strategiesForTrvGroup);
         }
 
         return null;

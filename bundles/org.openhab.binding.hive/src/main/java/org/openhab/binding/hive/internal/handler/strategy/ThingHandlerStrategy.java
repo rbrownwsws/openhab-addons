@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.handler.strategy;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
@@ -49,10 +50,10 @@ public interface ThingHandlerStrategy {
      *      performed on.
      *
      * @return
-     *      {@code true} - If {@code thing} was updated.
-     *      {@code false} - If {@code thing} was not updated.
+     *      {@code null} - If the {@linkplain Node} does not need to be updated.
+     *      {@code updatedNode} - If the {@linkplain Node} needs to be updated.
      */
-    boolean handleCommand(
+    @Nullable Node handleCommand(
             final ChannelUID channelUID,
             final Command command,
             final Node hiveNode

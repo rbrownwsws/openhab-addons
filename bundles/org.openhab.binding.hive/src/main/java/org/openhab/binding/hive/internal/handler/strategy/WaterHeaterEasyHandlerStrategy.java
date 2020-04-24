@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.handler.strategy;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -36,14 +37,8 @@ import org.openhab.binding.hive.internal.client.feature.WaterHeaterFeature;
  */
 @NonNullByDefault
 public final class WaterHeaterEasyHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final WaterHeaterEasyHandlerStrategy INSTANCE = new WaterHeaterEasyHandlerStrategy();
-
-    public static WaterHeaterEasyHandlerStrategy getInstance() {
-        return INSTANCE;
-    }
-
     @Override
-    public boolean handleCommand(
+    public @Nullable Node handleCommand(
             final ChannelUID channelUID,
             final Command command,
             final Node hiveNode
@@ -76,7 +71,6 @@ public final class WaterHeaterEasyHandlerStrategy extends ThingHandlerStrategyBa
                     handleUpdate(
                             thing,
                             thingHandlerCallback,
-                            hiveNode,
                             waterHeaterFeature,
                             onOffDeviceFeature,
                             transientModeFeature
@@ -86,7 +80,7 @@ public final class WaterHeaterEasyHandlerStrategy extends ThingHandlerStrategyBa
         });
     }
 
-    private boolean handleCommand(
+    private @Nullable Node handleCommand(
             final ChannelUID channelUID,
             final Command command,
             final Node hiveNode,
@@ -94,55 +88,74 @@ public final class WaterHeaterEasyHandlerStrategy extends ThingHandlerStrategyBa
             final OnOffDeviceFeature onOffDeviceFeature,
             final TransientModeFeature transientModeFeature
     ) {
-        boolean needUpdate = false;
+        @Nullable WaterHeaterFeature newWaterHeaterFeature = null;
+        @Nullable OnOffDeviceFeature newOnOffDeviceFeature = null;
+        @Nullable TransientModeFeature newTransientModeFeature = null;
+
         if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING)
                 && command instanceof StringType
         ) {
             final StringType newOperatingMode = (StringType) command;
             if (newOperatingMode.toString().equals(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_SCHEDULE)) {
-                waterHeaterFeature.setOperatingMode(WaterHeaterOperatingMode.SCHEDULE);
-                onOffDeviceFeature.setMode(OnOffMode.ON);
+                newWaterHeaterFeature = waterHeaterFeature.withTargetOperatingMode(WaterHeaterOperatingMode.SCHEDULE);
+                newOnOffDeviceFeature = onOffDeviceFeature.withTargetMode(OnOffMode.ON);
             } else if (newOperatingMode.toString().equals(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_ON)) {
-                waterHeaterFeature.setOperatingMode(WaterHeaterOperatingMode.ON);
-                onOffDeviceFeature.setMode(OnOffMode.ON);
+                newWaterHeaterFeature = waterHeaterFeature.withTargetOperatingMode(WaterHeaterOperatingMode.ON);
+                newOnOffDeviceFeature = onOffDeviceFeature.withTargetMode(OnOffMode.ON);
             } else {
                 // easy-mode-operating: OFF
-                onOffDeviceFeature.setMode(OnOffMode.OFF);
+                newOnOffDeviceFeature = onOffDeviceFeature.withTargetMode(OnOffMode.OFF);
             }
-
-            needUpdate = true;
         } else if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_EASY_MODE_BOOST)
                 && command instanceof OnOffType
         ) {
             final OnOffType newOverrideMode = (OnOffType) command;
 
             if (newOverrideMode == OnOffType.ON) {
-                transientModeFeature.setIsEnabled(true);
-                waterHeaterFeature.setTemporaryOperatingModeOverride(OverrideMode.TRANSIENT);
+                newTransientModeFeature = transientModeFeature.withTargetIsEnabled(true);
+                newWaterHeaterFeature = waterHeaterFeature.withTargetTemporaryOperatingModeOverride(OverrideMode.TRANSIENT);
             } else {
-                transientModeFeature.setIsEnabled(false);
-                waterHeaterFeature.setTemporaryOperatingModeOverride(OverrideMode.NONE);
+                newTransientModeFeature = transientModeFeature.withTargetIsEnabled(false);
+                newWaterHeaterFeature = waterHeaterFeature.withTargetTemporaryOperatingModeOverride(OverrideMode.NONE);
             }
-
-
-            needUpdate = true;
         }
 
-        return needUpdate;
+        if (newWaterHeaterFeature != null
+                || newOnOffDeviceFeature != null
+                || newTransientModeFeature != null
+        ) {
+            final Node.Builder nodeBuilder = Node.builder();
+            nodeBuilder.from(hiveNode);
+
+            if (newWaterHeaterFeature != null) {
+                nodeBuilder.putFeature(WaterHeaterFeature.class, newWaterHeaterFeature);
+            }
+
+            if (newOnOffDeviceFeature != null) {
+                nodeBuilder.putFeature(OnOffDeviceFeature.class, newOnOffDeviceFeature);
+            }
+
+            if (newTransientModeFeature != null) {
+                nodeBuilder.putFeature(TransientModeFeature.class, newTransientModeFeature);
+            }
+
+            return nodeBuilder.build();
+        } else {
+            return null;
+        }
     }
 
     private void handleUpdate(
             final Thing thing,
             final ThingHandlerCallback thingHandlerCallback,
-            final Node hiveNode,
             final WaterHeaterFeature waterHeaterFeature,
             final OnOffDeviceFeature onOffDeviceFeature,
             final TransientModeFeature transientModeFeature
     ) {
         useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING, easyModeOperatingChannel -> {
-            if (waterHeaterFeature.getOperatingMode() == WaterHeaterOperatingMode.SCHEDULE) {
+            if (waterHeaterFeature.getOperatingMode().getDisplayValue() == WaterHeaterOperatingMode.SCHEDULE) {
                 thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_SCHEDULE));
-            } else if (onOffDeviceFeature.getMode() == OnOffMode.ON) {
+            } else if (onOffDeviceFeature.getMode().getDisplayValue() == OnOffMode.ON) {
                 thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_ON));
             } else {
                 thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_OFF));
@@ -150,8 +163,8 @@ public final class WaterHeaterEasyHandlerStrategy extends ThingHandlerStrategyBa
         });
 
         useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_MODE_BOOST, easyModeBoostChannel -> {
-            final OnOffType boostActive = OnOffType.from(waterHeaterFeature.getTemporaryOperatingModeOverride() == OverrideMode.TRANSIENT
-                    && transientModeFeature.getIsEnabled());
+            final OnOffType boostActive = OnOffType.from(waterHeaterFeature.getTemporaryOperatingModeOverride().getDisplayValue() == OverrideMode.TRANSIENT
+                    && transientModeFeature.getIsEnabled().getDisplayValue());
             thingHandlerCallback.stateUpdated(easyModeBoostChannel, boostActive);
         });
     }

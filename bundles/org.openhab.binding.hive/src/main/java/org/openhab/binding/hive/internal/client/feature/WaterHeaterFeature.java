@@ -15,10 +15,8 @@ package org.openhab.binding.hive.internal.client.feature;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.hive.internal.client.FeatureAttribute;
-import org.openhab.binding.hive.internal.client.OverrideMode;
-import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
-import org.openhab.binding.hive.internal.client.WaterHeaterOperatingMode;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.hive.internal.client.*;
 
 /**
  *
@@ -31,7 +29,7 @@ public final class WaterHeaterFeature implements Feature {
     private final FeatureAttribute<Boolean> isOn;
     private final SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride;
 
-    public WaterHeaterFeature(
+    private WaterHeaterFeature(
             final SettableFeatureAttribute<WaterHeaterOperatingMode> operatingMode,
             final FeatureAttribute<Boolean> isOn,
             final SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride
@@ -45,39 +43,96 @@ public final class WaterHeaterFeature implements Feature {
         this.temporaryOperatingModeOverride = temporaryOperatingModeOverride;
     }
 
-    public SettableFeatureAttribute<WaterHeaterOperatingMode> getOperatingModeAttribute() {
+    public SettableFeatureAttribute<WaterHeaterOperatingMode> getOperatingMode() {
         return this.operatingMode;
     }
 
-    public WaterHeaterOperatingMode getOperatingMode() {
-        return this.operatingMode.getDisplayValue();
+    public WaterHeaterFeature withTargetOperatingMode(final WaterHeaterOperatingMode targetOperatingMode) {
+        Objects.requireNonNull(targetOperatingMode);
+
+        return WaterHeaterFeature.builder()
+                .from(this)
+                .operatingMode(DefaultFeatureAttribute.<WaterHeaterOperatingMode>builder()
+                        .from(this.operatingMode)
+                        .targetValue(targetOperatingMode)
+                        .build()
+                )
+                .build();
     }
 
-    public void setOperatingMode(final WaterHeaterOperatingMode operatingMode) {
-        Objects.requireNonNull(operatingMode);
-
-        this.operatingMode.setTargetValue(operatingMode);
-    }
-
-    public FeatureAttribute<Boolean> getIsOnAttribute() {
+    public FeatureAttribute<Boolean> getIsOn() {
         return this.isOn;
     }
 
-    public boolean isOn() {
-        return this.isOn.getDisplayValue();
-    }
-
-    public SettableFeatureAttribute<OverrideMode> getTemporaryOperatingModeOverrideAttribute() {
+    public SettableFeatureAttribute<OverrideMode> getTemporaryOperatingModeOverride() {
         return this.temporaryOperatingModeOverride;
     }
 
-    public OverrideMode getTemporaryOperatingModeOverride() {
-        return this.temporaryOperatingModeOverride.getDisplayValue();
+    public WaterHeaterFeature withTargetTemporaryOperatingModeOverride(final OverrideMode targetOverrideMode) {
+        Objects.requireNonNull(targetOverrideMode);
+
+        return WaterHeaterFeature.builder()
+                .from(this)
+                .temporaryOperatingModeOverride(DefaultFeatureAttribute.<OverrideMode>builder()
+                        .from(this.temporaryOperatingModeOverride)
+                        .targetValue(targetOverrideMode)
+                        .build()
+                )
+                .build();
     }
 
-    public void setTemporaryOperatingModeOverride(final OverrideMode overrideMode) {
-        Objects.requireNonNull(overrideMode);
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        this.temporaryOperatingModeOverride.setTargetValue(overrideMode);
+    public static final class Builder {
+        private @Nullable SettableFeatureAttribute<WaterHeaterOperatingMode> operatingMode;
+        private @Nullable FeatureAttribute<Boolean> isOn;
+        private @Nullable SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride;
+
+        public Builder from(final WaterHeaterFeature waterHeaterFeature) {
+            Objects.requireNonNull(waterHeaterFeature);
+
+            return this.operatingMode(waterHeaterFeature.getOperatingMode())
+                    .isOn(waterHeaterFeature.getIsOn())
+                    .temporaryOperatingModeOverride(waterHeaterFeature.getTemporaryOperatingModeOverride());
+        }
+
+        public Builder operatingMode(final SettableFeatureAttribute<WaterHeaterOperatingMode> operatingMode) {
+            this.operatingMode = Objects.requireNonNull(operatingMode);
+
+            return this;
+        }
+
+        public Builder isOn(final FeatureAttribute<Boolean> isOn) {
+            this.isOn = Objects.requireNonNull(isOn);
+
+            return this;
+        }
+
+        public Builder temporaryOperatingModeOverride(final SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride) {
+            this.temporaryOperatingModeOverride = Objects.requireNonNull(temporaryOperatingModeOverride);
+
+            return this;
+        }
+
+        public WaterHeaterFeature build() {
+            final @Nullable SettableFeatureAttribute<WaterHeaterOperatingMode> operatingMode = this.operatingMode;
+            final @Nullable FeatureAttribute<Boolean> isOn = this.isOn;
+            final @Nullable SettableFeatureAttribute<OverrideMode> temporaryOperatingModeOverride = this.temporaryOperatingModeOverride;
+
+            if (operatingMode == null
+                    || isOn == null
+                    || temporaryOperatingModeOverride == null
+            ) {
+                throw new IllegalStateException(BuilderUtil.REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE);
+            }
+
+            return new WaterHeaterFeature(
+                    operatingMode,
+                    isOn,
+                    temporaryOperatingModeOverride
+            );
+        }
     }
 }

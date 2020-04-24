@@ -17,7 +17,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.math.BigDecimal;
 import java.net.URI;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -29,7 +32,13 @@ import org.mockito.Mock;
 import org.openhab.binding.hive.internal.TestUtil;
 import org.openhab.binding.hive.internal.client.*;
 import org.openhab.binding.hive.internal.client.dto.*;
+import org.openhab.binding.hive.internal.client.feature.HeatingThermostatFeature;
 import org.openhab.binding.hive.internal.client.feature.LinksFeature;
+import org.openhab.binding.hive.internal.client.feature.TransientModeFeature;
+import org.openhab.binding.hive.internal.client.feature.TransientModeHeatingActionsFeature;
+
+import tec.uom.se.quantity.Quantities;
+import tec.uom.se.unit.Units;
 
 /**
  *
@@ -67,6 +76,26 @@ public class DefaultNodeRepositoryTest {
         when(this.response.getContent(eq(NodesDto.class))).thenReturn(content);
     }
 
+    private static HeatingThermostatV1FeatureDto getGoodHeatingThermostatV1FeatureDto() {
+        final HeatingThermostatV1FeatureDto heatingThermostatV1FeatureDto = new HeatingThermostatV1FeatureDto();
+        heatingThermostatV1FeatureDto.operatingMode = TestUtil.createSimpleFeatureAttributeDto(HeatingThermostatOperatingMode.SCHEDULE);
+        heatingThermostatV1FeatureDto.operatingState = TestUtil.createSimpleFeatureAttributeDto(HeatingThermostatOperatingState.OFF);
+        heatingThermostatV1FeatureDto.targetHeatTemperature = TestUtil.createSimpleFeatureAttributeDto(BigDecimal.valueOf(20));
+        heatingThermostatV1FeatureDto.temporaryOperatingModeOverride = TestUtil.createSimpleFeatureAttributeDto(OverrideMode.NONE);
+
+        return heatingThermostatV1FeatureDto;
+    }
+
+    private static TransientModeV1FeatureDto getGoodTransientModeV1FeatureDtoWithoutActions() {
+        final TransientModeV1FeatureDto transientModeV1FeatureDto = new TransientModeV1FeatureDto();
+        transientModeV1FeatureDto.duration = TestUtil.createSimpleFeatureAttributeDto(60000L);
+        transientModeV1FeatureDto.isEnabled = TestUtil.createSimpleFeatureAttributeDto(true);
+        transientModeV1FeatureDto.startDatetime = TestUtil.createSimpleFeatureAttributeDto(Instant.now().atZone(ZoneId.systemDefault()));
+        transientModeV1FeatureDto.endDatetime = TestUtil.createSimpleFeatureAttributeDto(Instant.now().atZone(ZoneId.systemDefault()));
+
+        return transientModeV1FeatureDto;
+    }
+
     @Test
     public void testGetNode() {
         /* Given */
@@ -75,7 +104,7 @@ public class DefaultNodeRepositoryTest {
 
         this.setUpSuccessResponse(nodesDto);
 
-        final NodeId nodeId = new NodeId(UUID.fromString(TestUtil.UUID_DEADBEEF));
+        final NodeId nodeId = TestUtil.NODE_ID_DEADBEEF;
 
         final DefaultNodeRepository nodeRepository = new DefaultNodeRepository(this.requestFactory);
 
@@ -85,7 +114,96 @@ public class DefaultNodeRepositoryTest {
 
 
         /* Then */
-        verify(this.requestFactory, times(1)).newRequest(URI.create("nodes/" + TestUtil.UUID_DEADBEEF));
+        verify(this.requestFactory, times(1)).newRequest(URI.create("nodes/" + nodeId.toString()));
+    }
+
+    /**
+     * Make sure an exception is not thrown when the transient mode feature has
+     * no actions.
+     */
+    @Test
+    public void testHeatingWithMissingTransientActions() {
+        /* Given */
+        final NodeId nodeId = TestUtil.NODE_ID_DEADBEEF;
+        final NodeDto nodeDto = TestUtil.createSimpleNodeDto(nodeId);
+        assert nodeDto.features != null;
+
+        // Add Heating Thermostat feature
+        nodeDto.features.heating_thermostat_v1 = getGoodHeatingThermostatV1FeatureDto();
+
+        // Add Transient Mode but leave actions null
+        nodeDto.features.transient_mode_v1 = getGoodTransientModeV1FeatureDtoWithoutActions();
+
+        final NodesDto nodesDto = new NodesDto();
+        nodesDto.nodes = Collections.singletonList(nodeDto);
+
+        this.setUpSuccessResponse(nodesDto);
+
+        final DefaultNodeRepository nodeRepository = new DefaultNodeRepository(this.requestFactory);
+
+
+        /* When */
+        final @Nullable Node node = nodeRepository.getNode(nodeId);
+
+
+        /* Then */
+        // No exceptions hopefully!
+        assertThat(node).isNotNull();
+
+        final @Nullable HeatingThermostatFeature heatingThermostatFeature = node.getFeature(HeatingThermostatFeature.class);
+        assertThat(heatingThermostatFeature).isNotNull();
+
+        final @Nullable TransientModeFeature transientModeFeature = node.getFeature(TransientModeFeature.class);
+        assertThat(transientModeFeature).isNotNull();
+
+        final @Nullable TransientModeHeatingActionsFeature transientModeHeatingActionsFeature = node.getFeature(TransientModeHeatingActionsFeature.class);
+        assertThat(transientModeHeatingActionsFeature).isNull();
+    }
+
+    @Test
+    public void testHeatingWithGoodTransientActions() {
+        /* Given */
+        final NodeId nodeId = TestUtil.NODE_ID_DEADBEEF;
+        final NodeDto nodeDto = TestUtil.createSimpleNodeDto(nodeId);
+        assert nodeDto.features != null;
+
+        // Add Heating Thermostat feature
+        nodeDto.features.heating_thermostat_v1 = getGoodHeatingThermostatV1FeatureDto();
+
+        // Add Transient Mode with action
+        final int boostTargetTemperature = 22;
+        final ActionDto actionDto = new ActionDto();
+        actionDto.actionType = ActionType.GENERIC;
+        actionDto.attribute = AttributeName.ATTRIBUTE_NAME_TARGET_HEAT_TEMPERATURE;
+        actionDto.value = Integer.toString(boostTargetTemperature);
+
+        nodeDto.features.transient_mode_v1 = getGoodTransientModeV1FeatureDtoWithoutActions();
+        nodeDto.features.transient_mode_v1.actions = TestUtil.createSimpleFeatureAttributeDto(Collections.singletonList(actionDto));
+
+        final NodesDto nodesDto = new NodesDto();
+        nodesDto.nodes = Collections.singletonList(nodeDto);
+
+        this.setUpSuccessResponse(nodesDto);
+
+        final DefaultNodeRepository nodeRepository = new DefaultNodeRepository(this.requestFactory);
+
+
+        /* When */
+        final @Nullable Node node = nodeRepository.getNode(nodeId);
+
+
+        /* Then */
+        assertThat(node).isNotNull();
+
+        final @Nullable HeatingThermostatFeature heatingThermostatFeature = node.getFeature(HeatingThermostatFeature.class);
+        assertThat(heatingThermostatFeature).isNotNull();
+
+        final @Nullable TransientModeFeature transientModeFeature = node.getFeature(TransientModeFeature.class);
+        assertThat(transientModeFeature).isNotNull();
+
+        final @Nullable TransientModeHeatingActionsFeature transientModeHeatingActionsFeature = node.getFeature(TransientModeHeatingActionsFeature.class);
+        assertThat(transientModeHeatingActionsFeature).isNotNull();
+        assertThat(transientModeHeatingActionsFeature.getBoostTargetTemperature().getDisplayValue()).isEqualTo(Quantities.getQuantity(boostTargetTemperature, Units.CELSIUS));
     }
 
     @Test
@@ -96,6 +214,7 @@ public class DefaultNodeRepositoryTest {
         reverseLinkDto.bindingGroupIds = Collections.singleton(GroupId.TRVBM);
 
         final NodeDto nodeDto = TestUtil.createSimpleNodeDto(TestUtil.NODE_ID_DEADBEEF);
+        assert nodeDto.features != null;
         nodeDto.features.links_v1 = new LinksV1FeatureDto();
         nodeDto.features.links_v1.reverseLinks = TestUtil.createSimpleFeatureAttributeDto(Collections.singleton(reverseLinkDto));
 
@@ -118,8 +237,8 @@ public class DefaultNodeRepositoryTest {
         final @Nullable LinksFeature linksFeature = linksNode.getFeature(LinksFeature.class);
         assertThat(linksFeature).isNotNull();
 
-        assertThat(linksFeature.getLinksAttribute()).isNull();
-        assertThat(linksFeature.getReverseLinksAttribute()).isNotNull();
+        assertThat(linksFeature.getLinks()).isNull();
+        assertThat(linksFeature.getReverseLinks()).isNotNull();
 
         // TODO: verify more
     }
@@ -154,8 +273,8 @@ public class DefaultNodeRepositoryTest {
         final @Nullable LinksFeature linksFeature = linksNode.getFeature(LinksFeature.class);
         assertThat(linksFeature).isNotNull();
 
-        assertThat(linksFeature.getLinksAttribute()).isNotNull();
-        assertThat(linksFeature.getReverseLinksAttribute()).isNull();
+        assertThat(linksFeature.getLinks()).isNotNull();
+        assertThat(linksFeature.getReverseLinks()).isNull();
 
         // TODO: verify more
     }

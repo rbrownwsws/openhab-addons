@@ -15,6 +15,7 @@ package org.openhab.binding.hive.internal.handler.strategy;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.library.types.StringType;
@@ -38,51 +39,54 @@ import tec.uom.se.quantity.Quantities;
  */
 @NonNullByDefault
 public final class HeatingThermostatHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final HeatingThermostatHandlerStrategy INSTANCE = new HeatingThermostatHandlerStrategy();
-
-    public static HeatingThermostatHandlerStrategy getInstance() {
-        return INSTANCE;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
-    public boolean handleCommand(
+    public @Nullable Node handleCommand(
             final ChannelUID channelUID,
             final Command command,
             final Node hiveNode
     ) {
         return useFeatureSafely(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
-            boolean needUpdate = false;
+            @Nullable HeatingThermostatFeature newHeatingThermostatFeature = null;
+
             if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET)
                     && command instanceof QuantityType
             ) {
                 // N.B. Suppress unchecked because openHAB should hopefully only be passing us QuantityType<Temperature>
                 final QuantityType<Temperature> newTargetHeatTemperature = (QuantityType<Temperature>) command;
-                heatingThermostatFeature.setTargetHeatTemperature(
+
+                newHeatingThermostatFeature = heatingThermostatFeature.withTargetTargetHeatTemperature(
                         Quantities.getQuantity(
                                 newTargetHeatTemperature.toBigDecimal(),
                                 newTargetHeatTemperature.getUnit()
                         )
                 );
-
-                needUpdate = true;
             } else if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_MODE_OPERATING)
                     && command instanceof StringType
             ) {
                 final StringType newOperatingMode = (StringType) command;
-                heatingThermostatFeature.setOperatingMode(HeatingThermostatOperatingMode.valueOf(newOperatingMode.toString()));
-
-                needUpdate = true;
+                newHeatingThermostatFeature = heatingThermostatFeature.withTargetOperatingMode(
+                        HeatingThermostatOperatingMode.valueOf(newOperatingMode.toString())
+                );
             } else if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE)
                     && command instanceof OnOffType
             ) {
                 final OnOffType newOverrideMode = (OnOffType) command;
-                heatingThermostatFeature.setTemporaryOperatingModeOverride(newOverrideMode == OnOffType.ON ? OverrideMode.TRANSIENT : OverrideMode.NONE);
-
-                needUpdate = true;
+                heatingThermostatFeature.withTargetTemporaryOperatingModeOverride(
+                        newOverrideMode == OnOffType.ON ? OverrideMode.TRANSIENT : OverrideMode.NONE
+                );
             }
 
-            return needUpdate;
+            if (newHeatingThermostatFeature != null) {
+                final Node.Builder nodeBuilder = Node.builder();
+                nodeBuilder.from(hiveNode);
+
+                nodeBuilder.putFeature(HeatingThermostatFeature.class, newHeatingThermostatFeature);
+
+                return nodeBuilder.build();
+            } else {
+                return null;
+            }
         });
     }
 
@@ -94,25 +98,25 @@ public final class HeatingThermostatHandlerStrategy extends ThingHandlerStrategy
     ) {
         useFeatureSafely(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING, operatingModeChannel -> {
-                thingHandlerCallback.stateUpdated(operatingModeChannel, new StringType(heatingThermostatFeature.getOperatingMode().toString()));
+                thingHandlerCallback.stateUpdated(operatingModeChannel, new StringType(heatingThermostatFeature.getOperatingMode().getDisplayValue().toString()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_STATE_OPERATING, operatingStateChannel -> {
-                thingHandlerCallback.stateUpdated(operatingStateChannel, new StringType(heatingThermostatFeature.getOperatingState().toString()));
+                thingHandlerCallback.stateUpdated(operatingStateChannel, new StringType(heatingThermostatFeature.getOperatingState().getDisplayValue().toString()));
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET, targetHeatTemperatureChannel -> {
                 thingHandlerCallback.stateUpdated(
                         targetHeatTemperatureChannel,
                         new QuantityType<>(
-                                heatingThermostatFeature.getTargetHeatTemperature().getValue(),
-                                heatingThermostatFeature.getTargetHeatTemperature().getUnit()
+                                heatingThermostatFeature.getTargetHeatTemperature().getDisplayValue().getValue(),
+                                heatingThermostatFeature.getTargetHeatTemperature().getDisplayValue().getUnit()
                         )
                 );
             });
 
             useChannelSafely(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE, operatingModeOverrideChannel -> {
-                thingHandlerCallback.stateUpdated(operatingModeOverrideChannel, OnOffType.from(heatingThermostatFeature.getTemporaryOperatingModeOverride() == OverrideMode.TRANSIENT));
+                thingHandlerCallback.stateUpdated(operatingModeOverrideChannel, OnOffType.from(heatingThermostatFeature.getTemporaryOperatingModeOverride().getDisplayValue() == OverrideMode.TRANSIENT));
             });
         });
     }

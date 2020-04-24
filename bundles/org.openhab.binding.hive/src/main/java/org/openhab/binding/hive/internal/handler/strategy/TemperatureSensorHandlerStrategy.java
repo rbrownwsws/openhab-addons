@@ -28,12 +28,6 @@ import org.openhab.binding.hive.internal.client.feature.TemperatureSensorFeature
  */
 @NonNullByDefault
 public final class TemperatureSensorHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final TemperatureSensorHandlerStrategy INSTANCE = new TemperatureSensorHandlerStrategy();
-
-    public static TemperatureSensorHandlerStrategy getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public void handleUpdate(
             final Thing thing,
@@ -45,8 +39,8 @@ public final class TemperatureSensorHandlerStrategy extends ThingHandlerStrategy
                 thingHandlerCallback.stateUpdated(
                         temperatureChannel,
                         new QuantityType<>(
-                                temperatureSensorFeature.getTemperature().getValue(),
-                                temperatureSensorFeature.getTemperature().getUnit()
+                                temperatureSensorFeature.getTemperature().getDisplayValue().getValue(),
+                                temperatureSensorFeature.getTemperature().getDisplayValue().getUnit()
                         )
                 );
             });

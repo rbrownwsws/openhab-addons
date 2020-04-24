@@ -26,6 +26,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openhab.binding.hive.internal.TestUtil;
 import org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException;
 import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
 import org.openhab.binding.hive.internal.client.repository.NodeRepository;
@@ -134,11 +135,11 @@ public class DefaultHiveClientTest {
     @Test
     public void testGetNodes() {
         /* Given */
-        final Node expectedNode = mock(Node.class);
+        final Node expectedNode = TestUtil.getTestNodeWithFeatures(Collections.emptyMap());
         final Set<Node> expectedResults = Collections.unmodifiableSet(Collections.singleton(expectedNode));
         when(this.nodeRepository.getAllNodes()).thenReturn(expectedResults);
 
-        DefaultHiveClient hiveClient = createClient();
+        final DefaultHiveClient hiveClient = createClient();
 
 
         /* When */

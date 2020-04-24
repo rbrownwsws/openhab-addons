@@ -35,12 +35,6 @@ import org.openhab.binding.hive.internal.client.feature.WaterHeaterFeature;
  */
 @NonNullByDefault
 public final class BoostTimeRemainingHandlerStrategy extends ThingHandlerStrategyBase  {
-    private static final BoostTimeRemainingHandlerStrategy INSTANCE = new BoostTimeRemainingHandlerStrategy();
-
-    public static BoostTimeRemainingHandlerStrategy getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public void handleUpdate(
             final Thing thing,
@@ -48,15 +42,15 @@ public final class BoostTimeRemainingHandlerStrategy extends ThingHandlerStrateg
             final Node hiveNode
     ) {
         useFeatureSafely(hiveNode, TransientModeFeature.class, transientModeFeature -> {
-            long minutesRemaining = Instant.now().until(transientModeFeature.getEndDatetime(), ChronoUnit.MINUTES);
+            long minutesRemaining = Instant.now().until(transientModeFeature.getEndDatetime().getDisplayValue(), ChronoUnit.MINUTES);
             minutesRemaining = Math.max(0, minutesRemaining);
 
             // If we know the transient mode has been cancelled set remaining
             // time to 0
             final @Nullable HeatingThermostatFeature heatingThermostatFeature = hiveNode.getFeature(HeatingThermostatFeature.class);
             final @Nullable WaterHeaterFeature waterHeaterFeature = hiveNode.getFeature(WaterHeaterFeature.class);
-            if ((heatingThermostatFeature != null && heatingThermostatFeature.getTemporaryOperatingModeOverride() == OverrideMode.NONE)
-                    || (waterHeaterFeature != null && waterHeaterFeature.getTemporaryOperatingModeOverride() == OverrideMode.NONE)
+            if ((heatingThermostatFeature != null && heatingThermostatFeature.getTemporaryOperatingModeOverride().getDisplayValue() == OverrideMode.NONE)
+                    || (waterHeaterFeature != null && waterHeaterFeature.getTemporaryOperatingModeOverride().getDisplayValue() == OverrideMode.NONE)
             ) {
                 minutesRemaining = 0;
             }

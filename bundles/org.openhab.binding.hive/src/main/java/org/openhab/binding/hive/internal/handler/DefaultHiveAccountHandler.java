@@ -82,17 +82,17 @@ public final class DefaultHiveAccountHandler extends BaseBridgeHandler implement
                 }
 
                 // Try each strategy until we get one that can handle the command.
-                boolean commandHandled = false;
+                @Nullable Node modifiedNode = null;
                 final Iterator<ThingHandlerStrategy> strategyIterator = this.hiveThingHandler.getStrategies().iterator();
-                while (strategyIterator.hasNext() && !commandHandled) {
+                while (strategyIterator.hasNext() && modifiedNode == null) {
                     final @Nullable ThingHandlerStrategy strategy = strategyIterator.next();
                     assert strategy != null;
 
-                    commandHandled = strategy.handleCommand(channelUID, command, hiveNode);
+                    modifiedNode = strategy.handleCommand(channelUID, command, hiveNode);
                 }
 
                 // If the command was handled push the update to the Hive API.
-                if (commandHandled) {
+                if (modifiedNode != null) {
                     final @Nullable HiveClient hiveClient = DefaultHiveAccountHandler.this.hiveClient;
 
                     if (hiveClient == null) {

@@ -12,19 +12,25 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
+import java.time.Instant;
+
+import javax.measure.Quantity;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.client.DefaultFeatureAttribute;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.TransientModeHeatingActionsFeature;
 
 import tec.uom.se.quantity.Quantities;
+import tec.uom.se.unit.Units;
 
 /**
  * A {@link ThingHandlerStrategy} for handling channels that interface with
@@ -35,37 +41,67 @@ import tec.uom.se.quantity.Quantities;
  */
 @NonNullByDefault
 public final class HeatingTransientModeHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final HeatingTransientModeHandlerStrategy INSTANCE = new HeatingTransientModeHandlerStrategy();
+    public static final Quantity<Temperature> DEFAULT_BOOST_TEMPERATURE = Quantities.getQuantity(22, Units.CELSIUS);
 
-    public static HeatingTransientModeHandlerStrategy getInstance() {
-        return INSTANCE;
+    private static TransientModeHeatingActionsFeature getDefaultTransientModeActionsFeature() {
+        final Instant now = Instant.now();
+
+        return TransientModeHeatingActionsFeature.builder()
+                .boostTargetTemperature(
+                        DefaultFeatureAttribute.<Quantity<Temperature>>builder()
+                                .displayValue(DEFAULT_BOOST_TEMPERATURE)
+                                .reportedValue(DEFAULT_BOOST_TEMPERATURE)
+                                .reportChangedTime(now)
+                                .reportReceivedTime(now)
+                                .build()
+                )
+                .build();
+    }
+
+    private static TransientModeHeatingActionsFeature getEffectiveTransientModeActionsFeature(final Node node) {
+        @Nullable TransientModeHeatingActionsFeature transientModeActionsFeature = node.getFeature(TransientModeHeatingActionsFeature.class);
+        if (transientModeActionsFeature == null) {
+            transientModeActionsFeature = getDefaultTransientModeActionsFeature();
+        }
+
+        return transientModeActionsFeature;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean handleCommand(
+    public @Nullable Node handleCommand(
             final ChannelUID channelUID,
             final Command command,
             final Node hiveNode
     ) {
-        return useFeatureSafely(hiveNode, TransientModeHeatingActionsFeature.class, transientModeFeature -> {
-            if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST)
-                    && command instanceof QuantityType
-            ) {
-                // N.B. Suppress unchecked because openHAB should hopefully only be passing us QuantityType<Temperature>
-                final QuantityType<Temperature> newTargetHeatTemperature = (QuantityType<Temperature>) command;
-                transientModeFeature.setBoostTargetTemperature(
-                        Quantities.getQuantity(
-                                newTargetHeatTemperature.toBigDecimal(),
-                                newTargetHeatTemperature.getUnit()
-                        )
-                );
+        @Nullable TransientModeHeatingActionsFeature newTransientModeActionsFeature = null;
 
-                return true;
-            }
+        if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST)
+                && command instanceof QuantityType
+        ) {
+            // N.B. Suppress unchecked because openHAB should hopefully only be passing us QuantityType<Temperature>
+            final QuantityType<Temperature> newTargetHeatTemperature = (QuantityType<Temperature>) command;
 
-            return false;
-        });
+            final TransientModeHeatingActionsFeature transientModeActionsFeature = getEffectiveTransientModeActionsFeature(hiveNode);
+
+            newTransientModeActionsFeature = transientModeActionsFeature.withTargetBoostTargetTemperature(
+                    Quantities.getQuantity(
+                            newTargetHeatTemperature.toBigDecimal(),
+                            newTargetHeatTemperature.getUnit()
+                    )
+            );
+        }
+
+        if (newTransientModeActionsFeature != null) {
+            final Node.Builder nodeBuilder = Node.builder();
+            nodeBuilder.from(hiveNode);
+
+            nodeBuilder.putFeature(TransientModeHeatingActionsFeature.class, newTransientModeActionsFeature);
+
+            return nodeBuilder.build();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -74,16 +110,15 @@ public final class HeatingTransientModeHandlerStrategy extends ThingHandlerStrat
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, TransientModeHeatingActionsFeature.class, transientModeFeature -> {
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST, boostTargetHeatTemperatureChannel -> {
-                thingHandlerCallback.stateUpdated(
-                        boostTargetHeatTemperatureChannel,
-                        new QuantityType<>(
-                                transientModeFeature.getBoostTargetTemperature().getValue(),
-                                transientModeFeature.getBoostTargetTemperature().getUnit()
-                        )
-                );
-            });
+        final TransientModeHeatingActionsFeature transientModeActionsFeature = getEffectiveTransientModeActionsFeature(hiveNode);
+        useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST, boostTargetHeatTemperatureChannel -> {
+            thingHandlerCallback.stateUpdated(
+                    boostTargetHeatTemperatureChannel,
+                    new QuantityType<>(
+                            transientModeActionsFeature.getBoostTargetTemperature().getDisplayValue().getValue(),
+                            transientModeActionsFeature.getBoostTargetTemperature().getDisplayValue().getUnit()
+                    )
+            );
         });
     }
 }

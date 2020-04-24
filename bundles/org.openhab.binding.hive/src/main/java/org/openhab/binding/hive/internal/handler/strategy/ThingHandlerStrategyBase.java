@@ -52,7 +52,7 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
      */
     @FunctionalInterface
     protected interface DoWithFeatureAndReturn<F extends Feature> {
-        boolean doStuff(F feature);
+        @Nullable Node doStuff(F feature);
     }
 
     /**
@@ -133,7 +133,7 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
      *      Either the result of {@code thingToDo.doStuff(F)} if the feature
      *      is available or {@code null} if the feature is not available.
      */
-    protected <F extends Feature> boolean useFeatureSafely(
+    protected <F extends Feature> @Nullable Node useFeatureSafely(
             final Node hiveNode,
             final Class<F> featureClass,
             final DoWithFeatureAndReturn<F> thingToDo
@@ -148,7 +148,7 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
             return thingToDo.doStuff(feature);
         } else {
             this.logger.warn("Could not get feature {} for node {} ({}). Has it been given the wrong kind of handler?", featureClass.getName(), hiveNode.getName(), hiveNode.getId());
-            return false;
+            return null;
         }
     }
 
@@ -179,17 +179,17 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
             final Class<F> featureClass,
             final DoWithFeature<F> thingToDo
     ) {
-        useFeatureSafely(hiveNode, featureClass, (feature) -> { thingToDo.doStuff(feature); return false;});
+        useFeatureSafely(hiveNode, featureClass, (feature) -> { thingToDo.doStuff(feature); return null;});
     }
 
     // Default implementation that does nothing.
     // Useful for read-only features.
     @Override
-    public boolean handleCommand(
+    public @Nullable Node handleCommand(
             final ChannelUID channelUID,
             final Command command,
             final Node hiveNode
     ) {
-        return false;
+        return null;
     }
 }

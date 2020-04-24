@@ -13,7 +13,6 @@
 package org.openhab.binding.hive.internal.client;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
  *
@@ -21,6 +20,10 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public interface SettableFeatureAttribute<T> extends FeatureAttribute<T> {
-    @Nullable T getTargetValue();
+public final class BuilderUtil {
+    public static final String REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE = "Required attributes have not been set";
+
+    private BuilderUtil() {
+        throw new AssertionError();
+    }
 }

@@ -72,12 +72,12 @@ public class TestUtil {
 
     public static <T> SettableFeatureAttribute<T> createSimpleFeatureAttribute(final T value) {
         final Instant time = Instant.now();
-        return new SettableFeatureAttribute<>(
-                value,
-                time,
-                time,
-                value
-        );
+        return DefaultFeatureAttribute.<T>builder()
+                .displayValue(value)
+                .reportedValue(value)
+                .reportChangedTime(time)
+                .reportReceivedTime(time)
+                .build();
     }
 
     public static <T> FeatureAttributeDto<T> createSimpleFeatureAttributeDto(final T value) {
@@ -106,14 +106,14 @@ public class TestUtil {
     }
 
     public static Node getTestNodeWithFeatures(final Map<Class<? extends Feature>, Feature> features) {
-        return new DefaultNode(
-                new NodeId(UUID.randomUUID()),
-                new NodeName("dummy-node"),
-                NodeType.THERMOSTAT,
-                ProductType.HEATING,
-                Protocol.NONE,
-                new NodeId(UUID.randomUUID()),
-                features
-        );
+        return Node.builder()
+                .id(new NodeId(UUID.randomUUID()))
+                .name(new NodeName("dummy-node"))
+                .nodeType(NodeType.THERMOSTAT)
+                .productType(ProductType.HEATING)
+                .protocol(Protocol.NONE)
+                .parentNodeId(new NodeId(UUID.randomUUID()))
+                .features(features)
+                .build();
     }
 }

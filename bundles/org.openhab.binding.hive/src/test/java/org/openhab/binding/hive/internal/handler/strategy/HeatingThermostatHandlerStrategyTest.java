@@ -12,6 +12,17 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.measure.Quantity;
+import javax.measure.quantity.Temperature;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
@@ -26,23 +37,15 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.TestUtil;
-import org.openhab.binding.hive.internal.client.*;
+import org.openhab.binding.hive.internal.client.HeatingThermostatOperatingMode;
+import org.openhab.binding.hive.internal.client.HeatingThermostatOperatingState;
+import org.openhab.binding.hive.internal.client.Node;
+import org.openhab.binding.hive.internal.client.OverrideMode;
 import org.openhab.binding.hive.internal.client.feature.Feature;
 import org.openhab.binding.hive.internal.client.feature.HeatingThermostatFeature;
+
 import tec.uom.se.quantity.Quantities;
 import tec.uom.se.unit.Units;
-
-import javax.measure.Quantity;
-import javax.measure.quantity.Temperature;
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 /**
  *
@@ -111,19 +114,20 @@ public class HeatingThermostatHandlerStrategyTest {
     @Test
     public void testNormalUpdate() {
         /* Given */
-        final HeatingThermostatHandlerStrategy strategy = HeatingThermostatHandlerStrategy.getInstance();
+        final HeatingThermostatHandlerStrategy strategy = new HeatingThermostatHandlerStrategy();
 
         final HeatingThermostatOperatingMode operatingMode = HeatingThermostatOperatingMode.SCHEDULE;
         final HeatingThermostatOperatingState operatingState = HeatingThermostatOperatingState.HEAT;
         final Quantity<Temperature> targetHeatTemperature = Quantities.getQuantity(20, Units.CELSIUS);
         final OverrideMode overrideMode = OverrideMode.NONE;
 
-        final HeatingThermostatFeature heatingThermostatFeature = new HeatingThermostatFeature(
-                TestUtil.createSimpleFeatureAttribute(operatingMode),
-                TestUtil.createSimpleFeatureAttribute(operatingState),
-                TestUtil.createSimpleFeatureAttribute(targetHeatTemperature),
-                TestUtil.createSimpleFeatureAttribute(overrideMode)
-        );
+        final HeatingThermostatFeature heatingThermostatFeature = HeatingThermostatFeature.builder()
+                .operatingMode(TestUtil.createSimpleFeatureAttribute(operatingMode))
+                .operatingState(TestUtil.createSimpleFeatureAttribute(operatingState))
+                .targetHeatTemperature(TestUtil.createSimpleFeatureAttribute(targetHeatTemperature))
+                .temporaryOperatingModeOverride(TestUtil.createSimpleFeatureAttribute(overrideMode))
+                .build();
+
         final Map<Class<? extends Feature>, Feature> features = new HashMap<>();
         features.put(HeatingThermostatFeature.class, heatingThermostatFeature);
 

@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.hive.internal.client.feature;
 
-import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -31,7 +31,7 @@ public final class LinksFeature implements Feature {
     private final @Nullable FeatureAttribute<Set<Link>> links;
     private final @Nullable FeatureAttribute<Set<ReverseLink>> reverseLinks;
 
-    public LinksFeature(
+    private LinksFeature(
             final @Nullable FeatureAttribute<Set<Link>> links,
             final @Nullable FeatureAttribute<Set<ReverseLink>> reverseLinks
     ) {
@@ -39,30 +39,43 @@ public final class LinksFeature implements Feature {
         this.reverseLinks = reverseLinks;
     }
 
-    public final @Nullable FeatureAttribute<Set<Link>> getLinksAttribute() {
+    public @Nullable FeatureAttribute<Set<Link>> getLinks() {
         return this.links;
     }
 
-    public final Set<Link> getLinks() {
-        final @Nullable FeatureAttribute<Set<Link>> links = this.links;
-        if (links != null) {
-            return links.getDisplayValue();
-        } else {
-            return Collections.emptySet();
-        }
-    }
-
-    public final @Nullable FeatureAttribute<Set<ReverseLink>> getReverseLinksAttribute() {
+    public @Nullable FeatureAttribute<Set<ReverseLink>> getReverseLinks() {
         return this.reverseLinks;
     }
 
-    public final Set<ReverseLink> getReverseLinks() {
-        final @Nullable FeatureAttribute<Set<ReverseLink>> reverseLinks = this.reverseLinks;
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        if (reverseLinks != null) {
-            return reverseLinks.getDisplayValue();
-        } else {
-            return Collections.emptySet();
+    public static final class Builder {
+        private @Nullable FeatureAttribute<Set<Link>> links;
+        private @Nullable FeatureAttribute<Set<ReverseLink>> reverseLinks;
+        
+        public Builder from(final LinksFeature linksFeature) {
+            Objects.requireNonNull(linksFeature);
+            
+            return this.links(linksFeature.getLinks())
+                    .reverseLinks(linksFeature.getReverseLinks());
+        }
+        
+        public Builder links(final @Nullable FeatureAttribute<Set<Link>> links) {
+            this.links = links;
+            
+            return this;
+        }
+
+        public Builder reverseLinks(final @Nullable FeatureAttribute<Set<ReverseLink>> reverseLinks) {
+            this.reverseLinks = reverseLinks;
+
+            return this;
+        }
+
+        public LinksFeature build() {
+            return new LinksFeature(links, reverseLinks);
         }
     }
 }

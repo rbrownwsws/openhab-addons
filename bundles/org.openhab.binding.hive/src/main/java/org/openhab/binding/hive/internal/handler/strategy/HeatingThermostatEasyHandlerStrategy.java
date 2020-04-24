@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.handler.strategy;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -32,14 +33,8 @@ import org.openhab.binding.hive.internal.client.feature.OnOffDeviceFeature;
  */
 @NonNullByDefault
 public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStrategyBase {
-    private static final HeatingThermostatEasyHandlerStrategy INSTANCE = new HeatingThermostatEasyHandlerStrategy();
-
-    public static HeatingThermostatEasyHandlerStrategy getInstance() {
-        return INSTANCE;
-    }
-
     @Override
-    public boolean handleCommand(
+    public @Nullable Node handleCommand(
             final ChannelUID channelUID,
             final Command command,
             final Node hiveNode
@@ -49,6 +44,7 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
                 return handleCommand(
                         channelUID,
                         command,
+                        hiveNode,
                         heatingThermostatFeature,
                         onOffDeviceFeature
                 );
@@ -74,39 +70,57 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
         });
     }
 
-    private boolean handleCommand(
+    private @Nullable Node handleCommand(
             final ChannelUID channelUID,
             final Command command,
+            final Node hiveNode,
             final HeatingThermostatFeature heatingThermostatFeature,
             final OnOffDeviceFeature onOffDeviceFeature
     ) {
-        boolean needUpdate = false;
+        @Nullable HeatingThermostatFeature newHeatingThermostatFeature = null;
+        @Nullable OnOffDeviceFeature newOnOffDeviceFeature = null;
+
         if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING)
                 && command instanceof StringType
         ) {
             final StringType newOperatingMode = (StringType) command;
             if (newOperatingMode.toString().equals(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_MANUAL)) {
-                heatingThermostatFeature.setOperatingMode(HeatingThermostatOperatingMode.MANUAL);
-                onOffDeviceFeature.setMode(OnOffMode.ON);
+                newHeatingThermostatFeature = heatingThermostatFeature.withTargetOperatingMode(HeatingThermostatOperatingMode.MANUAL);
+                newOnOffDeviceFeature = onOffDeviceFeature.withTargetMode(OnOffMode.ON);
             } else if (newOperatingMode.toString().equals(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_SCHEDULE)) {
-                heatingThermostatFeature.setOperatingMode(HeatingThermostatOperatingMode.SCHEDULE);
-                onOffDeviceFeature.setMode(OnOffMode.ON);
+                newHeatingThermostatFeature = heatingThermostatFeature.withTargetOperatingMode(HeatingThermostatOperatingMode.SCHEDULE);
+                newOnOffDeviceFeature = onOffDeviceFeature.withTargetMode(OnOffMode.ON);
             } else {
                 // easy-mode-operating: OFF
-                onOffDeviceFeature.setMode(OnOffMode.OFF);
+                newOnOffDeviceFeature = onOffDeviceFeature.withTargetMode(OnOffMode.OFF);
             }
-
-            needUpdate = true;
         } else if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_EASY_MODE_BOOST)
                 && command instanceof OnOffType
         ) {
             final OnOffType newOverrideMode = (OnOffType) command;
-            heatingThermostatFeature.setTemporaryOperatingModeOverride(newOverrideMode == OnOffType.ON ? OverrideMode.TRANSIENT : OverrideMode.NONE);
-
-            needUpdate = true;
+            newHeatingThermostatFeature = heatingThermostatFeature.withTargetTemporaryOperatingModeOverride(
+                    newOverrideMode == OnOffType.ON ? OverrideMode.TRANSIENT : OverrideMode.NONE
+            );
         }
 
-        return needUpdate;
+        if (newHeatingThermostatFeature != null
+                || newOnOffDeviceFeature != null
+        ) {
+            final Node.Builder nodeBuilder = Node.builder();
+            nodeBuilder.from(hiveNode);
+
+            if (newHeatingThermostatFeature != null) {
+                nodeBuilder.putFeature(HeatingThermostatFeature.class, newHeatingThermostatFeature);
+            }
+
+            if (newOnOffDeviceFeature != null) {
+                nodeBuilder.putFeature(OnOffDeviceFeature.class, newOnOffDeviceFeature);
+            }
+
+            return nodeBuilder.build();
+        } else {
+            return null;
+        }
     }
 
     private void handleUpdate(
@@ -116,9 +130,9 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
             final OnOffDeviceFeature onOffDeviceFeature
     ) {
         useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING, easyModeOperatingChannel -> {
-            if (onOffDeviceFeature.getMode() == OnOffMode.OFF) {
+            if (onOffDeviceFeature.getMode().getDisplayValue() == OnOffMode.OFF) {
                 thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_OFF));
-            } else if (heatingThermostatFeature.getOperatingMode() == HeatingThermostatOperatingMode.SCHEDULE) {
+            } else if (heatingThermostatFeature.getOperatingMode().getDisplayValue() == HeatingThermostatOperatingMode.SCHEDULE) {
                 thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_SCHEDULE));
             } else {
                 thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_MANUAL));
@@ -126,12 +140,12 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
         });
 
         useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_MODE_BOOST, easyModeBoostChannel -> {
-            final OnOffType boostActive = OnOffType.from(heatingThermostatFeature.getTemporaryOperatingModeOverride() == OverrideMode.TRANSIENT);
+            final OnOffType boostActive = OnOffType.from(heatingThermostatFeature.getTemporaryOperatingModeOverride().getDisplayValue() == OverrideMode.TRANSIENT);
             thingHandlerCallback.stateUpdated(easyModeBoostChannel, boostActive);
         });
 
         useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_STATE_IS_ON, easyStateIsOnChannel -> {
-            final OnOffType isOn = OnOffType.from(heatingThermostatFeature.getOperatingState().equals(HeatingThermostatOperatingState.HEAT));
+            final OnOffType isOn = OnOffType.from(heatingThermostatFeature.getOperatingState().getDisplayValue().equals(HeatingThermostatOperatingState.HEAT));
             thingHandlerCallback.stateUpdated(easyStateIsOnChannel, isOn);
         });
     }

@@ -28,6 +28,10 @@ public final class NodeType extends SimpleValueTypeBase<URI> {
     public static final NodeType THERMOSTAT_UI = new NodeType(URI.create("http://alertme.com/schema/json/node.class.thermostatui.json#"));
     public static final NodeType RADIATOR_VALVE = new NodeType(URI.create("http://alertme.com/schema/json/node.class.trv.json#"));
 
+    public static final NodeType SYNTHETIC_DAYLIGHT = new NodeType(URI.create("http://alertme.com/schema/json/node.class.synthetic.daylight.json#"));
+    public static final NodeType SYNTHETIC_HOME_STATE = new NodeType(URI.create("http://alertme.com/schema/json/node.class.synthetic.home.state.json#"));
+    public static final NodeType SYNTHETIC_RULE = new NodeType(URI.create("http://alertme.com/schema/json/node.class.synthetic.rule.json#"));
+
     public NodeType(final URI nodeType) {
         super(nodeType);
     }
