@@ -23,4 +23,6 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public interface SettableFeatureAttribute<T> extends FeatureAttribute<T> {
     @Nullable T getTargetValue();
+
+    SettableFeatureAttribute<T> withTargetValue(@Nullable T targetValue);
 }

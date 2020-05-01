@@ -20,11 +20,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class AttributeName extends SimpleValueTypeBase<String> {
-    public static final AttributeName ATTRIBUTE_NAME_TARGET_HEAT_TEMPERATURE = new AttributeName("targetHeatTemperature");
-    public static final AttributeName ATTRIBUTE_NAME_MODE = new AttributeName("mode");
+public enum AttributeName {
+    HEATING_THERMOSTAT_TARGET_HEAT_TEMPERATURE,
+    ON_OFF_DEVICE_MODE,
+    WATER_HEATER_HEATING_OPERATING_MODE,
 
-    public AttributeName(final String attributeName) {
-        super(attributeName);
-    }
+    UNEXPECTED
 }

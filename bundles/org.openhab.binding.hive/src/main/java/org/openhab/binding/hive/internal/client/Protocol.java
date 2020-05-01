@@ -20,17 +20,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class Protocol extends SimpleValueTypeBase<String> {
-    public static final Protocol SYNTHETIC = new Protocol("SYNTHETIC");
-    public static final Protocol ZIGBEE = new Protocol("ZIGBEE");
-    public static final Protocol PROXIED = new Protocol("PROXIED");
-    public static final Protocol MQTT = new Protocol("MQTT");
-    public static final Protocol XMPP = new Protocol("XMPP");
-    public static final Protocol VIRTUAL = new Protocol("VIRTUAL");
+public enum Protocol {
+    SYNTHETIC,
+    ZIGBEE,
+    PROXIED,
+    MQTT,
+    XMPP,
+    VIRTUAL,
 
-    public static final Protocol NONE = new Protocol("NONE");
-
-    public Protocol(final String protocol) {
-        super(protocol);
-    }
+    NONE,
+    UNEXPECTED
 }

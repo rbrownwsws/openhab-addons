@@ -29,7 +29,7 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public final class HiveApiInstant {
-    private Instant instant;
+    private final Instant instant;
 
     public HiveApiInstant(final Instant instant) {
         Objects.requireNonNull(instant);
@@ -43,17 +43,21 @@ public final class HiveApiInstant {
 
     @Override
     public boolean equals(final @Nullable Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
+        }
+
         final HiveApiInstant that = (HiveApiInstant) o;
-        return instant.equals(that.instant);
+
+        return this.instant.equals(that.instant);
     }
 
-    @NonNullByDefault({})
     @Override
     public int hashCode() {
-        return Objects.hash(instant);
+        return Objects.hash(this.instant);
     }
 }

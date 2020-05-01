@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.hive.internal.client.exception.HiveException;
 
 /**
  * A class for interacting with the Hive API as a specific user.
@@ -32,7 +33,7 @@ public interface HiveClient extends AutoCloseable {
     /**
      * Gets all the {@link Node}s associated with the authenticated user.
      */
-    Set<Node> getAllNodes();
+    Set<Node> getAllNodes() throws HiveException;
 
     /**
      * Get the raw JSON returned by the Hive API for a get all nodes request.
@@ -42,7 +43,7 @@ public interface HiveClient extends AutoCloseable {
      * @return
      *      The raw JSON string returned by the Hive API.
      */
-    String getAllNodesJson();
+    String getAllNodesJson() throws HiveException;
 
     /**
      * Get a node with a given {@link NodeId}.
@@ -54,7 +55,7 @@ public interface HiveClient extends AutoCloseable {
      *      {@code null} if no {@linkplain Node} exists with the id
      *      {@code nodeId}.
      */
-    @Nullable Node getNode(NodeId nodeId);
+    @Nullable Node getNode(NodeId nodeId) throws HiveException;
 
     /**
      * Push an updated version of a {@link Node} to the Hive API.
@@ -67,5 +68,5 @@ public interface HiveClient extends AutoCloseable {
      *      The updated version of the {@linkplain Node} returned by the
      *      Hive API.
      */
-    @Nullable Node updateNode(Node node);
+    @Nullable Node updateNode(Node node) throws HiveException;
 }

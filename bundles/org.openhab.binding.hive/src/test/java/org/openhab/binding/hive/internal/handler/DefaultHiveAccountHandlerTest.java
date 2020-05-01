@@ -40,6 +40,7 @@ import org.openhab.binding.hive.internal.client.HiveClient;
 import org.openhab.binding.hive.internal.client.HiveClientFactory;
 import org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException;
 import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
+import org.openhab.binding.hive.internal.client.exception.HiveException;
 import org.openhab.binding.hive.internal.discovery.HiveDiscoveryService;
 import org.openhab.binding.hive.internal.discovery.HiveDiscoveryServiceFactory;
 
@@ -86,7 +87,7 @@ public class DefaultHiveAccountHandlerTest extends MultithreadedTestBase {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws HiveException {
         initMocks(this);
 
         when(this.hiveClient.getAllNodes()).thenReturn(Collections.emptySet());
@@ -113,7 +114,7 @@ public class DefaultHiveAccountHandlerTest extends MultithreadedTestBase {
     }
 
     @Test
-    public void testInitGood() throws TimeoutException, InterruptedException {
+    public void testInitGood() throws TimeoutException, InterruptedException, HiveException {
         /* Given */
         final DefaultHiveAccountHandler accountHandler = new DefaultHiveAccountHandler(
                 this.hiveClientFactory,
@@ -145,7 +146,7 @@ public class DefaultHiveAccountHandlerTest extends MultithreadedTestBase {
     }
 
     @Test
-    public void testInitBadCredentials() throws TimeoutException, InterruptedException {
+    public void testInitBadCredentials() throws TimeoutException, InterruptedException, HiveException {
         /* Given */
         final DefaultHiveAccountHandler accountHandler = new DefaultHiveAccountHandler(
                 this.hiveClientFactory,
@@ -180,7 +181,7 @@ public class DefaultHiveAccountHandlerTest extends MultithreadedTestBase {
     }
 
     @Test
-    public void testInitApiException() throws TimeoutException, InterruptedException {
+    public void testInitApiException() throws TimeoutException, InterruptedException, HiveException {
         /* Given */
         final DefaultHiveAccountHandler accountHandler = new DefaultHiveAccountHandler(
                 this.hiveClientFactory,

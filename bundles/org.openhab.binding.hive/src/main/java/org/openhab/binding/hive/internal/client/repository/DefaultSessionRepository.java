@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client.repository;
 
 import java.net.URI;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -22,10 +23,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.*;
 import org.openhab.binding.hive.internal.client.dto.SessionDto;
 import org.openhab.binding.hive.internal.client.dto.SessionsDto;
-import org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException;
-import org.openhab.binding.hive.internal.client.exception.HiveApiNotAuthorisedException;
-import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
-import org.openhab.binding.hive.internal.client.exception.HiveClientResponseException;
+import org.openhab.binding.hive.internal.client.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +51,7 @@ public final class DefaultSessionRepository implements SessionRepository {
     }
 
     @Override
-    public Session createSession(final Username username, final Password password) {
+    public Session createSession(final String username, final String password) throws HiveApiAuthenticationException, HiveApiUnknownException, HiveClientResponseException, HiveClientRequestException {
         /* Build our request entity with our user credentials */
         final SessionDto credentials = new SessionDto();
         credentials.username = username;
@@ -64,14 +62,14 @@ public final class DefaultSessionRepository implements SessionRepository {
 
         /* Send our new session request to the Hive API. */
         final HiveApiResponse response = this.requestFactory.newRequest(HiveApiConstants.ENDPOINT_SESSIONS)
-                .accept(MediaType.API_V6_5_0_JSON)
+                .accept(HiveApiConstants.MEDIA_TYPE_API_V6_5_0_JSON)
                 .post(requestEntity);
 
-        if (response.getStatusCode() == 400) {
+        if (response.getStatusCode() == HiveApiConstants.STATUS_CODE_400_BAD_REQUEST) {
             throw new HiveApiAuthenticationException(
                     "Creating a new session failed because an incorrect username or password was provided"
             );
-        } else if (response.getStatusCode() != 200) {
+        } else if (response.getStatusCode() != HiveApiConstants.STATUS_CODE_200_OK) {
             throw new HiveApiUnknownException("Creating a new session failed with response code: " + response.getStatusCode());
         }
 
@@ -104,38 +102,40 @@ public final class DefaultSessionRepository implements SessionRepository {
     }
 
     @Override
-    public void deleteSession(final Session session) {
+    public void deleteSession(final Session session)
+            throws HiveApiNotAuthorisedException, HiveApiUnknownException, HiveClientUnknownException, HiveClientRequestException {
         /* Send our delete session request to the Hive API. */
         final HiveApiResponse response = this.requestFactory.newRequest(getEndpointPathForSession(session.getSessionId()))
-                .accept(MediaType.API_V6_5_0_JSON)
+                .accept(HiveApiConstants.MEDIA_TYPE_API_V6_5_0_JSON)
                 .delete();
 
-        if (response.getStatusCode() == 401) {
-            throw new HiveApiNotAuthorisedException();
-        } else if (response.getStatusCode() != 200) {
-            throw new HiveApiUnknownException("Deleting session failed with response code: " + response.getStatusCode());
-        }
+        RepositoryUtil.checkResponse("deleteSession", response);
     }
 
     @Override
-    public boolean isValidSession(final @Nullable Session session) {
+    public boolean isValidSession(final @Nullable Session session) throws HiveApiUnknownException, HiveClientRequestException {
         if (session == null) {
             return false;
         }
 
         /* Try to get our own session from the Hive API. */
         final HiveApiResponse response = this.requestFactory.newRequest(getEndpointPathForSession(session.getSessionId()))
-                .accept(MediaType.API_V6_5_0_JSON)
+                .accept(HiveApiConstants.MEDIA_TYPE_API_V6_5_0_JSON)
                 .get();
 
-        if (response.getStatusCode() == 200) {
+        if (response.getStatusCode() == HiveApiConstants.STATUS_CODE_200_OK) {
             // If we succeeded the session is still valid.
             return true;
-        } else if (response.getStatusCode() == 401 || response.getStatusCode() == 403) {
+        } else if (response.getStatusCode() == HiveApiConstants.STATUS_CODE_401_UNAUTHORIZED
+                || response.getStatusCode() == HiveApiConstants.STATUS_CODE_403_FORBIDDEN) {
             // If we failed our session has expired (or was never valid).
             return false;
         }
 
-        throw new HiveApiUnknownException("Checking session failed for an unknown reason");
+        throw new HiveApiUnknownException(MessageFormat.format(
+                "Checking session failed for an unknown reason. Status: {0}. Message: {1}",
+                response.getStatusCode(),
+                response.getRawContent())
+        );
     }
 }

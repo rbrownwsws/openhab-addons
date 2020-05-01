@@ -15,27 +15,28 @@ package org.openhab.binding.hive.internal.client.exception;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Thrown to indicate a call to the Hive API has failed because the client is not authorised.
+ * Thrown to indicate something has gone wrong while interacting with the
+ * Hive API.
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class HiveApiNotAuthorisedException extends HiveApiException {
-    private static final long serialVersionUID = 1L;
+public abstract class HiveException extends Exception {
+    public static final long serialVersionUID = 1L;
 
-    public HiveApiNotAuthorisedException() {
+    public HiveException() {
         super();
     }
 
-    public HiveApiNotAuthorisedException(final String message) {
+    public HiveException(final String message) {
         super(message);
     }
 
-    public HiveApiNotAuthorisedException(final Throwable cause) {
+    public HiveException(final Throwable cause) {
         super(cause);
     }
 
-    public HiveApiNotAuthorisedException(final String message, final Throwable cause) {
+    public HiveException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

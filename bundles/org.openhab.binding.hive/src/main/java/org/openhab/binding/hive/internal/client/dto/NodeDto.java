@@ -15,8 +15,8 @@ package org.openhab.binding.hive.internal.client.dto;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.NodeId;
-import org.openhab.binding.hive.internal.client.NodeName;
 import org.openhab.binding.hive.internal.client.NodeType;
+import org.openhab.binding.hive.internal.client.Protocol;
 import org.openhab.binding.hive.internal.client.UserId;
 
 /**
@@ -90,7 +90,7 @@ public final class NodeDto {
     /**
      * name (string, optional): Node name
      */
-    public @Nullable NodeName name;
+    public @Nullable String name;
 
     /**
      * nodeType (string, optional): Node type
@@ -111,7 +111,7 @@ public final class NodeDto {
      * protocol (string, optional): Node protocol, optional, read-only
      * ['SYNTHETIC', 'ZIGBEE', 'PROXIED', 'MQTT', 'XMPP', 'VIRTUAL', 'any other provided by hub']
      */
-    public @Nullable String protocol;
+    public @Nullable Protocol protocol;
 
     /*
      * relationships (inline_model_28, optional): Node relationships

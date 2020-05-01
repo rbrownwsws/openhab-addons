@@ -15,6 +15,7 @@ package org.openhab.binding.hive.internal.client.adapter;
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.SessionId;
 
 import com.google.gson.stream.JsonReader;
@@ -25,10 +26,9 @@ import com.google.gson.stream.JsonReader;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class SessionIdGsonAdapter extends SimpleGsonTypeAdapterBase<SessionId> {
-    @NonNullByDefault({})
+public final class SessionIdGsonAdapter extends GsonTypeAdapterBase<SessionId> {
     @Override
-    public SessionId read(final JsonReader in) throws IOException {
+    public @Nullable SessionId readValue(final JsonReader in) throws IOException {
         return new SessionId(in.nextString());
     }
 }

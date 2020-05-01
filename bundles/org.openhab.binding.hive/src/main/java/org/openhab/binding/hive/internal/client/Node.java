@@ -29,7 +29,7 @@ import org.openhab.binding.hive.internal.client.feature.Feature;
 @NonNullByDefault
 public final class Node {
     private final NodeId id;
-    private final NodeName name;
+    private final String name;
     private final NodeType nodeType;
     private final ProductType productType;
     private final Protocol protocol;
@@ -38,7 +38,7 @@ public final class Node {
 
     private Node(
             final NodeId id,
-            final NodeName name,
+            final String name,
             final NodeType nodeType,
             final ProductType productType,
             final Protocol protocol,
@@ -66,7 +66,7 @@ public final class Node {
         return this.id;
     }
 
-    public NodeName getName() {
+    public String getName() {
         return this.name;
     }
 
@@ -111,7 +111,7 @@ public final class Node {
 
     public static final class Builder {
         private @Nullable NodeId id;
-        private @Nullable NodeName name;
+        private @Nullable String name;
         private @Nullable NodeType nodeType;
         private @Nullable ProductType productType;
         private @Nullable Protocol protocol;
@@ -136,7 +136,7 @@ public final class Node {
             return this;
         }
 
-        public Builder name(final NodeName name) {
+        public Builder name(final String name) {
             this.name = Objects.requireNonNull(name);
 
             return this;
@@ -186,7 +186,7 @@ public final class Node {
 
         public Node build() {
             final @Nullable NodeId id = this.id;
-            final @Nullable NodeName name = this.name;
+            final @Nullable String name = this.name;
             final @Nullable NodeType nodeType = this.nodeType;
             final @Nullable ProductType productType = this.productType;
             final @Nullable Protocol protocol = this.protocol;

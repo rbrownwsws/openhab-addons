@@ -15,8 +15,8 @@ package org.openhab.binding.hive.internal.client.exception;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Thrown to indicate that the {@link org.openhab.binding.hive.internal.client.HiveClient}
- * got a "failure" response from the Hive API but does not understand why.
+ * Thrown to indicate that the Hive Client got a non-success response from the
+ * Hive API but does not understand why (and it is the client's fault).
  *
  * @author Ross Brown - Initial contribution
  */

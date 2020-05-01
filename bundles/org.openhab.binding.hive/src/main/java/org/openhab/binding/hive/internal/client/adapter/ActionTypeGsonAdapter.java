@@ -12,13 +12,9 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import java.io.IOException;
-import java.net.URI;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.ActionType;
-
-import com.google.gson.stream.JsonReader;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 
 /**
  * A gson {@link com.google.gson.TypeAdapter} for {@link ActionType}.
@@ -26,10 +22,11 @@ import com.google.gson.stream.JsonReader;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class ActionTypeGsonAdapter extends SimpleGsonTypeAdapterBase<ActionType> {
-    @NonNullByDefault({})
-    @Override
-    public ActionType read(final JsonReader in) throws IOException {
-        return new ActionType(URI.create(in.nextString()));
+public final class ActionTypeGsonAdapter extends ComplexEnumGsonTypeAdapterBase<ActionType> {
+    public ActionTypeGsonAdapter() {
+        super(EnumMapper.builder(ActionType.class)
+                .setUnexpectedValue(ActionType.UNEXPECTED)
+                .add(ActionType.GENERIC, HiveApiConstants.ACTION_TYPE_GENERIC)
+                .build());
     }
 }

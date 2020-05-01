@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.openhab.binding.hive.internal.TestUtil;
 import org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException;
 import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
+import org.openhab.binding.hive.internal.client.exception.HiveException;
 import org.openhab.binding.hive.internal.client.repository.NodeRepository;
 import org.openhab.binding.hive.internal.client.repository.SessionRepository;
 
@@ -52,10 +53,10 @@ public class DefaultHiveClientTest {
     private NodeRepository nodeRepository;
 
     @NonNullByDefault({})
-    private Username username;
+    private String username;
 
     @NonNullByDefault({})
-    private Password password;
+    private String password;
 
     @NonNullByDefault({})
     private Session session;
@@ -63,15 +64,15 @@ public class DefaultHiveClientTest {
     @Before
     public void setUp() {
         initMocks(this);
-        this.username = new Username("hiveuser@example.com");
-        this.password = new Password("password123");
+        this.username = "hiveuser@example.com";
+        this.password = "password123";
         this.session = new Session(
                 new SessionId("deadbeef-dead-beef-dead-beefdeadbeef"),
                 new UserId(UUID.fromString("deadbeef-dead-beef-dead-beefdeadbeef"))
         );
     }
 
-    private DefaultHiveClient createClient() {
+    private DefaultHiveClient createClient() throws HiveException {
         return new DefaultHiveClient(
                 this.authenticationManager,
                 this.username,
@@ -85,7 +86,7 @@ public class DefaultHiveClientTest {
      * Test that DefaultHiveClient tries to authenticate when it is created.
      */
     @Test
-    public void testGoodLogin() {
+    public void testGoodLogin() throws HiveException {
         /* Given */
         when(this.sessionRepository.createSession(any(), any())).thenReturn(this.session);
 
@@ -103,7 +104,7 @@ public class DefaultHiveClientTest {
      * Test that DefaultHiveClient passes on authentication exceptions.
      */
     @Test(expected = HiveApiAuthenticationException.class)
-    public void testBadCredentialsLogin() {
+    public void testBadCredentialsLogin() throws HiveException {
         /* Given */
         when(this.sessionRepository.createSession(any(), any())).thenThrow(new HiveApiAuthenticationException());
 
@@ -118,7 +119,7 @@ public class DefaultHiveClientTest {
      * Test that DefaultHiveClient passes on exception when API does something unexpected.
      */
     @Test(expected = HiveApiUnknownException.class)
-    public void testApiErrorLogin() {
+    public void testApiErrorLogin() throws HiveException {
         /* Given */
         when(this.sessionRepository.createSession(any(), any())).thenThrow(new HiveApiUnknownException());
 
@@ -133,7 +134,7 @@ public class DefaultHiveClientTest {
      * Test the DefaultHiveClient passes on the nodes from the NodeRepository.
      */
     @Test
-    public void testGetNodes() {
+    public void testGetNodes() throws HiveException {
         /* Given */
         final Node expectedNode = TestUtil.getTestNodeWithFeatures(Collections.emptyMap());
         final Set<Node> expectedResults = Collections.unmodifiableSet(Collections.singleton(expectedNode));

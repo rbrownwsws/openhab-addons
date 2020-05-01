@@ -12,8 +12,6 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import java.net.URI;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -22,10 +20,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class ScheduleType extends SimpleValueTypeBase<URI> {
-    public static final ScheduleType WEEKLY = new ScheduleType(URI.create("http://alertme.com/schema/json/configuration/configuration.device.schedule.weekly.v1.json#"));
+public enum ScheduleType {
+    WEEKLY,
 
-    public ScheduleType(final URI scheduleType) {
-        super(scheduleType);
-    }
+    UNEXPECTED
 }

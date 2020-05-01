@@ -14,11 +14,10 @@ package org.openhab.binding.hive.internal.client;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.hive.internal.client.exception.HiveApiNotAuthorisedException;
+import org.openhab.binding.hive.internal.client.exception.*;
 import org.openhab.binding.hive.internal.client.repository.NodeRepository;
 import org.openhab.binding.hive.internal.client.repository.SessionRepository;
 
@@ -29,10 +28,12 @@ import org.openhab.binding.hive.internal.client.repository.SessionRepository;
  */
 @NonNullByDefault
 final class DefaultHiveClient implements HiveClient {
+    private static final int MAX_REAUTHENTICATION_ATTEMPTS = 1;
+
     private final SessionAuthenticationManager authenticationManager;
 
-    private final Username username;
-    private final Password password;
+    private final String username;
+    private final String password;
 
     private final SessionRepository sessionRepository;
     private final NodeRepository nodeRepository;
@@ -42,20 +43,23 @@ final class DefaultHiveClient implements HiveClient {
     /**
      *
      *
-     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException
+     * @throws HiveApiAuthenticationException
      *      If we failed to authenticate with the provided username and password.
      *
-     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException
+     * @throws HiveApiUnknownException
      *      If something unexpected happens while communicating with the Hive
      *      API.
+     *
+     * @throws HiveClientResponseException
+     *      If we don't understand the response the Hive API gave us.
      */
     public DefaultHiveClient(
             final SessionAuthenticationManager authenticationManager,
-            final Username username,
-            final Password password,
+            final String username,
+            final String password,
             final SessionRepository sessionRepository,
             final NodeRepository nodeRepository
-    ) {
+    ) throws HiveException {
         Objects.requireNonNull(authenticationManager);
         Objects.requireNonNull(sessionRepository);
         Objects.requireNonNull(nodeRepository);
@@ -73,20 +77,20 @@ final class DefaultHiveClient implements HiveClient {
 
     @Override
     public void close() {
-        // TODO: Clean up
+        // No cleanup required.
     }
 
     /**
      * Try to authenticate with the Hive API.
      *
-     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException
+     * @throws HiveApiAuthenticationException
      *      If we failed to authenticate with the stored username and password.
      *
-     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException
+     * @throws HiveApiUnknownException
      *      If something unexpected happens while communicating with the Hive
      *      API.
      */
-    private void authenticate() {
+    private void authenticate() throws HiveException {
         this.authenticationManager.clearSession();
 
         final Session session = this.sessionRepository.createSession(
@@ -98,16 +102,17 @@ final class DefaultHiveClient implements HiveClient {
         this.authenticationManager.setSession(session);
     }
 
-    private <T> T makeAuthenticatedApiCall(final Supplier<T> apiCall) {
+    private <T> T makeAuthenticatedApiCall(final ApiCall<T> apiCall) throws HiveException {
         // If we get a valid result return it.
         // If we are not authorised check if session has expired, reauthenticate and try again.
         // Otherwise let other exceptions bubble up.
-        boolean reauthenticated = false;
-        while (true) {
+        int reauthenticationCount = 0;
+        while (reauthenticationCount <= MAX_REAUTHENTICATION_ATTEMPTS) {
             try {
-                return apiCall.get();
+                return apiCall.call();
             } catch (final HiveApiNotAuthorisedException ex) {
-                if (reauthenticated || this.sessionRepository.isValidSession(this.authenticationManager.getSession())) {
+                if (reauthenticationCount == MAX_REAUTHENTICATION_ATTEMPTS
+                        || this.sessionRepository.isValidSession(this.authenticationManager.getSession())) {
                     // We are either not authorised for this resource or
                     // something has gone wrong with the client logic.
                     // Pass on the exception.
@@ -116,10 +121,12 @@ final class DefaultHiveClient implements HiveClient {
                     // Session seems to no longer be valid.
                     // Reauthenticate and try again.
                     authenticate();
-                    reauthenticated = true;
+                    reauthenticationCount++;
                 }
             }
         }
+
+        throw new IllegalStateException("Authentication failed and somehow I've escaped my trap.");
     }
 
     @Override
@@ -133,17 +140,17 @@ final class DefaultHiveClient implements HiveClient {
     }
 
     @Override
-    public Set<Node> getAllNodes() {
+    public Set<Node> getAllNodes() throws HiveException {
         return makeAuthenticatedApiCall(this.nodeRepository::getAllNodes);
     }
 
     @Override
-    public String getAllNodesJson() {
+    public String getAllNodesJson() throws HiveException {
         return makeAuthenticatedApiCall(this.nodeRepository::getAllNodesJson);
     }
 
     @Override
-    public @Nullable Node getNode(final NodeId nodeId) {
+    public @Nullable Node getNode(final NodeId nodeId) throws HiveException {
         Objects.requireNonNull(nodeId);
 
         // N.B. Type parameter because Checker Framework needs a little help.
@@ -151,10 +158,15 @@ final class DefaultHiveClient implements HiveClient {
     }
 
     @Override
-    public @Nullable Node updateNode(final Node node) {
+    public @Nullable Node updateNode(final Node node) throws HiveException {
         Objects.requireNonNull(node);
 
         // N.B. Type parameter because Checker Framework needs a little help.
         return this.<@Nullable Node>makeAuthenticatedApiCall(() -> this.nodeRepository.updateNode(node));
+    }
+    
+    @FunctionalInterface
+    private interface ApiCall<T> {
+        T call() throws HiveException;
     }
 }

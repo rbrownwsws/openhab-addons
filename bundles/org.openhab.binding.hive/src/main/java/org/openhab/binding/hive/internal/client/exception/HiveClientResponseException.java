@@ -15,9 +15,9 @@ package org.openhab.binding.hive.internal.client.exception;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Thrown to indicate that the {@link org.openhab.binding.hive.internal.client.HiveClient}
- * got a "success" response from the Hive API but either does not understand
- * the response or thinks it is malformed.
+ * Thrown to indicate that the Hive client got a "success" response from the
+ * Hive API but either does not understand the response or thinks it is
+ * malformed.
  *
  * @author Ross Brown - Initial contribution
  */

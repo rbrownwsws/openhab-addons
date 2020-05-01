@@ -20,7 +20,6 @@ import javax.measure.quantity.Temperature;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.BuilderUtil;
-import org.openhab.binding.hive.internal.client.DefaultFeatureAttribute;
 import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
 
 /**
@@ -50,10 +49,7 @@ public final class TransientModeHeatingActionsFeature implements Feature {
         return TransientModeHeatingActionsFeature.builder()
                 .from(this)
                 .boostTargetTemperature(
-                        DefaultFeatureAttribute.<Quantity<Temperature>>builder()
-                                .from(this.boostTargetTemperature)
-                                .targetValue(targetBoostTargetTemperature)
-                                .build()
+                        this.boostTargetTemperature.withTargetValue(targetBoostTargetTemperature)
                 )
                 .build();
     }

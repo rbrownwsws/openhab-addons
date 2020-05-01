@@ -52,11 +52,7 @@ public final class WaterHeaterFeature implements Feature {
 
         return WaterHeaterFeature.builder()
                 .from(this)
-                .operatingMode(DefaultFeatureAttribute.<WaterHeaterOperatingMode>builder()
-                        .from(this.operatingMode)
-                        .targetValue(targetOperatingMode)
-                        .build()
-                )
+                .operatingMode(this.operatingMode.withTargetValue(targetOperatingMode))
                 .build();
     }
 
@@ -73,10 +69,8 @@ public final class WaterHeaterFeature implements Feature {
 
         return WaterHeaterFeature.builder()
                 .from(this)
-                .temporaryOperatingModeOverride(DefaultFeatureAttribute.<OverrideMode>builder()
-                        .from(this.temporaryOperatingModeOverride)
-                        .targetValue(targetOverrideMode)
-                        .build()
+                .temporaryOperatingModeOverride(
+                        this.temporaryOperatingModeOverride.withTargetValue(targetOverrideMode)
                 )
                 .build();
     }

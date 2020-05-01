@@ -22,7 +22,6 @@ import java.net.URI;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collections;
-import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -32,6 +31,8 @@ import org.mockito.Mock;
 import org.openhab.binding.hive.internal.TestUtil;
 import org.openhab.binding.hive.internal.client.*;
 import org.openhab.binding.hive.internal.client.dto.*;
+import org.openhab.binding.hive.internal.client.exception.HiveClientRequestException;
+import org.openhab.binding.hive.internal.client.exception.HiveException;
 import org.openhab.binding.hive.internal.client.feature.HeatingThermostatFeature;
 import org.openhab.binding.hive.internal.client.feature.LinksFeature;
 import org.openhab.binding.hive.internal.client.feature.TransientModeFeature;
@@ -65,7 +66,7 @@ public class DefaultNodeRepositoryTest {
         initMocks(this);
     }
 
-    private void setUpSuccessResponse(final NodesDto content) {
+    private void setUpSuccessResponse(final NodesDto content) throws HiveClientRequestException {
         when(this.requestFactory.newRequest(any())).thenReturn(this.request);
 
         when(this.request.accept(any())).thenReturn(this.request);
@@ -97,7 +98,7 @@ public class DefaultNodeRepositoryTest {
     }
 
     @Test
-    public void testGetNode() {
+    public void testGetNode() throws HiveException {
         /* Given */
         final NodesDto nodesDto = new NodesDto();
         nodesDto.nodes = Collections.emptyList();
@@ -122,7 +123,7 @@ public class DefaultNodeRepositoryTest {
      * no actions.
      */
     @Test
-    public void testHeatingWithMissingTransientActions() {
+    public void testHeatingWithMissingTransientActions() throws HiveException {
         /* Given */
         final NodeId nodeId = TestUtil.NODE_ID_DEADBEEF;
         final NodeDto nodeDto = TestUtil.createSimpleNodeDto(nodeId);
@@ -161,7 +162,7 @@ public class DefaultNodeRepositoryTest {
     }
 
     @Test
-    public void testHeatingWithGoodTransientActions() {
+    public void testHeatingWithGoodTransientActions() throws HiveException {
         /* Given */
         final NodeId nodeId = TestUtil.NODE_ID_DEADBEEF;
         final NodeDto nodeDto = TestUtil.createSimpleNodeDto(nodeId);
@@ -174,7 +175,7 @@ public class DefaultNodeRepositoryTest {
         final int boostTargetTemperature = 22;
         final ActionDto actionDto = new ActionDto();
         actionDto.actionType = ActionType.GENERIC;
-        actionDto.attribute = AttributeName.ATTRIBUTE_NAME_TARGET_HEAT_TEMPERATURE;
+        actionDto.attribute = AttributeName.HEATING_THERMOSTAT_TARGET_HEAT_TEMPERATURE;
         actionDto.value = Integer.toString(boostTargetTemperature);
 
         nodeDto.features.transient_mode_v1 = getGoodTransientModeV1FeatureDtoWithoutActions();
@@ -207,7 +208,7 @@ public class DefaultNodeRepositoryTest {
     }
 
     @Test
-    public void testLinksFeatureNoLinks() {
+    public void testLinksFeatureNoLinks() throws HiveException {
         /* Given */
         final ReverseLinkDto reverseLinkDto = new ReverseLinkDto();
         reverseLinkDto.boundNode = TestUtil.NODE_ID_CAFEBABE;
@@ -244,7 +245,7 @@ public class DefaultNodeRepositoryTest {
     }
 
     @Test
-    public void testLinksFeatureNoReverseLinks() {
+    public void testLinksFeatureNoReverseLinks() throws HiveException {
         /* Given */
         final LinkDto linkDto = new LinkDto();
         linkDto.boundNode = TestUtil.NODE_ID_CAFEBABE;

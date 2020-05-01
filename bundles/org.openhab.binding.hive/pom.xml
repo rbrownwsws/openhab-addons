@@ -34,10 +34,27 @@
       <version>3.1.13</version>
       <scope>test</scope>
     </dependency>
+
+    <!-- Nicer junit4 parameterized tests -->
+    <dependency>
+      <groupId>pl.pragmatists</groupId>
+      <artifactId>JUnitParams</artifactId>
+      <version>1.1.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <!-- Configure surefire to not trim stack traces -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <trimStackTrace>false</trimStackTrace>
+        </configuration>
+      </plugin>
+
       <!-- Code coverage plugin -->
       <plugin>
         <groupId>org.jacoco</groupId>

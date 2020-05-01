@@ -19,7 +19,6 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.BuilderUtil;
-import org.openhab.binding.hive.internal.client.DefaultFeatureAttribute;
 import org.openhab.binding.hive.internal.client.FeatureAttribute;
 import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
 
@@ -61,11 +60,7 @@ public final class TransientModeFeature implements Feature {
 
         return TransientModeFeature.builder()
                 .from(this)
-                .duration(DefaultFeatureAttribute.<Duration>builder()
-                        .from(this.duration)
-                        .targetValue(targetDuration)
-                        .build()
-                )
+                .duration(this.duration.withTargetValue(targetDuration))
                 .build();
     }
 
@@ -76,11 +71,7 @@ public final class TransientModeFeature implements Feature {
     public TransientModeFeature withTargetIsEnabled(final boolean targetIsEnabled) {
         return TransientModeFeature.builder()
                 .from(this)
-                .isEnabled(DefaultFeatureAttribute.<Boolean>builder()
-                        .from(this.isEnabled)
-                        .targetValue(targetIsEnabled)
-                        .build()
-                )
+                .isEnabled(this.isEnabled.withTargetValue(targetIsEnabled))
                 .build();
     }
 

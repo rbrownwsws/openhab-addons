@@ -21,7 +21,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -35,6 +37,7 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.TestUtil;
@@ -47,11 +50,16 @@ import org.openhab.binding.hive.internal.client.feature.OnOffDeviceFeature;
 import org.openhab.binding.hive.internal.client.feature.TransientModeFeature;
 import org.openhab.binding.hive.internal.client.feature.WaterHeaterFeature;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import junitparams.naming.TestCaseName;
+
 /**
  *
  *
  * @author Ross Brown - Initial contribution
  */
+@RunWith(JUnitParamsRunner.class)
 @NonNullByDefault
 public class WaterHeaterEasyHandlerStrategyTest {
     @NonNullByDefault({})
@@ -104,14 +112,18 @@ public class WaterHeaterEasyHandlerStrategyTest {
     }
 
     @Test
-    public void testNormalUpdateScheduleOnNoneOn() {
+    @Parameters(method = "getUpdateParams")
+    @TestCaseName("Test Update [operatingMode: {0}, onOffMode: {3}, isOn: {1}, overrideMode: {2}] = [mode:{4}, boost:{5}]")
+    public void testUpdateEasyOperatingMode(
+            final WaterHeaterOperatingMode operatingMode,
+            final boolean isOn,
+            final OverrideMode overrideMode,
+            final OnOffMode onOffMode,
+            final String expectedEasyOperatingMode,
+            final OnOffType expectedBoostMode
+    ) {
         /* Given */
         final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
-
-        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.SCHEDULE;
-        final boolean isOn = true;
-        final OverrideMode overrideMode = OverrideMode.NONE;
-        final OnOffMode onOffMode = OnOffMode.ON;
 
         // Create the test node
         final Node node = getGoodNode(
@@ -133,129 +145,57 @@ public class WaterHeaterEasyHandlerStrategyTest {
         /* Then */
         verify(this.thingHandlerCallback).stateUpdated(
                 eq(this.easyOperatingModeChannelUid),
-                eq(new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_SCHEDULE))
+                eq(new StringType(expectedEasyOperatingMode))
         );
 
         verify(this.thingHandlerCallback).stateUpdated(
                 eq(this.easyBoostModeChannelUid),
-                eq(OnOffType.OFF)
+                eq(expectedBoostMode)
         );
     }
 
-    @Test
-    public void testNormalUpdateOnOnNoneOn() {
-        /* Given */
-        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
-
-        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.ON;
-        final boolean isOn = true;
-        final OverrideMode overrideMode = OverrideMode.NONE;
-        final OnOffMode onOffMode = OnOffMode.ON;
-
-        // Create the test node
-        final Node node = getGoodNode(
-                operatingMode,
-                isOn,
-                overrideMode,
-                onOffMode
-        );
-
-
-        /* When */
-        strategy.handleUpdate(
-                this.thing,
-                this.thingHandlerCallback,
-                node
-        );
-
-
-        /* Then */
-        verify(this.thingHandlerCallback).stateUpdated(
-                eq(this.easyOperatingModeChannelUid),
-                eq(new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_ON))
-        );
-
-        verify(this.thingHandlerCallback).stateUpdated(
-                eq(this.easyBoostModeChannelUid),
-                eq(OnOffType.OFF)
-        );
-    }
-
-    @Test
-    public void testNormalUpdateOnOffNoneOff() {
-        /* Given */
-        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
-
-        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.ON;
-        final boolean isOn = false;
-        final OverrideMode overrideMode = OverrideMode.NONE;
-        final OnOffMode onOffMode = OnOffMode.OFF;
-
-        // Create the test node
-        final Node node = getGoodNode(
-                operatingMode,
-                isOn,
-                overrideMode,
-                onOffMode
-        );
-
-
-        /* When */
-        strategy.handleUpdate(
-                this.thing,
-                this.thingHandlerCallback,
-                node
-        );
-
-
-        /* Then */
-        verify(this.thingHandlerCallback).stateUpdated(
-                eq(this.easyOperatingModeChannelUid),
-                eq(new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_OFF))
-        );
-
-        verify(this.thingHandlerCallback).stateUpdated(
-                eq(this.easyBoostModeChannelUid),
-                eq(OnOffType.OFF)
-        );
-    }
-
-    @Test
-    public void testNormalUpdateScheduleOnTransientOn() {
-        /* Given */
-        final WaterHeaterEasyHandlerStrategy strategy = new WaterHeaterEasyHandlerStrategy();
-
-        final WaterHeaterOperatingMode operatingMode = WaterHeaterOperatingMode.SCHEDULE;
-        final boolean isOn = true;
-        final OverrideMode overrideMode = OverrideMode.TRANSIENT;
-        final OnOffMode onOffMode = OnOffMode.ON;
-
-        // Create the test node
-        final Node node = getGoodNode(
-                operatingMode,
-                isOn,
-                overrideMode,
-                onOffMode
-        );
-
-
-        /* When */
-        strategy.handleUpdate(
-                this.thing,
-                this.thingHandlerCallback,
-                node
-        );
-
-
-        /* Then */
-        verify(this.thingHandlerCallback).stateUpdated(
-                eq(this.easyOperatingModeChannelUid),
-                eq(new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_SCHEDULE))
-        );
-
-        verify(this.thingHandlerCallback).stateUpdated(
-                eq(this.easyBoostModeChannelUid),
-                eq(OnOffType.ON)
+    public List<List<Object>> getUpdateParams() {
+        return Arrays.asList(
+                Arrays.asList(
+                        WaterHeaterOperatingMode.SCHEDULE,
+                        true,
+                        OverrideMode.NONE,
+                        OnOffMode.ON,
+                        HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_SCHEDULE,
+                        OnOffType.OFF
+                ),
+                Arrays.asList(
+                        WaterHeaterOperatingMode.ON,
+                        true,
+                        OverrideMode.NONE,
+                        OnOffMode.ON,
+                        HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_ON,
+                        OnOffType.OFF
+                ),
+                Arrays.asList(
+                        WaterHeaterOperatingMode.ON,
+                        false,
+                        OverrideMode.NONE,
+                        OnOffMode.OFF,
+                        HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_OFF,
+                        OnOffType.OFF
+                ),
+                Arrays.asList(
+                        WaterHeaterOperatingMode.SCHEDULE,
+                        false,
+                        OverrideMode.NONE,
+                        OnOffMode.OFF,
+                        HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_OFF,
+                        OnOffType.OFF
+                ),
+                Arrays.asList(
+                        WaterHeaterOperatingMode.SCHEDULE,
+                        true,
+                        OverrideMode.TRANSIENT,
+                        OnOffMode.ON,
+                        HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_SCHEDULE,
+                        OnOffType.ON
+                )
         );
     }
 

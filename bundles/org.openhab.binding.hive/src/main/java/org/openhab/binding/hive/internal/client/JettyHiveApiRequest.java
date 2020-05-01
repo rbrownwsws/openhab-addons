@@ -48,26 +48,26 @@ final class JettyHiveApiRequest implements HiveApiRequest {
     private void setContent(final Object content) {
         this.request.content(
                 new StringContentProvider(this.jsonService.toJson(content)),
-                MediaType.JSON.toString()
+                HiveApiConstants.MEDIA_TYPE_JSON
         );
     }
 
     @Override
-    public HiveApiRequest accept(final MediaType mediaType) {
-        this.request.accept(mediaType.toString());
+    public HiveApiRequest accept(final String mediaType) {
+        this.request.accept(mediaType);
 
         return this;
     }
 
     @Override
-    public HiveApiResponse get() {
+    public HiveApiResponse get() throws HiveClientRequestException {
         this.request.method(HttpMethod.GET);
 
         return this.sendRequest();
     }
 
     @Override
-    public HiveApiResponse post(final Object requestBody) {
+    public HiveApiResponse post(final Object requestBody) throws HiveClientRequestException {
         Objects.requireNonNull(requestBody);
 
         this.request.method(HttpMethod.POST);
@@ -77,7 +77,7 @@ final class JettyHiveApiRequest implements HiveApiRequest {
     }
 
     @Override
-    public HiveApiResponse put(final Object requestBody) {
+    public HiveApiResponse put(final Object requestBody) throws HiveClientRequestException {
         Objects.requireNonNull(requestBody);
 
         this.request.method(HttpMethod.PUT);
@@ -87,13 +87,13 @@ final class JettyHiveApiRequest implements HiveApiRequest {
     }
 
     @Override
-    public HiveApiResponse delete() {
+    public HiveApiResponse delete() throws HiveClientRequestException {
         this.request.method(HttpMethod.DELETE);
 
         return this.sendRequest();
     }
 
-    private HiveApiResponse sendRequest() {
+    private HiveApiResponse sendRequest() throws HiveClientRequestException {
         try {
             final ContentResponse response = this.request.send();
 

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.NodeId;
 
 import com.google.gson.stream.JsonReader;
@@ -26,10 +27,9 @@ import com.google.gson.stream.JsonReader;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class NodeIdGsonAdapter extends SimpleGsonTypeAdapterBase<NodeId> {
-    @NonNullByDefault({})
+public final class NodeIdGsonAdapter extends GsonTypeAdapterBase<NodeId> {
     @Override
-    public NodeId read(final JsonReader in) throws IOException {
+    public @Nullable NodeId readValue(final JsonReader in) throws IOException {
         return new NodeId(UUID.fromString(in.nextString()));
     }
 }

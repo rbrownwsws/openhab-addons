@@ -13,7 +13,6 @@
 package org.openhab.binding.hive.internal.client;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -36,9 +35,9 @@ public final class FeatureAttributeFactory {
 
     private static <F, T> void buildFeatureAttribute(
             final DefaultFeatureAttribute.Builder<T> featureAttributeBuilder,
-            final Function<F, T> adapter,
+            final Adapter<F, T> adapter,
             final FeatureAttributeDto<F> dto
-    ) {
+    ) throws HiveClientResponseException {
         Objects.requireNonNull(featureAttributeBuilder);
         Objects.requireNonNull(adapter);
         Objects.requireNonNull(dto);
@@ -69,14 +68,14 @@ public final class FeatureAttributeFactory {
         featureAttributeBuilder.reportReceivedTime(reportReceivedTime.asInstant());
     }
 
-    public static <T> FeatureAttribute<T> getReadOnlyFromDto(final @Nullable FeatureAttributeDto<T> dto) {
-        return getReadOnlyFromDtoWithAdapter(Function.identity(), dto);
+    public static <T> FeatureAttribute<T> getReadOnlyFromDto(final @Nullable FeatureAttributeDto<T> dto) throws HiveClientResponseException {
+        return getReadOnlyFromDtoWithAdapter(Adapter.identity(), dto);
     }
 
     public static <F, T> FeatureAttribute<T> getReadOnlyFromDtoWithAdapter(
-            final Function<F, T> adapter,
+            final Adapter<F, T> adapter,
             final @Nullable FeatureAttributeDto<F> dto
-    ) {
+    ) throws HiveClientResponseException {
         if (dto == null) {
             throw new HiveClientResponseException(FEATURE_ATTRIBUTE_NULL_MESSAGE);
         }
@@ -92,14 +91,14 @@ public final class FeatureAttributeFactory {
         return featureAttributeBuilder.build();
     }
 
-    public static <T> SettableFeatureAttribute<T> getSettableFromDto(final @Nullable FeatureAttributeDto<T> dto) {
-        return getSettableFromDtoWithAdapter(Function.identity(), dto);
+    public static <T> SettableFeatureAttribute<T> getSettableFromDto(final @Nullable FeatureAttributeDto<T> dto) throws HiveClientResponseException {
+        return getSettableFromDtoWithAdapter(Adapter.identity(), dto);
     }
 
     public static <F, T> SettableFeatureAttribute<T> getSettableFromDtoWithAdapter(
-            final Function<F, T> adapter,
+            final Adapter<F, T> adapter,
             final @Nullable FeatureAttributeDto<F> dto
-    ) {
+    ) throws HiveClientResponseException {
         if (dto == null) {
             throw new HiveClientResponseException(FEATURE_ATTRIBUTE_NULL_MESSAGE);
         }
@@ -118,5 +117,14 @@ public final class FeatureAttributeFactory {
         }
 
         return featureAttributeBuilder.build();
+    }
+
+    @FunctionalInterface
+    public interface Adapter<F, T> {
+        T apply(F from) throws HiveClientResponseException;
+
+        static <T> Adapter<T, T> identity() {
+            return from -> from;
+        }
     }
 }

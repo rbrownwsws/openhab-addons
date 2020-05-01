@@ -28,7 +28,12 @@ import org.openhab.binding.hive.internal.TestUtil;
 import org.openhab.binding.hive.internal.client.dto.*;
 
 /**
+ * Tests for {@link GsonJsonService}.
  *
+ * <p>
+ *     These are more like small integration tests than unit tests but it is
+ *     simpler to put here because we don't need all the OSGi stuff to work.
+ * </p>
  *
  * @author Ross Brown - Initial contribution
  */
@@ -49,7 +54,7 @@ public class GsonJsonServiceTest {
         final String json = TestUtil.getResourceAsString("/exampleSessions.json");
 
         final SessionId sessionId = new SessionId("mytoken");
-        final Username username = new Username("hiveuser@example.com");
+        final String username = "hiveuser@example.com";
         final UserId userId = new UserId(UUID.fromString("deadbeef-dead-beef-dead-beefdeadbeef"));
 
 
@@ -79,7 +84,7 @@ public class GsonJsonServiceTest {
         String json = TestUtil.getResourceAsString("/exampleThermostatNode.json");
 
         final NodeId nodeId = new NodeId(UUID.fromString("deadbeef-dead-beef-dead-beefdeadbeef"));
-        final NodeName nodeName = new NodeName("Thermostat 1");
+        final String nodeName = "Thermostat 1";
         final HiveApiInstant createdOn = new HiveApiInstant(Instant.ofEpochMilli(1513173613796L));
         final HiveApiInstant firstInstall = new HiveApiInstant(Instant.ofEpochMilli(1513173925623L));
         final UserId userId = new UserId(UUID.fromString("deadbeef-dead-beef-dead-beefdeadbeef"));
@@ -215,10 +220,10 @@ public class GsonJsonServiceTest {
         assertThat(nodeDto.features.transient_mode_v1.endDatetime).isNotNull();
         assertThat(nodeDto.features.transient_mode_v1.endDatetime.reportedValue).isEqualTo(ZonedDateTime.of(
                 2020,
-                03,
-                01,
+                3,
+                1,
                 22,
-                05,
+                5,
                 44,
                 442000000,
                 ZoneOffset.UTC

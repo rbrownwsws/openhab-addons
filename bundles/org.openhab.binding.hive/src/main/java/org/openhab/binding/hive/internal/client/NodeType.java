@@ -12,8 +12,6 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import java.net.URI;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -22,17 +20,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class NodeType extends SimpleValueTypeBase<URI> {
-    public static final NodeType HUB = new NodeType(URI.create("http://alertme.com/schema/json/node.class.hub.json#"));
-    public static final NodeType THERMOSTAT = new NodeType(URI.create("http://alertme.com/schema/json/node.class.thermostat.json#"));
-    public static final NodeType THERMOSTAT_UI = new NodeType(URI.create("http://alertme.com/schema/json/node.class.thermostatui.json#"));
-    public static final NodeType RADIATOR_VALVE = new NodeType(URI.create("http://alertme.com/schema/json/node.class.trv.json#"));
+public enum NodeType {
+    HUB,
+    THERMOSTAT,
+    THERMOSTAT_UI,
+    RADIATOR_VALVE,
+    SYNTHETIC_DAYLIGHT,
+    SYNTHETIC_HOME_STATE,
+    SYNTHETIC_RULE,
 
-    public static final NodeType SYNTHETIC_DAYLIGHT = new NodeType(URI.create("http://alertme.com/schema/json/node.class.synthetic.daylight.json#"));
-    public static final NodeType SYNTHETIC_HOME_STATE = new NodeType(URI.create("http://alertme.com/schema/json/node.class.synthetic.home.state.json#"));
-    public static final NodeType SYNTHETIC_RULE = new NodeType(URI.create("http://alertme.com/schema/json/node.class.synthetic.rule.json#"));
-
-    public NodeType(final URI nodeType) {
-        super(nodeType);
-    }
+    UNEXPECTED
 }

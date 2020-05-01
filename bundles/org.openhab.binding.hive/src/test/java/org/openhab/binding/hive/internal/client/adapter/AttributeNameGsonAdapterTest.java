@@ -12,7 +12,12 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.AttributeName;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 
 /**
  *
@@ -20,9 +25,37 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public class AttributeNameGsonAdapterTest extends GsonAdapterTestBase<AttributeNameGsonAdapter> {
+public class AttributeNameGsonAdapterTest extends ComplexEnumGsonAdapterTest<AttributeName, AttributeNameGsonAdapter> {
     @Override
     protected AttributeNameGsonAdapter getAdapter() {
         return new AttributeNameGsonAdapter();
+    }
+
+    @Override
+    protected List<List<Object>> getGoodParams() {
+        return Arrays.asList(
+                Arrays.asList(
+                        AttributeName.HEATING_THERMOSTAT_TARGET_HEAT_TEMPERATURE,
+                        HiveApiConstants.ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_TARGET_HEAT_TEMPERATURE
+                ),
+                Arrays.asList(
+                        AttributeName.ON_OFF_DEVICE_MODE,
+                        HiveApiConstants.ATTRIBUTE_NAME_ON_OFF_DEVICE_V1_MODE
+                ),
+                Arrays.asList(
+                        AttributeName.WATER_HEATER_HEATING_OPERATING_MODE,
+                        HiveApiConstants.ATTRIBUTE_NAME_WATER_HEATER_HEATING_OPERATING_MODE
+                )
+        );
+    }
+
+    @Override
+    protected AttributeName getUnexpectedEnum() {
+        return AttributeName.UNEXPECTED;
+    }
+
+    @Override
+    protected String getUnexpectedString() {
+        return "somethingUnexpected";
     }
 }

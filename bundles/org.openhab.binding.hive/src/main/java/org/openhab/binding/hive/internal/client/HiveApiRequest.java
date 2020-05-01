@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.exception.HiveClientRequestException;
 
 /**
  * A facade for HTTP requests to the Hive API
@@ -30,7 +31,7 @@ public interface HiveApiRequest {
      * @return
      *      This request.
      */
-    HiveApiRequest accept(MediaType mediaType);
+    HiveApiRequest accept(String mediaType);
 
     /**
      * Make the request to the Hive API using the method GET.
@@ -43,7 +44,7 @@ public interface HiveApiRequest {
      *      (before the Hive API has a chance to respond)
      *      e.g. The connection times out.
      */
-    HiveApiResponse get();
+    HiveApiResponse get() throws HiveClientRequestException;
 
     /**
      * Make the request to the Hive API using the method POST.
@@ -56,7 +57,7 @@ public interface HiveApiRequest {
      *      (before the Hive API has a chance to respond)
      *      e.g. The connection times out.
      */
-    HiveApiResponse post(Object requestBody);
+    HiveApiResponse post(Object requestBody) throws HiveClientRequestException;
 
     /**
      * Make the request to the Hive API using the method PUT.
@@ -69,7 +70,7 @@ public interface HiveApiRequest {
      *      (before the Hive API has a chance to respond)
      *      e.g. The connection times out.
      */
-    HiveApiResponse put(Object requestBody);
+    HiveApiResponse put(Object requestBody) throws HiveClientRequestException;
 
     /**
      * Make the request to the Hive API using the method DELETE.
@@ -82,5 +83,5 @@ public interface HiveApiRequest {
      *      (before the Hive API has a chance to respond)
      *      e.g. The connection times out.
      */
-    HiveApiResponse delete();
+    HiveApiResponse delete() throws HiveClientRequestException;
 }

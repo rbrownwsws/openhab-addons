@@ -42,9 +42,12 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveAccountConfig;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
-import org.openhab.binding.hive.internal.client.*;
+import org.openhab.binding.hive.internal.client.HiveClient;
+import org.openhab.binding.hive.internal.client.HiveClientFactory;
+import org.openhab.binding.hive.internal.client.Node;
+import org.openhab.binding.hive.internal.client.NodeId;
 import org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException;
-import org.openhab.binding.hive.internal.client.exception.HiveApiException;
+import org.openhab.binding.hive.internal.client.exception.HiveException;
 import org.openhab.binding.hive.internal.discovery.HiveDiscoveryService;
 import org.openhab.binding.hive.internal.discovery.HiveDiscoveryServiceFactory;
 import org.openhab.binding.hive.internal.handler.strategy.ThingHandlerStrategy;
@@ -60,75 +63,6 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public final class DefaultHiveAccountHandler extends BaseBridgeHandler implements HiveAccountHandler {
     private static final Pattern UUID_REGEX = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
-
-    private class HiveThingManager implements ThingHandlerCommandCallback {
-        private final HiveThingHandler hiveThingHandler;
-
-        private @Nullable Node hiveNode = null;
-
-        public HiveThingManager(final HiveThingHandler hiveThingHandler) {
-            Objects.requireNonNull(hiveThingHandler);
-
-            this.hiveThingHandler = hiveThingHandler;
-        }
-
-        @Override
-        public void handleCommand(final ChannelUID channelUID, final Command command) {
-            DefaultHiveAccountHandler.this.accountStateLock.lock();
-            try {
-                final @Nullable Node hiveNode = this.hiveNode;
-                if (hiveNode == null) {
-                    return;
-                }
-
-                // Try each strategy until we get one that can handle the command.
-                @Nullable Node modifiedNode = null;
-                final Iterator<ThingHandlerStrategy> strategyIterator = this.hiveThingHandler.getStrategies().iterator();
-                while (strategyIterator.hasNext() && modifiedNode == null) {
-                    final @Nullable ThingHandlerStrategy strategy = strategyIterator.next();
-                    assert strategy != null;
-
-                    modifiedNode = strategy.handleCommand(channelUID, command, hiveNode);
-                }
-
-                // If the command was handled push the update to the Hive API.
-                if (modifiedNode != null) {
-                    final @Nullable HiveClient hiveClient = DefaultHiveAccountHandler.this.hiveClient;
-
-                    if (hiveClient == null) {
-                        throw new IllegalStateException("UpdateNode called before HiveClient has been initialised.");
-                    }
-
-                    // Post the modified node to the Hive API and get the
-                    // canonical updated version of the node in return.
-                    final @Nullable Node updatedNode = hiveClient.updateNode(hiveNode);
-
-                    // Handle the updated node state.
-                    if (updatedNode != null) {
-                        this.updateState(updatedNode);
-                    }
-                }
-            } finally {
-                DefaultHiveAccountHandler.this.accountStateLock.unlock();
-            }
-        }
-
-        public final void updateState(final Node hiveNode) {
-            Objects.requireNonNull(hiveNode);
-
-            // Save the node for use by handleCommand.
-            this.hiveNode = hiveNode;
-
-            // Update channel states using the handler strategies.
-            final @Nullable ThingHandlerCallback thingHandlerCallback = this.hiveThingHandler.getThingHandlerCallback();
-            if (thingHandlerCallback != null) {
-                for (final ThingHandlerStrategy strategy : this.hiveThingHandler.getStrategies()) {
-                    strategy.handleUpdate(this.hiveThingHandler.getThing(), thingHandlerCallback, hiveNode);
-                }
-            }
-        }
-
-    }
 
     private final Logger logger = LoggerFactory.getLogger(DefaultHiveAccountHandler.class);
 
@@ -197,8 +131,8 @@ public final class DefaultHiveAccountHandler extends BaseBridgeHandler implement
 
             try {
                 this.hiveClient = this.hiveClientFactory.newClient(
-                        new Username(username),
-                        new Password(password)
+                        username,
+                        password
                 );
 
                 this.pollingJob = this.scheduler.scheduleWithFixedDelay(
@@ -215,7 +149,7 @@ public final class DefaultHiveAccountHandler extends BaseBridgeHandler implement
                         ThingStatusDetail.CONFIGURATION_ERROR,
                         "Username and Password are not correct."
                 );
-            } catch (final HiveApiException ex) {
+            } catch (final HiveException ex) {
                 updateStatus(
                         ThingStatus.OFFLINE,
                         ThingStatusDetail.COMMUNICATION_ERROR,
@@ -243,49 +177,57 @@ public final class DefaultHiveAccountHandler extends BaseBridgeHandler implement
         if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_DUMP_NODES)) {
             final @Nullable HiveClient hiveClient = this.hiveClient;
             if (command instanceof OnOffType && hiveClient != null) {
-                final String nodesJson = hiveClient.getAllNodesJson();
-
-                final String dumpFilePrefix = "hive-nodes-";
-
-                final String origDumpFileName = dumpFilePrefix + "original.json";
-                final String anonDumpFileName = dumpFilePrefix + "anon.json";
-
-                final Path origDumpFile = Paths.get(ConfigConstants.getUserDataFolder(), origDumpFileName);
-                final Path anonDumpFile = Paths.get(ConfigConstants.getUserDataFolder(), anonDumpFileName);
-
-                // Write the original file.
                 try {
-                    Files.write(origDumpFile, nodesJson.getBytes());
-                } catch (final IOException ex) {
-                    throw new IllegalStateException(ex);
-                }
+                    final String nodesJson = hiveClient.getAllNodesJson();
 
-                // Find any UUIDs in the JSON.
-                final Matcher uuidMatcher = UUID_REGEX.matcher(nodesJson);
-                final Set<String> foundUuids = new HashSet<>();
-                while (uuidMatcher.find()) {
-                    foundUuids.add(uuidMatcher.group());
+                    writeNodesDumpFile(nodesJson);
+                } catch (final HiveException e) {
+                    this.logger.debug("Something went wrong while trying to dump nodes.", e);
                 }
-
-                // Replace all the found UUIDs with random new ones.
-                String anonNodesJson = nodesJson;
-                for (final String origUuid : foundUuids) {
-                    anonNodesJson = anonNodesJson.replace(origUuid, UUID.randomUUID().toString());
-                }
-
-                // Write the "anonymized" file.
-                try {
-                    Files.write(anonDumpFile, anonNodesJson.getBytes());
-                } catch (final IOException ex) {
-                    throw new IllegalStateException(ex);
-                }
-
-                this.logger.debug("Go get your dumped nodes here: {}", anonDumpFile.toAbsolutePath().toString());
             }
 
             // Reset the switch
             this.updateState(HiveBindingConstants.CHANNEL_DUMP_NODES, OnOffType.OFF);
         }
+    }
+
+    private void writeNodesDumpFile(final String nodesJson) {
+        final String dumpFilePrefix = "hive-nodes-";
+
+        final String origDumpFileName = dumpFilePrefix + "original.json";
+        final String anonDumpFileName = dumpFilePrefix + "anon.json";
+
+        final Path origDumpFile = Paths.get(ConfigConstants.getUserDataFolder(), origDumpFileName);
+        final Path anonDumpFile = Paths.get(ConfigConstants.getUserDataFolder(), anonDumpFileName);
+
+        // Write the original file.
+        try {
+            Files.write(origDumpFile, nodesJson.getBytes());
+        } catch (final IOException ex) {
+            throw new IllegalStateException(ex);
+        }
+
+        // Find any UUIDs in the JSON.
+        final Matcher uuidMatcher = UUID_REGEX.matcher(nodesJson);
+        final Set<String> foundUuids = new HashSet<>();
+        while (uuidMatcher.find()) {
+            foundUuids.add(uuidMatcher.group());
+        }
+
+        // Replace all the found UUIDs with random new ones.
+        String anonNodesJson = nodesJson;
+        for (final String origUuid : foundUuids) {
+            anonNodesJson = anonNodesJson.replace(origUuid, UUID.randomUUID().toString());
+        }
+
+        // Write the "anonymized" file.
+        try {
+            Files.write(anonDumpFile, anonNodesJson.getBytes());
+        } catch (final IOException ex) {
+            throw new IllegalStateException(ex);
+        }
+
+        this.logger.debug("Go get your dumped nodes here: {}", anonDumpFile.toAbsolutePath().toString());
     }
 
     @Override
@@ -368,5 +310,78 @@ public final class DefaultHiveAccountHandler extends BaseBridgeHandler implement
         Objects.requireNonNull(handler);
 
         return new NodeId(UUID.fromString((String) handler.getThing().getConfiguration().get(HiveBindingConstants.CONFIG_NODE_ID)));
+    }
+
+    private class HiveThingManager implements ThingHandlerCommandCallback {
+        private final HiveThingHandler hiveThingHandler;
+
+        private @Nullable Node hiveNode = null;
+
+        public HiveThingManager(final HiveThingHandler hiveThingHandler) {
+            Objects.requireNonNull(hiveThingHandler);
+
+            this.hiveThingHandler = hiveThingHandler;
+        }
+
+        @Override
+        public void handleCommand(final ChannelUID channelUID, final Command command) {
+            DefaultHiveAccountHandler.this.accountStateLock.lock();
+            try {
+                final @Nullable Node hiveNode = this.hiveNode;
+                if (hiveNode == null) {
+                    return;
+                }
+
+                // Try each strategy until we get one that can handle the command.
+                @Nullable Node modifiedNode = null;
+                final Iterator<ThingHandlerStrategy> strategyIterator = this.hiveThingHandler.getStrategies().iterator();
+                while (strategyIterator.hasNext() && modifiedNode == null) {
+                    final @Nullable ThingHandlerStrategy strategy = strategyIterator.next();
+                    assert strategy != null;
+
+                    modifiedNode = strategy.handleCommand(channelUID, command, hiveNode);
+                }
+
+                // If the command was handled push the update to the Hive API.
+                if (modifiedNode != null) {
+                    final @Nullable HiveClient hiveClient = DefaultHiveAccountHandler.this.hiveClient;
+
+                    if (hiveClient == null) {
+                        throw new IllegalStateException("UpdateNode called before HiveClient has been initialised.");
+                    }
+
+                    try {
+                        // Post the modified node to the Hive API and get the
+                        // canonical updated version of the node in return.
+                        final @Nullable Node updatedNode = hiveClient.updateNode(modifiedNode);
+
+                        // Handle the updated node state.
+                        if (updatedNode != null) {
+                            this.updateState(updatedNode);
+                        }
+                    } catch (final HiveException ex) {
+                        logger.debug("Something went wrong posting an update to the Hive API" ,ex);
+                    }
+                }
+            } finally {
+                DefaultHiveAccountHandler.this.accountStateLock.unlock();
+            }
+        }
+
+        public final void updateState(final Node hiveNode) {
+            Objects.requireNonNull(hiveNode);
+
+            // Save the node for use by handleCommand.
+            this.hiveNode = hiveNode;
+
+            // Update channel states using the handler strategies.
+            final @Nullable ThingHandlerCallback thingHandlerCallback = this.hiveThingHandler.getThingHandlerCallback();
+            if (thingHandlerCallback != null) {
+                for (final ThingHandlerStrategy strategy : this.hiveThingHandler.getStrategies()) {
+                    strategy.handleUpdate(this.hiveThingHandler.getThing(), thingHandlerCallback, hiveNode);
+                }
+            }
+        }
+
     }
 }

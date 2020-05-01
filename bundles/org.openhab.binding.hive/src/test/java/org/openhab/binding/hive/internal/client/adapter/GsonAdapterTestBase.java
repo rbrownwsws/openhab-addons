@@ -12,16 +12,13 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonWriter;
@@ -33,16 +30,13 @@ import com.google.gson.stream.JsonWriter;
  */
 @NonNullByDefault
 public abstract class GsonAdapterTestBase<T extends TypeAdapter<?>> {
-    @NonNullByDefault({})
-    @Mock
-    protected JsonWriter jsonWriter;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
+    public static final String JSON_NULL = "null";
 
     protected abstract T getAdapter();
+
+    protected String toJsonString(final String string) {
+        return "\"" + string + "\"";
+    }
 
     /**
      * Makes sure we actually output null instead of throwing a NPE.
@@ -50,14 +44,18 @@ public abstract class GsonAdapterTestBase<T extends TypeAdapter<?>> {
     @Test
     public void testNullValue() throws IOException {
         /* Given */
+        final StringWriter stringWriter = new StringWriter();
+        final JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
         final T adapter = getAdapter();
 
 
         /* When */
-        adapter.write(this.jsonWriter, null);
+        adapter.write(jsonWriter, null);
 
 
         /* Then */
-        verify(this.jsonWriter, times(1)).nullValue();
+        // No exceptions hopefully!
+        assertThat(stringWriter.toString()).isEqualTo(JSON_NULL);
     }
 }

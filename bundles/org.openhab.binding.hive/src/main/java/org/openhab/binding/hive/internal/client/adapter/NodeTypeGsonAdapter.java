@@ -12,13 +12,9 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import java.io.IOException;
-import java.net.URI;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.NodeType;
-
-import com.google.gson.stream.JsonReader;
 
 /**
  * A gson {@link com.google.gson.TypeAdapter} for {@link NodeType}.
@@ -26,10 +22,17 @@ import com.google.gson.stream.JsonReader;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class NodeTypeGsonAdapter extends SimpleGsonTypeAdapterBase<NodeType> {
-    @NonNullByDefault({})
-    @Override
-    public NodeType read(final JsonReader in) throws IOException {
-        return new NodeType(URI.create(in.nextString()));
+public final class NodeTypeGsonAdapter extends ComplexEnumGsonTypeAdapterBase<NodeType> {
+    public NodeTypeGsonAdapter() {
+        super(EnumMapper.builder(NodeType.class)
+                .setUnexpectedValue(NodeType.UNEXPECTED)
+                .add(NodeType.HUB, HiveApiConstants.NODE_TYPE_HUB)
+                .add(NodeType.RADIATOR_VALVE, HiveApiConstants.NODE_TYPE_RADIATOR_VALVE)
+                .add(NodeType.SYNTHETIC_DAYLIGHT, HiveApiConstants.NODE_TYPE_SYNTHETIC_DAYLIGHT)
+                .add(NodeType.SYNTHETIC_HOME_STATE, HiveApiConstants.NODE_TYPE_SYNTHETIC_HOME_STATE)
+                .add(NodeType.SYNTHETIC_RULE, HiveApiConstants.NODE_TYPE_SYNTHETIC_RULE)
+                .add(NodeType.THERMOSTAT, HiveApiConstants.NODE_TYPE_THERMOSTAT)
+                .add(NodeType.THERMOSTAT_UI, HiveApiConstants.NODE_TYPE_THERMOSTAT_UI)
+                .build());
     }
 }

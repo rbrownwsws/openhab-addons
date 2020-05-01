@@ -13,6 +13,12 @@
 package org.openhab.binding.hive.internal.client.adapter;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
+import org.openhab.binding.hive.internal.client.NodeType;
+import org.openhab.binding.hive.internal.client.ProductType;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -20,9 +26,35 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public class ProductTypeGsonAdapterTest extends GsonAdapterTestBase<ProductTypeGsonAdapter> {
+public class ProductTypeGsonAdapterTest extends ComplexEnumGsonAdapterTest<ProductType, ProductTypeGsonAdapter> {
     @Override
     protected ProductTypeGsonAdapter getAdapter() {
         return new ProductTypeGsonAdapter();
+    }
+
+    @Override
+    protected List<List<Object>> getGoodParams() {
+        return Arrays.asList(
+                Arrays.asList(ProductType.ACTIONS, HiveApiConstants.PRODUCT_TYPE_ACTIONS),
+                Arrays.asList(ProductType.BOILER_MODULE, HiveApiConstants.PRODUCT_TYPE_BOILER_MODULE),
+                Arrays.asList(ProductType.DAYLIGHT_SD, HiveApiConstants.PRODUCT_TYPE_DAYLIGHT_SD),
+                Arrays.asList(ProductType.HEATING, HiveApiConstants.PRODUCT_TYPE_HEATING),
+                Arrays.asList(ProductType.HOT_WATER, HiveApiConstants.PRODUCT_TYPE_HOT_WATER),
+                Arrays.asList(ProductType.HUB, HiveApiConstants.PRODUCT_TYPE_HUB),
+                Arrays.asList(ProductType.THERMOSTAT_UI, HiveApiConstants.PRODUCT_TYPE_THERMOSTAT_UI),
+                Arrays.asList(ProductType.TRV, HiveApiConstants.PRODUCT_TYPE_TRV),
+                Arrays.asList(ProductType.TRV_GROUP, HiveApiConstants.PRODUCT_TYPE_TRV_GROUP),
+                Arrays.asList(ProductType.UNKNOWN, HiveApiConstants.PRODUCT_TYPE_UNKNOWN)
+        );
+    }
+
+    @Override
+    protected ProductType getUnexpectedEnum() {
+        return ProductType.UNEXPECTED;
+    }
+
+    @Override
+    protected String getUnexpectedString() {
+        return "SOMETHING_UNEXPECTED";
     }
 }

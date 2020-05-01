@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Thrown to indicate something of an unknown nature has gone wrong while
- * making a call to the Hive API (and it is the client's fault).
+ * making a call to the Hive API (and it is the server's fault).
  *
  * @author Ross Brown - Initial contribution
  */
@@ -30,6 +30,10 @@ public final class HiveApiUnknownException extends HiveApiException {
 
     public HiveApiUnknownException(final String message) {
         super(message);
+    }
+
+    public HiveApiUnknownException(final Throwable cause) {
+        super(cause);
     }
 
     public HiveApiUnknownException(final String message, final Throwable cause) {

@@ -38,10 +38,7 @@ final class GsonJsonService implements JsonService {
                 .registerTypeAdapter(HiveApiInstant.class, new HiveApiInstantGsonAdapter())
                 .registerTypeAdapter(UserId.class, new UserIdGsonAdapter())
                 .registerTypeAdapter(SessionId.class, new SessionIdGsonAdapter())
-                .registerTypeAdapter(Username.class, new UsernameGsonAdapter())
-                .registerTypeAdapter(Password.class, new PasswordGsonAdapter())
                 .registerTypeAdapter(NodeId.class, new NodeIdGsonAdapter())
-                .registerTypeAdapter(NodeName.class, new NodeNameGsonAdapter())
                 .registerTypeAdapter(NodeType.class, new NodeTypeGsonAdapter())
                 .registerTypeAdapter(FeatureType.class, new FeatureTypeGsonAdapter())
                 .registerTypeAdapter(ProductType.class, new ProductTypeGsonAdapter())
@@ -51,6 +48,7 @@ final class GsonJsonService implements JsonService {
                 .registerTypeAdapter(Eui64.class, new Eui64GsonAdapter())
                 .registerTypeAdapter(GroupId.class, new GroupIdGsonAdapter())
                 .registerTypeAdapter(ScheduleType.class, new ScheduleTypeGsonAdapter())
+                .registerTypeAdapter(Protocol.class, new ProtocolGsonAdapter())
                 .create();
     }
 

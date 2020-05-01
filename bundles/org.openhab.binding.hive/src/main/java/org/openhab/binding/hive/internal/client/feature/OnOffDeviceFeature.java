@@ -17,7 +17,6 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.BuilderUtil;
-import org.openhab.binding.hive.internal.client.DefaultFeatureAttribute;
 import org.openhab.binding.hive.internal.client.OnOffMode;
 import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
 
@@ -47,11 +46,7 @@ public final class OnOffDeviceFeature implements Feature {
 
         return OnOffDeviceFeature.builder()
                 .from(this)
-                .mode(DefaultFeatureAttribute.<OnOffMode>builder()
-                        .from(this.mode)
-                        .targetValue(targetMode)
-                        .build()
-                )
+                .mode(this.mode.withTargetValue(targetMode))
                 .build();
     }
 

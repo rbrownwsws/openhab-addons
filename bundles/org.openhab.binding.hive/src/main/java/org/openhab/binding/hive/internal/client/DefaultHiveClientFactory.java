@@ -16,6 +16,7 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.HttpClient;
+import org.openhab.binding.hive.internal.client.exception.HiveException;
 import org.openhab.binding.hive.internal.client.repository.DefaultNodeRepository;
 import org.openhab.binding.hive.internal.client.repository.DefaultSessionRepository;
 import org.openhab.binding.hive.internal.client.repository.NodeRepository;
@@ -37,10 +38,6 @@ public final class DefaultHiveClientFactory implements HiveClientFactory {
     public DefaultHiveClientFactory(final HttpClient httpClient) {
         Objects.requireNonNull(httpClient);
 
-        if (!httpClient.isStarted()) {
-            throw new IllegalArgumentException("The provided HttpClient is not started!");
-        }
-
         this.requestFactory = new JettyHiveApiRequestFactory(
                 httpClient,
                 HiveApiConstants.DEFAULT_BASE_PATH,
@@ -50,9 +47,9 @@ public final class DefaultHiveClientFactory implements HiveClientFactory {
     }
 
     public HiveClient newClient(
-            final Username username,
-            final Password password
-    ) {
+            final String username,
+            final String password
+    ) throws HiveException {
         Objects.requireNonNull(username);
         Objects.requireNonNull(password);
 

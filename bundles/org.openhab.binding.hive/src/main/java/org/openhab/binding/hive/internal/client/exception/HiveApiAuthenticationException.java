@@ -32,6 +32,10 @@ public final class HiveApiAuthenticationException extends HiveApiException {
         super(message);
     }
 
+    public HiveApiAuthenticationException(final Throwable cause) {
+        super(cause);
+    }
+
     public HiveApiAuthenticationException(final String message, final Throwable cause) {
         super(message, cause);
     }

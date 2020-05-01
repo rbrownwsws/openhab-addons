@@ -13,6 +13,7 @@
 package org.openhab.binding.hive.internal.client;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.exception.HiveException;
 
 /**
  * A factory for getting new instances of {@link HiveClient}.
@@ -33,7 +34,7 @@ public interface HiveClientFactory {
      *      A new {@link HiveClient}.
      */
     HiveClient newClient(
-            final Username username,
-            final Password password
-    );
+            final String username,
+            final String password
+    ) throws HiveException;
 }

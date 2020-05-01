@@ -61,19 +61,20 @@ final class JettyHiveApiRequestFactory implements HiveApiRequestFactory, Session
             final JsonService jsonService,
             final String clientId
     ) {
-        Objects.requireNonNull(httpClient);
-        Objects.requireNonNull(apiBasePath);
-        Objects.requireNonNull(jsonService);
-        Objects.requireNonNull(clientId);
+        this.httpClient = Objects.requireNonNull(httpClient);
+        this.apiBasePath = Objects.requireNonNull(apiBasePath);
+        this.jsonService = Objects.requireNonNull(jsonService);
+        this.clientId = Objects.requireNonNull(clientId);
 
         if (!apiBasePath.isAbsolute()) {
             throw new IllegalArgumentException("API base path must be absolute");
         }
 
-        this.httpClient = httpClient;
-        this.apiBasePath = apiBasePath;
-        this.jsonService = jsonService;
-        this.clientId = clientId;
+        // httpClient needs to be started or modifying the protocol handlers
+        // will not work correctly.
+        if (!httpClient.isStarted()) {
+            throw new IllegalArgumentException("The provided HttpClient is not started!");
+        }
 
         // Remove jetty's default authentication handler as it will be confused
         // by the Hive API's lack of "WWW-Authenticate" header and will mess

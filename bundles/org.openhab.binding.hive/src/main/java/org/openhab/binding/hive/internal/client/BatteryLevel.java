@@ -40,12 +40,16 @@ public final class BatteryLevel {
 
     @Override
     public boolean equals(final @Nullable Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
-        BatteryLevel that = (BatteryLevel) o;
-        return value == that.value;
+        }
+
+        final BatteryLevel that = (BatteryLevel) o;
+        return this.value == that.value;
     }
 
     @Override

@@ -20,20 +20,18 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class GroupId extends SimpleValueTypeBase<String> {
+public enum GroupId {
     /**
      * Group that links
      * Synthetic TRV Heating Zone --> Physical TRV Device
      */
-    public static final GroupId TRVS = new GroupId("trvs");
+    TRVS,
 
     /**
      * Group that links
      * Synthetic TRV Heating Zone --> Parent Synthetic Thermostat Heating Zone
      */
-    public static final GroupId TRVBM = new GroupId("trvbm");
+    TRVBM,
 
-    public GroupId(final String groupId) {
-        super(groupId);
-    }
+    UNEXPECTED
 }

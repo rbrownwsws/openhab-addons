@@ -153,12 +153,12 @@ public final class WaterHeaterEasyHandlerStrategy extends ThingHandlerStrategyBa
             final TransientModeFeature transientModeFeature
     ) {
         useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING, easyModeOperatingChannel -> {
-            if (waterHeaterFeature.getOperatingMode().getDisplayValue() == WaterHeaterOperatingMode.SCHEDULE) {
-                thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_SCHEDULE));
-            } else if (onOffDeviceFeature.getMode().getDisplayValue() == OnOffMode.ON) {
-                thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_ON));
-            } else {
+            if (onOffDeviceFeature.getMode().getDisplayValue() == OnOffMode.OFF) {
                 thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_OFF));
+            } else if (waterHeaterFeature.getOperatingMode().getDisplayValue() == WaterHeaterOperatingMode.SCHEDULE) {
+                thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_SCHEDULE));
+            } else {
+                thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HOT_WATER_EASY_MODE_OPERATING_ON));
             }
         });
 

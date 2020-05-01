@@ -12,12 +12,9 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import java.io.IOException;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.ProductType;
-
-import com.google.gson.stream.JsonReader;
 
 /**
  * A gson {@link com.google.gson.TypeAdapter} for {@link ProductType}.
@@ -25,10 +22,20 @@ import com.google.gson.stream.JsonReader;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class ProductTypeGsonAdapter extends SimpleGsonTypeAdapterBase<ProductType> {
-    @NonNullByDefault({})
-    @Override
-    public ProductType read(final JsonReader in) throws IOException {
-        return new ProductType(in.nextString());
+public final class ProductTypeGsonAdapter extends ComplexEnumGsonTypeAdapterBase<ProductType> {
+    public ProductTypeGsonAdapter() {
+        super(EnumMapper.builder(ProductType.class)
+                .setUnexpectedValue(ProductType.UNEXPECTED)
+                .add(ProductType.ACTIONS, HiveApiConstants.PRODUCT_TYPE_ACTIONS)
+                .add(ProductType.BOILER_MODULE, HiveApiConstants.PRODUCT_TYPE_BOILER_MODULE)
+                .add(ProductType.DAYLIGHT_SD, HiveApiConstants.PRODUCT_TYPE_DAYLIGHT_SD)
+                .add(ProductType.HEATING, HiveApiConstants.PRODUCT_TYPE_HEATING)
+                .add(ProductType.HOT_WATER, HiveApiConstants.PRODUCT_TYPE_HOT_WATER)
+                .add(ProductType.HUB, HiveApiConstants.PRODUCT_TYPE_HUB)
+                .add(ProductType.THERMOSTAT_UI, HiveApiConstants.PRODUCT_TYPE_THERMOSTAT_UI)
+                .add(ProductType.TRV, HiveApiConstants.PRODUCT_TYPE_TRV)
+                .add(ProductType.TRV_GROUP, HiveApiConstants.PRODUCT_TYPE_TRV_GROUP)
+                .add(ProductType.UNKNOWN, HiveApiConstants.PRODUCT_TYPE_UNKNOWN)
+                .build());
     }
 }

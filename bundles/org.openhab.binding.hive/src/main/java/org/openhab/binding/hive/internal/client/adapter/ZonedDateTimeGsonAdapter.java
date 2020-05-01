@@ -19,23 +19,21 @@ import java.time.format.DateTimeFormatter;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * A gson {@link TypeAdapter} for {@link ZonedDateTime} as used by the
+ * A gson {@link com.google.gson.TypeAdapter} for {@link ZonedDateTime} as used by the
  * Hive API.
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class ZonedDateTimeGsonAdapter extends TypeAdapter<ZonedDateTime> {
+public final class ZonedDateTimeGsonAdapter extends GsonTypeAdapterBase<ZonedDateTime> {
     private static final DateTimeFormatter HIVE_DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
-    @NonNullByDefault({})
     @Override
-    public void write(final JsonWriter out, final @Nullable ZonedDateTime zonedDateTime) throws IOException {
+    public void writeValue(final JsonWriter out, final @Nullable ZonedDateTime zonedDateTime) throws IOException {
         if (zonedDateTime != null) {
             out.value(zonedDateTime.format(HIVE_DATETIME_FORMAT));
         } else {
@@ -43,9 +41,8 @@ public final class ZonedDateTimeGsonAdapter extends TypeAdapter<ZonedDateTime> {
         }
     }
 
-    @NonNullByDefault({})
     @Override
-    public ZonedDateTime read(final JsonReader in) throws IOException {
+    public @Nullable ZonedDateTime readValue(final JsonReader in) throws IOException {
         return ZonedDateTime.parse(in.nextString(), HIVE_DATETIME_FORMAT);
     }
 }

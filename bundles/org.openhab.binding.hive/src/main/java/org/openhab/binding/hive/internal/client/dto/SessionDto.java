@@ -14,10 +14,8 @@ package org.openhab.binding.hive.internal.client.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.hive.internal.client.Password;
 import org.openhab.binding.hive.internal.client.SessionId;
 import org.openhab.binding.hive.internal.client.UserId;
-import org.openhab.binding.hive.internal.client.Username;
 
 /**
  * A model of a "Session"
@@ -55,7 +53,7 @@ public final class SessionDto {
     /**
      * password (string, optional): Password
      */
-    public @Nullable Password password;
+    public @Nullable String password;
 
     /**
      * sessionDuration (integer, optional): Session duration in minutes
@@ -75,7 +73,7 @@ public final class SessionDto {
     /**
      * username (string, optional): Username
      */
-    public @Nullable Username username;
+    public @Nullable String username;
 
     /**
      * uuid (string, optional): User UUID

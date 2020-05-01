@@ -29,7 +29,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.openhab.binding.hive.internal.TestUtil;
 import org.openhab.binding.hive.internal.client.*;
-import org.openhab.binding.hive.internal.client.dto.*;
+import org.openhab.binding.hive.internal.client.dto.HeatingThermostatV1FeatureDto;
+import org.openhab.binding.hive.internal.client.dto.SessionDto;
+import org.openhab.binding.hive.internal.client.dto.SessionsDto;
+import org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException;
+import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
+import org.openhab.binding.hive.internal.client.exception.HiveClientRequestException;
+import org.openhab.binding.hive.internal.client.exception.HiveClientResponseException;
 
 /**
  *
@@ -40,8 +46,8 @@ import org.openhab.binding.hive.internal.client.dto.*;
 public class DefaultSessionRepositoryTest {
     private static final SessionId SESSION_ID = new SessionId("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJob25leWNvbWIiLCJleHAiOjE1ODc2MDUwMDYsInV1aWQiOiIzZTgzYzQzZS1mN2Y2LTRhNDMtYjM5Zi0yYjFkOTc2MjVlY2EiLCJ1c2VybmFtZSI6ImpvaG4uc21pdGhAZXhhbXBsZS5jb20iLCJqdGkiOiIwMGNhN2NhOC0wMTM4LTQxMTctYTAyNi0zMWYwMzg5YTk5NTkiLCJpYXQiOjE1ODc2MDE0MDZ9.vTao7fUmEBzBY1Ha1PR4di6pngnRQ9i9tDD6gFp9M-I");
     private static final UserId USER_ID = new UserId(UUID.fromString(TestUtil.UUID_DEADBEEF));
-    private static final Username USERNAME = new Username("john.smith@example.com");
-    private static final Password PASSWORD = new Password("super_secret_password");
+    private static final String USERNAME = "john.smith@example.com";
+    private static final String PASSWORD = "super_secret_password";
 
     @NonNullByDefault({})
     @Mock
@@ -60,7 +66,7 @@ public class DefaultSessionRepositoryTest {
         initMocks(this);
     }
 
-    private void setUpSuccessResponse(final SessionsDto content) {
+    private void setUpSuccessResponse(final SessionsDto content) throws HiveClientRequestException {
         when(this.requestFactory.newRequest(any())).thenReturn(this.request);
 
         when(this.request.accept(any())).thenReturn(this.request);
@@ -82,7 +88,8 @@ public class DefaultSessionRepositoryTest {
     }
 
     @Test
-    public void testGoodCreateSession() {
+    public void testGoodCreateSession() throws HiveClientRequestException, HiveClientResponseException,
+            HiveApiUnknownException, HiveApiAuthenticationException {
         /* Given */
         final SessionDto sessionDto = new SessionDto();
         sessionDto.username = USERNAME;

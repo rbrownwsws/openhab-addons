@@ -12,7 +12,13 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
+import org.openhab.binding.hive.internal.client.ScheduleType;
 
 /**
  *
@@ -20,9 +26,29 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public class ScheduleTypeGsonAdapterTest extends GsonAdapterTestBase<ScheduleTypeGsonAdapter> {
+public class ScheduleTypeGsonAdapterTest extends ComplexEnumGsonAdapterTest<ScheduleType, ScheduleTypeGsonAdapter> {
     @Override
     protected ScheduleTypeGsonAdapter getAdapter() {
         return new ScheduleTypeGsonAdapter();
+    }
+
+    @Override
+    protected List<List<Object>> getGoodParams() {
+        return Collections.singletonList(
+                Arrays.asList(
+                        ScheduleType.WEEKLY,
+                        HiveApiConstants.SCHEDULE_TYPE_WEEKLY
+                )
+        );
+    }
+
+    @Override
+    protected ScheduleType getUnexpectedEnum() {
+        return ScheduleType.UNEXPECTED;
+    }
+
+    @Override
+    protected String getUnexpectedString() {
+        return "http://alertme.com/schema/json/configuration/configuration.device.schedule.unexpected.type.v1.json#";
     }
 }

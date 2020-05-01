@@ -94,9 +94,9 @@ public class TestUtil {
         final NodeDto nodeDto = new NodeDto();
         nodeDto.id = nodeId;
         nodeDto.parentNodeId = nodeId;
-        nodeDto.name = new NodeName("My test node");
+        nodeDto.name = "My test node";
         nodeDto.nodeType = NodeType.THERMOSTAT;
-        nodeDto.protocol = Protocol.ZIGBEE.toString();
+        nodeDto.protocol = Protocol.ZIGBEE;
 
         nodeDto.features = new FeaturesDto();
         nodeDto.features.device_management_v1 = new DeviceManagementV1FeatureDto();
@@ -108,7 +108,7 @@ public class TestUtil {
     public static Node getTestNodeWithFeatures(final Map<Class<? extends Feature>, Feature> features) {
         return Node.builder()
                 .id(new NodeId(UUID.randomUUID()))
-                .name(new NodeName("dummy-node"))
+                .name("dummy-node")
                 .nodeType(NodeType.THERMOSTAT)
                 .productType(ProductType.HEATING)
                 .protocol(Protocol.NONE)

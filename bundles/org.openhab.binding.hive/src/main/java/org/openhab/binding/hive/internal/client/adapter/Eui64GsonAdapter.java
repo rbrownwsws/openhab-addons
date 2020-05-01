@@ -15,6 +15,7 @@ package org.openhab.binding.hive.internal.client.adapter;
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.Eui64;
 
 import com.google.gson.stream.JsonReader;
@@ -25,10 +26,9 @@ import com.google.gson.stream.JsonReader;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class Eui64GsonAdapter extends SimpleGsonTypeAdapterBase<Eui64> {
-    @NonNullByDefault({})
+public final class Eui64GsonAdapter extends GsonTypeAdapterBase<Eui64> {
     @Override
-    public Eui64 read(final JsonReader in) throws IOException {
+    public @Nullable Eui64 readValue(final JsonReader in) throws IOException {
         return new Eui64(in.nextString());
     }
 }

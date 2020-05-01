@@ -14,9 +14,8 @@ package org.openhab.binding.hive.internal.client.repository;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.hive.internal.client.Password;
 import org.openhab.binding.hive.internal.client.Session;
-import org.openhab.binding.hive.internal.client.Username;
+import org.openhab.binding.hive.internal.client.exception.*;
 
 /**
  *
@@ -37,17 +36,17 @@ public interface SessionRepository {
      * @return
      *      The the newly created Session.
      *
-     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiAuthenticationException
+     * @throws HiveApiAuthenticationException
      *      If the provided username and password are not valid.
      *
-     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException
+     * @throws HiveApiUnknownException
      *      If the call to the Hive API fails for an unknown reason.
      *
-     * @throws IllegalStateException
+     * @throws HiveClientResponseException
      *      If the call the the Hive API was a success but we do not understand
      *      the response.
      */
-    Session createSession(Username username, Password password);
+    Session createSession(String username, String password) throws HiveException;
 
     /**
      * Delete a session with a given ID.
@@ -60,13 +59,13 @@ public interface SessionRepository {
      * @param session
      *      The session to delete.
      *
-     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiNotAuthorisedException
+     * @throws HiveApiNotAuthorisedException
      *      If you are not authorised to delete the provided session.
      *
-     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException
+     * @throws HiveApiUnknownException
      *      If the call to the Hive API fails for an unknown reason.
      */
-    void deleteSession(Session session);
+    void deleteSession(Session session) throws HiveException;
 
     /**
      * Checks if a session is valid.
@@ -77,8 +76,8 @@ public interface SessionRepository {
      * @return
      *      {@code true} if the session is valid or {@code false} if it is not.
      *
-     * @throws org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException
+     * @throws HiveApiUnknownException
      *      If the call to the Hive API fails for an unknown reason.
      */
-    boolean isValidSession(@Nullable Session session);
+    boolean isValidSession(@Nullable Session session) throws HiveException;
 }

@@ -12,12 +12,9 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import java.io.IOException;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.AttributeName;
-
-import com.google.gson.stream.JsonReader;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 
 /**
  * A gson {@link com.google.gson.TypeAdapter} for {@link AttributeName}.
@@ -25,10 +22,22 @@ import com.google.gson.stream.JsonReader;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class AttributeNameGsonAdapter extends SimpleGsonTypeAdapterBase<AttributeName> {
-    @NonNullByDefault({})
-    @Override
-    public AttributeName read(final JsonReader in) throws IOException {
-        return new AttributeName(in.nextString());
+public final class AttributeNameGsonAdapter extends ComplexEnumGsonTypeAdapterBase<AttributeName> {
+    public AttributeNameGsonAdapter() {
+        super(EnumMapper.builder(AttributeName.class)
+                .setUnexpectedValue(AttributeName.UNEXPECTED)
+                .add(
+                        AttributeName.HEATING_THERMOSTAT_TARGET_HEAT_TEMPERATURE,
+                        HiveApiConstants.ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_TARGET_HEAT_TEMPERATURE
+                )
+                .add(
+                        AttributeName.ON_OFF_DEVICE_MODE,
+                        HiveApiConstants.ATTRIBUTE_NAME_ON_OFF_DEVICE_V1_MODE
+                )
+                .add(
+                        AttributeName.WATER_HEATER_HEATING_OPERATING_MODE,
+                        HiveApiConstants.ATTRIBUTE_NAME_WATER_HEATER_HEATING_OPERATING_MODE
+                )
+                .build());
     }
 }

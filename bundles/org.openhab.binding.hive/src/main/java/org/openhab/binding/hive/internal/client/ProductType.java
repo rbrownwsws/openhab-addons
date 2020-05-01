@@ -20,20 +20,17 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class ProductType extends SimpleValueTypeBase<String> {
-    public static final ProductType ACTIONS = new ProductType("ACTIONS");
-    public static final ProductType BOILER_MODULE = new ProductType("BOILER_MODULE");
-    public static final ProductType DAYLIGHT_SD = new ProductType("DAYLIGHT_SD");
-    public static final ProductType HEATING = new ProductType("HEATING");
-    public static final ProductType HOT_WATER = new ProductType("HOT_WATER");
-    public static final ProductType HUB = new ProductType("HUB");
-    public static final ProductType THERMOSTAT_UI = new ProductType("THERMOSTAT_UI");
-    public static final ProductType TRV = new ProductType("TRV");
-    public static final ProductType TRV_GROUP = new ProductType("TRV_GROUP");
+public enum ProductType {
+    ACTIONS,
+    BOILER_MODULE,
+    DAYLIGHT_SD,
+    HEATING,
+    HOT_WATER,
+    HUB,
+    THERMOSTAT_UI,
+    TRV,
+    TRV_GROUP,
+    UNKNOWN,
 
-    public static final ProductType UNKNOWN = new ProductType("UNKNOWN");
-
-    public ProductType(final String productType) {
-        super(productType);
-    }
+    UNEXPECTED
 }

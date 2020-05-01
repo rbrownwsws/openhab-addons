@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.NodeId;
+import org.openhab.binding.hive.internal.client.exception.HiveException;
 
 /**
  *
@@ -26,7 +27,7 @@ import org.openhab.binding.hive.internal.client.NodeId;
  */
 @NonNullByDefault
 public interface NodeRepository {
-    Set<Node> getAllNodes();
+    Set<Node> getAllNodes() throws HiveException;
 
     /**
      * Get the raw JSON returned by the Hive API for a get all nodes request.
@@ -36,8 +37,9 @@ public interface NodeRepository {
      * @return
      *      The raw JSON string returned by the Hive API.
      */
-    String getAllNodesJson();
+    String getAllNodesJson() throws HiveException;
 
-    @Nullable Node getNode(NodeId nodeId);
-    @Nullable Node updateNode(Node node);
+    @Nullable Node getNode(NodeId nodeId) throws HiveException;
+
+    @Nullable Node updateNode(Node node) throws HiveException;
 }

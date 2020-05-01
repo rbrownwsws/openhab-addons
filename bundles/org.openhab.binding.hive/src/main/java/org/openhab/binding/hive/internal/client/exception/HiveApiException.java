@@ -15,12 +15,12 @@ package org.openhab.binding.hive.internal.client.exception;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Thrown to indicate something has gone wrong with a call to the Hive API.
+ * Thrown to indicate that the Hive API has signaled something is wrong.
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public abstract class HiveApiException extends RuntimeException {
+public abstract class HiveApiException extends HiveException {
     public static final long serialVersionUID = 1L;
 
     public HiveApiException() {

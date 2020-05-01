@@ -18,7 +18,6 @@ import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Function;
 
 import javax.measure.Quantity;
 import javax.measure.quantity.Temperature;
@@ -27,9 +26,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.*;
 import org.openhab.binding.hive.internal.client.dto.*;
-import org.openhab.binding.hive.internal.client.exception.HiveApiNotAuthorisedException;
-import org.openhab.binding.hive.internal.client.exception.HiveApiUnknownException;
-import org.openhab.binding.hive.internal.client.exception.HiveClientResponseException;
+import org.openhab.binding.hive.internal.client.exception.*;
 import org.openhab.binding.hive.internal.client.feature.*;
 
 import tec.uom.se.quantity.Quantities;
@@ -69,7 +66,7 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static AutoBoostFeature getAutoBoostFeatureFromDto(
             final AutoBoostV1FeatureDto autoBoostV1FeatureDto
-    ) {
+    ) throws HiveClientResponseException {
         // FIXME: temperature-units: Actually check temperature unit.
         return AutoBoostFeature.builder()
                 .autoBoostDuration(FeatureAttributeFactory.getSettableFromDtoWithAdapter(
@@ -85,7 +82,7 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static BatteryDeviceFeature getBatteryDeviceFeatureFromDto(
             final BatteryDeviceV1FeatureDto batteryDeviceV1FeatureDto
-    ) {
+    ) throws HiveClientResponseException {
         return BatteryDeviceFeature.builder()
                 .batteryLevel(FeatureAttributeFactory.getReadOnlyFromDtoWithAdapter(
                         BatteryLevel::new,
@@ -102,8 +99,8 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static LinksFeature getLinksFeatureFromDto(
             final LinksV1FeatureDto linksV1FeatureDto
-    ) {
-        final Function<Set<LinkDto>, Set<Link>> linksAdapter = (list) -> {
+    ) throws HiveClientResponseException {
+        final FeatureAttributeFactory.Adapter<Set<LinkDto>, Set<Link>> linksAdapter = (list) -> {
             final Set<Link> links = new HashSet<>();
 
             for (final LinkDto linkDto : list) {
@@ -124,7 +121,7 @@ public final class DefaultNodeRepository implements NodeRepository {
             return Collections.unmodifiableSet(links);
         };
 
-        final Function<Set<ReverseLinkDto>, Set<ReverseLink>> reverseLinksAdapter = (list) -> {
+        final FeatureAttributeFactory.Adapter<Set<ReverseLinkDto>, Set<ReverseLink>> reverseLinksAdapter = (list) -> {
             final Set<ReverseLink> reverseLinks = new HashSet<>();
 
             for (final ReverseLinkDto reverseLinkDto : list) {
@@ -159,7 +156,7 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static OnOffDeviceFeature getOnOffDeviceFeatureFromDto(
             final OnOffDeviceV1FeatureDto onOffDeviceV1FeatureDto
-    ) {
+    ) throws HiveClientResponseException {
         return OnOffDeviceFeature.builder()
                 .mode(FeatureAttributeFactory.getSettableFromDto(onOffDeviceV1FeatureDto.mode))
                 .build();
@@ -167,7 +164,7 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static PhysicalDeviceFeature getPhysicalDeviceFeatureFromDto(
             final PhysicalDeviceV1FeatureDto physicalDeviceV1FeatureDto
-    ) {
+    ) throws HiveClientResponseException {
         final FeatureAttribute<String> hardwareIdentifier;
 
         final @Nullable FeatureAttributeDto<String> nativeIdentifierAttributeDto = physicalDeviceV1FeatureDto.nativeIdentifier;
@@ -214,7 +211,7 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static HeatingThermostatFeature getHeatingThermostatFeatureFromDto(
             final HeatingThermostatV1FeatureDto heatingThermostatV1FeatureDto
-    ) {
+    ) throws HiveClientResponseException {
         // FIXME: temperature-units: Actually check temperature unit.
         return HeatingThermostatFeature.builder()
                 .operatingMode(FeatureAttributeFactory.getSettableFromDto(heatingThermostatV1FeatureDto.operatingMode))
@@ -229,7 +226,7 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static TemperatureSensorFeature getTemperatureSensorFeatureFromDto(
             final TemperatureSensorV1FeatureDto temperatureSensorV1FeatureDto
-    ) {
+    ) throws HiveClientResponseException {
         // FIXME: temperature-units: Actually check temperature unit.
         return TemperatureSensorFeature.builder()
                 .temperature(FeatureAttributeFactory.getReadOnlyFromDtoWithAdapter(
@@ -241,7 +238,7 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static TransientModeFeature getTransientModeFeatureFromDto(
             final TransientModeV1FeatureDto transientModeV1FeatureDto
-    ) {
+    ) throws HiveClientResponseException {
         return TransientModeFeature.builder()
                 .duration(FeatureAttributeFactory.getSettableFromDtoWithAdapter(
                         Duration::ofSeconds,
@@ -255,7 +252,7 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static TransientModeHeatingActionsFeature getTransientModeHeatingActionsFeatureFromDto(
             final TransientModeV1FeatureDto transientModeV1FeatureDto
-    ) {
+    ) throws HiveClientResponseException {
         final @Nullable FeatureAttributeDto<List<ActionDto>> actionsAttribute = transientModeV1FeatureDto.actions;
         if (actionsAttribute == null) {
             throw new HiveClientResponseException("Transient mode actions attribute is unexpectedly null.");
@@ -292,7 +289,7 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static WaterHeaterFeature getWaterHeaterFeatureFromDto(
             final WaterHeaterV1FeatureDto waterHeaterV1FeatureDto
-    ) {
+    ) throws HiveClientResponseException {
         return WaterHeaterFeature.builder()
                 .operatingMode(FeatureAttributeFactory.getSettableFromDto(waterHeaterV1FeatureDto.operatingMode))
                 .isOn(FeatureAttributeFactory.getReadOnlyFromDto(waterHeaterV1FeatureDto.isOn))
@@ -302,7 +299,7 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static ZigbeeDeviceFeature getZigbeeDeviceFeatureFromDto(
             final ZigbeeDeviceV1FeatureDto zigbeeDeviceV1FeatureDto
-    ) {
+    ) throws HiveClientResponseException {
         return ZigbeeDeviceFeature.builder()
                 .eui64(FeatureAttributeFactory.getReadOnlyFromDto(zigbeeDeviceV1FeatureDto.eui64))
                 .averageLQI(FeatureAttributeFactory.getReadOnlyFromDto(zigbeeDeviceV1FeatureDto.averageLQI))
@@ -434,7 +431,7 @@ public final class DefaultNodeRepository implements NodeRepository {
             final ActionDto actionDto = new ActionDto();
             actionDto.actionType = ActionType.GENERIC;
             actionDto.featureType = FeatureType.HEATING_THERMOSTAT_V1;
-            actionDto.attribute = AttributeName.ATTRIBUTE_NAME_TARGET_HEAT_TEMPERATURE;
+            actionDto.attribute = AttributeName.HEATING_THERMOSTAT_TARGET_HEAT_TEMPERATURE;
             actionDto.value = temperatureToDtoValue(boostTargetTemperatureTarget).toString();
 
             final FeatureAttributeDto<List<ActionDto>> actionsDto = new FeatureAttributeDto<>();
@@ -470,7 +467,7 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static Set<Node> parseNodesDto(
             final NodesDto nodesDto
-    ) {
+    ) throws HiveClientResponseException {
         final @Nullable List<@Nullable NodeDto> nodeDtos = nodesDto.nodes;
         if (nodeDtos == null) {
             throw new HiveClientResponseException("Nodes list is unexpectedly null.");
@@ -497,7 +494,7 @@ public final class DefaultNodeRepository implements NodeRepository {
             }
             nodeBuilder.parentNodeId(parentNodeId);
 
-            final @Nullable NodeName nodeName = nodeDto.name;
+            final @Nullable String nodeName = nodeDto.name;
             if (nodeName == null) {
                 throw new HiveClientResponseException("NodeName is unexpectedly null.");
             }
@@ -509,10 +506,10 @@ public final class DefaultNodeRepository implements NodeRepository {
             }
             nodeBuilder.nodeType(nodeType);
 
-            final @Nullable String protocolString = nodeDto.protocol;
+            final @Nullable Protocol dtoProtocol = nodeDto.protocol;
             final Protocol protocol;
-            if (protocolString != null) {
-                protocol = new Protocol(protocolString);
+            if (dtoProtocol != null) {
+                protocol = dtoProtocol;
             } else {
                 protocol = Protocol.NONE;
             }
@@ -592,17 +589,14 @@ public final class DefaultNodeRepository implements NodeRepository {
     }
 
     @Override
-    public Set<Node> getAllNodes() {
+    public Set<Node> getAllNodes() throws HiveApiNotAuthorisedException, HiveClientResponseException,
+            HiveApiUnknownException, HiveClientUnknownException, HiveClientRequestException {
         /* Send our get nodes request to the Hive API. */
         final HiveApiResponse response = this.requestFactory.newRequest(HiveApiConstants.ENDPOINT_NODES)
-                .accept(MediaType.API_V6_5_0_JSON)
+                .accept(HiveApiConstants.MEDIA_TYPE_API_V6_5_0_JSON)
                 .get();
 
-        if (response.getStatusCode() == 401) {
-            throw new HiveApiNotAuthorisedException();
-        } else if (response.getStatusCode() != 200) {
-            throw new HiveApiUnknownException("Getting nodes failed for an unknown reason");
-        }
+        RepositoryUtil.checkResponse("getAllNodes", response);
 
         final NodesDto nodesDto = response.getContent(NodesDto.class);
 
@@ -610,33 +604,28 @@ public final class DefaultNodeRepository implements NodeRepository {
     }
 
     @Override
-    public String getAllNodesJson() {
+    public String getAllNodesJson() throws HiveApiNotAuthorisedException, HiveApiUnknownException,
+            HiveClientUnknownException, HiveClientRequestException {
         /* Send our get nodes request to the Hive API. */
         final HiveApiResponse response = this.requestFactory.newRequest(HiveApiConstants.ENDPOINT_NODES)
-                .accept(MediaType.API_V6_5_0_JSON)
+                .accept(HiveApiConstants.MEDIA_TYPE_API_V6_5_0_JSON)
                 .get();
 
-        if (response.getStatusCode() == 401) {
-            throw new HiveApiNotAuthorisedException();
-        } else if (response.getStatusCode() != 200) {
-            throw new HiveApiUnknownException("Getting nodes failed for an unknown reason");
-        }
+        RepositoryUtil.checkResponse("getAllNodesJson", response);
 
         return response.getRawContent();
     }
 
     @Override
-    public @Nullable Node getNode(final NodeId nodeId) {
+    public @Nullable Node getNode(final NodeId nodeId)
+            throws HiveApiNotAuthorisedException, HiveClientResponseException, HiveApiUnknownException,
+            HiveClientUnknownException, HiveClientRequestException {
         /* Send our get node request to the Hive API. */
         final HiveApiResponse response = this.requestFactory.newRequest(getEndpointPathForNode(nodeId))
-                .accept(MediaType.API_V6_5_0_JSON)
+                .accept(HiveApiConstants.MEDIA_TYPE_API_V6_5_0_JSON)
                 .get();
 
-        if (response.getStatusCode() == 401) {
-            throw new HiveApiNotAuthorisedException();
-        } else if (response.getStatusCode() != 200) {
-            throw new HiveApiUnknownException("Getting nodes failed for an unknown reason");
-        }
+        RepositoryUtil.checkResponse("getNode", response);
 
         final NodesDto nodesDto = response.getContent(NodesDto.class);
         final Set<Node> nodes = parseNodesDto(nodesDto);
@@ -653,7 +642,8 @@ public final class DefaultNodeRepository implements NodeRepository {
     }
 
     @Override
-    public @Nullable Node updateNode(final Node node) {
+    public @Nullable Node updateNode(final Node node) throws HiveApiNotAuthorisedException, HiveClientResponseException,
+            HiveApiUnknownException, HiveClientUnknownException, HiveClientRequestException {
         /* Prepare DTO to send Hive API */
         final NodeDto nodeDto = new NodeDto();
 
@@ -687,14 +677,10 @@ public final class DefaultNodeRepository implements NodeRepository {
         nodesDto.nodes = Collections.singletonList(nodeDto);
 
         final HiveApiResponse response = this.requestFactory.newRequest(getEndpointPathForNode(node.getId()))
-                .accept(MediaType.API_V6_5_0_JSON)
+                .accept(HiveApiConstants.MEDIA_TYPE_API_V6_5_0_JSON)
                 .put(nodesDto);
 
-        if (response.getStatusCode() == 401) {
-            throw new HiveApiNotAuthorisedException();
-        } else if (response.getStatusCode() != 200) {
-            throw new HiveApiUnknownException("Updating node failed for an unknown reason. Response code: " + response.getStatusCode());
-        }
+        RepositoryUtil.checkResponse("updateNode", response);
 
         final NodesDto responseNodesDto = response.getContent(NodesDto.class);
         final Set<Node> responseNodes = parseNodesDto(responseNodesDto);

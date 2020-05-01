@@ -12,13 +12,9 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import java.io.IOException;
-import java.net.URI;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.ScheduleType;
-
-import com.google.gson.stream.JsonReader;
 
 /**
  * A gson {@link com.google.gson.TypeAdapter} for {@link ScheduleType}.
@@ -26,10 +22,11 @@ import com.google.gson.stream.JsonReader;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class ScheduleTypeGsonAdapter extends SimpleGsonTypeAdapterBase<ScheduleType> {
-    @NonNullByDefault({})
-    @Override
-    public ScheduleType read(final JsonReader in) throws IOException {
-        return new ScheduleType(URI.create(in.nextString()));
+public final class ScheduleTypeGsonAdapter extends ComplexEnumGsonTypeAdapterBase<ScheduleType> {
+    public ScheduleTypeGsonAdapter() {
+        super(EnumMapper.builder(ScheduleType.class)
+                .setUnexpectedValue(ScheduleType.UNEXPECTED)
+                .add(ScheduleType.WEEKLY, HiveApiConstants.SCHEDULE_TYPE_WEEKLY)
+                .build());
     }
 }

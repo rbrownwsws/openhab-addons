@@ -13,33 +13,40 @@
 package org.openhab.binding.hive.internal.client.adapter;
 
 import java.io.IOException;
-import java.time.Instant;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.hive.internal.client.dto.HiveApiInstant;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * A gson {@link com.google.gson.TypeAdapter} for {@link HiveApiInstant}.
+ *
  *
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public final class HiveApiInstantGsonAdapter extends GsonTypeAdapterBase<HiveApiInstant> {
+abstract class ComplexEnumGsonTypeAdapterBase<E extends Enum<E>> extends GsonTypeAdapterBase<E> {
+    private final EnumMapper<E> enumMap;
+
+    protected ComplexEnumGsonTypeAdapterBase(final EnumMapper<E> enumMap) {
+        this.enumMap = Objects.requireNonNull(enumMap);
+    }
+
     @Override
-    public void writeValue(final JsonWriter out, final @Nullable HiveApiInstant hiveApiInstant) throws IOException {
-        if (hiveApiInstant != null) {
-            out.value(hiveApiInstant.asInstant().toEpochMilli());
+    public @Nullable E readValue(final JsonReader in) throws IOException {
+        final @Nullable String enumString = in.nextString();
+
+        if (enumString != null) {
+            return this.enumMap.getEnumForString(enumString);
         } else {
-            out.nullValue();
+            return null;
         }
     }
 
     @Override
-    public @Nullable HiveApiInstant readValue(final JsonReader in) throws IOException {
-        return new HiveApiInstant(Instant.ofEpochMilli(in.nextLong()));
+    public void writeValue(final JsonWriter out, final E value) throws IOException {
+        out.value(this.enumMap.getStringForEnum(value));
     }
 }

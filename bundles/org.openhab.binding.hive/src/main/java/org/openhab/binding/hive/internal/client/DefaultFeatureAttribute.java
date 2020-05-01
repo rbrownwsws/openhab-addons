@@ -70,6 +70,14 @@ public final class DefaultFeatureAttribute<T> implements SettableFeatureAttribut
         return this.reportChangedTime;
     }
 
+    @Override
+    public SettableFeatureAttribute<T> withTargetValue(final @Nullable T targetValue) {
+        return DefaultFeatureAttribute.<T>builder()
+                .from(this)
+                .targetValue(targetValue)
+                .build();
+    }
+
     public static <T> Builder<T> builder() {
         return new Builder<>();
     }

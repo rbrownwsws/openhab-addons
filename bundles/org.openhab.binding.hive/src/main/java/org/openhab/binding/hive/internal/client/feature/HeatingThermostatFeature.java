@@ -58,10 +58,7 @@ public final class HeatingThermostatFeature implements Feature {
         return HeatingThermostatFeature.builder()
                 .from(this)
                 .operatingMode(
-                        DefaultFeatureAttribute.<HeatingThermostatOperatingMode>builder()
-                                .from(this.operatingMode)
-                                .targetValue(targetOperatingMode)
-                                .build()
+                        this.operatingMode.withTargetValue(targetOperatingMode)
                 )
                 .build();
     }
@@ -78,10 +75,7 @@ public final class HeatingThermostatFeature implements Feature {
         return HeatingThermostatFeature.builder()
                 .from(this)
                 .targetHeatTemperature(
-                        DefaultFeatureAttribute.<Quantity<Temperature>>builder()
-                                .from(this.targetHeatTemperature)
-                                .targetValue(targetTargetHeatTemperature)
-                                .build()
+                        this.targetHeatTemperature.withTargetValue(targetTargetHeatTemperature)
                 )
                 .build();
     }
@@ -94,10 +88,7 @@ public final class HeatingThermostatFeature implements Feature {
         return HeatingThermostatFeature.builder()
                 .from(this)
                 .temporaryOperatingModeOverride(
-                        DefaultFeatureAttribute.<OverrideMode>builder()
-                                .from(this.temporaryOperatingModeOverride)
-                                .targetValue(targetOverrideMode)
-                                .build()
+                        this.temporaryOperatingModeOverride.withTargetValue(targetOverrideMode)
                 )
                 .build();
     }
