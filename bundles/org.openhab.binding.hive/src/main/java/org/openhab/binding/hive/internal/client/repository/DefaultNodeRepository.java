@@ -36,6 +36,8 @@ import tec.uom.se.unit.Units;
  * The default implementation of {@link NodeRepository}.
  *
  * @author Ross Brown - Initial contribution
+ * @author John McLaughlin - 
+ * 
  */
 @NonNullByDefault
 public final class DefaultNodeRepository implements NodeRepository {
@@ -84,16 +86,21 @@ public final class DefaultNodeRepository implements NodeRepository {
             final BatteryDeviceV1FeatureDto batteryDeviceV1FeatureDto
     ) throws HiveClientResponseException {
         return BatteryDeviceFeature.builder()
-                .batteryLevel(FeatureAttributeFactory.getReadOnlyFromDtoWithAdapter(
-                        BatteryLevel::new,
-                        batteryDeviceV1FeatureDto.batteryLevel
-                ))
+                .batteryLevel(FeatureAttributeFactory.getReadOnlyFromDtoWithAdapter(BatteryLevel::new,
+                        batteryDeviceV1FeatureDto.batteryLevel))
                 .batteryState(FeatureAttributeFactory.getReadOnlyFromDto(batteryDeviceV1FeatureDto.batteryState))
                 .batteryVoltage(FeatureAttributeFactory.getReadOnlyFromDtoWithAdapter(
-                        (val) -> Quantities.getQuantity(val, Units.VOLT),
-                        batteryDeviceV1FeatureDto.batteryVoltage
-                ))
-                .batteryNotificationState(FeatureAttributeFactory.getReadOnlyFromDto(batteryDeviceV1FeatureDto.notificationState))
+                        (val) -> Quantities.getQuantity(val, Units.VOLT), batteryDeviceV1FeatureDto.batteryVoltage))
+                .batteryNotificationState(
+                        FeatureAttributeFactory.getReadOnlyFromDto(batteryDeviceV1FeatureDto.notificationState))
+                .build();
+    }
+
+    private static DimmableLightFeature getDimmableLightFeatureFromDto(
+        final DimmableLightV1FeatureDto dimmableLightV1FeatureDto
+    ) throws HiveClientResponseException {
+        return DimmableLightFeature.builder()
+                .brightnessLevel(FeatureAttributeFactory.getSettableFromDto(dimmableLightV1FeatureDto.brightnessLevel))
                 .build();
     }
 
@@ -314,11 +321,10 @@ public final class DefaultNodeRepository implements NodeRepository {
             final AutoBoostFeature autoBoostFeature
     ) {
         final @Nullable Duration autoBoostDurationTarget = autoBoostFeature.getAutoBoostDuration().getTargetValue();
-        final @Nullable Quantity<Temperature> autoBoostTargetHeatTemperatureTarget = autoBoostFeature.getAutoBoostTargetHeatTemperature().getTargetValue();
+        final @Nullable Quantity<Temperature> autoBoostTargetHeatTemperatureTarget = autoBoostFeature
+                .getAutoBoostTargetHeatTemperature().getTargetValue();
 
-        if (autoBoostDurationTarget != null
-                || autoBoostTargetHeatTemperatureTarget != null
-        ) {
+        if (autoBoostDurationTarget != null || autoBoostTargetHeatTemperatureTarget != null) {
             final AutoBoostV1FeatureDto autoBoostV1FeatureDto = new AutoBoostV1FeatureDto();
             featuresDto.autoboost_v1 = autoBoostV1FeatureDto;
 
@@ -332,9 +338,26 @@ public final class DefaultNodeRepository implements NodeRepository {
             if (autoBoostTargetHeatTemperatureTarget != null) {
                 final FeatureAttributeDto<BigDecimal> autoBoostTargetHeatTemperatureAttribute = new FeatureAttributeDto<>();
                 autoBoostV1FeatureDto.autoBoostTargetHeatTemperature = autoBoostTargetHeatTemperatureAttribute;
-                autoBoostTargetHeatTemperatureAttribute.targetValue = temperatureToDtoValue(autoBoostTargetHeatTemperatureTarget);
+                autoBoostTargetHeatTemperatureAttribute.targetValue = temperatureToDtoValue(
+                        autoBoostTargetHeatTemperatureTarget);
             }
         }
+    }
+    
+   private static void updateFeaturesDtoWithDimmableLightFeature(
+            final FeaturesDto featureDto,
+            final DimmableLightFeature dimmableLightFeature
+    ) {
+       final @Nullable BrightnessLevel brightnessLevelTarget = dimmableLightFeature.getBrightnessLevel().getTargetValue();
+       if (brightnessLevelTarget != null) {
+           final DimmableLightV1FeatureDto dimmableLightV1FeatureDto = new DimmableLightV1FeatureDto();
+           featureDto.dimmable_light_v1 = dimmableLightV1FeatureDto;
+
+           final @Nullable FeatureAttributeDto<BrightnessLevel> brightnessLevelAtrribute = new FeatureAttributeDto<>();
+           dimmableLightV1FeatureDto.brightnessLevel = brightnessLevelAtrribute;
+           brightnessLevelAtrribute.targetValue = brightnessLevelTarget;
+        }
+
     }
 
     private static void updateFeaturesDtoWithOnOffDeviceFeature(
@@ -523,6 +546,7 @@ public final class DefaultNodeRepository implements NodeRepository {
             final @Nullable AutoBoostV1FeatureDto autoBoostV1FeatureDto = featuresDto.autoboost_v1;
             final @Nullable BatteryDeviceV1FeatureDto batteryDeviceV1FeatureDto = featuresDto.battery_device_v1;
             final @Nullable DeviceManagementV1FeatureDto deviceManagementV1FeatureDto = featuresDto.device_management_v1;
+            final @Nullable DimmableLightV1FeatureDto dimmableLightV1FeatureDto = featuresDto.dimmable_light_v1;
             final @Nullable HeatingThermostatV1FeatureDto heatingThermostatV1FeatureDto = featuresDto.heating_thermostat_v1;
             final @Nullable LinksV1FeatureDto linksV1FeatureDto = featuresDto.links_v1;
             final @Nullable OnOffDeviceV1FeatureDto onOffDeviceV1FeatureDto = featuresDto.on_off_device_v1;
@@ -537,6 +561,9 @@ public final class DefaultNodeRepository implements NodeRepository {
             }
             if (batteryDeviceV1FeatureDto != null) {
                 nodeBuilder.putFeature(BatteryDeviceFeature.class, getBatteryDeviceFeatureFromDto(batteryDeviceV1FeatureDto));
+            }
+            if (dimmableLightV1FeatureDto != null) {
+                nodeBuilder.putFeature(DimmableLightFeature.class, getDimmableLightFeatureFromDto(dimmableLightV1FeatureDto));
             }
             if (heatingThermostatV1FeatureDto != null) {
                 nodeBuilder.putFeature(HeatingThermostatFeature.class, getHeatingThermostatFeatureFromDto(heatingThermostatV1FeatureDto));
@@ -670,6 +697,8 @@ public final class DefaultNodeRepository implements NodeRepository {
                 updateFeaturesDtoWithTransientModeHeatingActionsFeature(featuresDto, (TransientModeHeatingActionsFeature) feature);
             } else if (featureClass.equals(WaterHeaterFeature.class)) {
                 updateFeaturesDtoWithWaterHeaterFeature(featuresDto, (WaterHeaterFeature) feature);
+            } else if (featureClass.equals(DimmableLightFeature.class)) {
+                updateFeaturesDtoWithDimmableLightFeature(featuresDto, (DimmableLightFeature) feature);
             }
         }
 

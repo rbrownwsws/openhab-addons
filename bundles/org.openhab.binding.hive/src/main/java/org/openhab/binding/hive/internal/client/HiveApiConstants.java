@@ -20,6 +20,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Constants related to the Hive API.
  *
  * @author Ross Brown - Initial contribution
+ * @author John McLaughlin - Added support for Hive Lights and Light Groups
+ * 
  */
 @NonNullByDefault
 public final class HiveApiConstants {
@@ -83,11 +85,14 @@ public final class HiveApiConstants {
     public static final String FEATURE_TYPE_AUTOBOOST_V1 = "http://alertme.com/schema/json/feature/node.feature.autoboost.v1.json#";
     public static final String FEATURE_TYPE_BATTERY_DEVICE_V1 = "http://alertme.com/schema/json/feature/node.feature.battery_device.v1.json#";
     public static final String FEATURE_TYPE_CHILD_LOCK_V1 = "http://alertme.com/schema/json/feature/node.feature.child_lock.v1.json#";
+    public static final String FEATURE_TYPE_DESCRIPTOR_V1 = "http://alertme.com/schema/json/feature/node.feature.descriptor.v1.json#";
     public static final String FEATURE_TYPE_DEVICE_MANAGEMENT_V1 = "http://alertme.com/schema/json/feature/node.feature.device_management.v1.json#";
+    public static final String FEATURE_TYPE_DIMMABLE_LIGHT_V1 = "http://alertme.com/schema/json/feature/node.feature.dimmable_light.v1.json#";
     public static final String FEATURE_TYPE_DISPLAY_ORIENTATION_V1 = "http://alertme.com/schema/json/feature/node.feature.display_orientation.v1.json#";
     public static final String FEATURE_TYPE_ETHERNET_DEVICE_V1 = "http://alertme.com/schema/json/feature/node.feature.ethernet_device.v1.json#";
     public static final String FEATURE_TYPE_FROST_PROTECT_V1 = "http://alertme.com/schema/json/feature/node.feature.frost_protect.v1.json#";
     public static final String FEATURE_TYPE_GROUP_V1 = "http://alertme.com/schema/json/feature/node.feature.group.v1.json#";
+    public static final String FEATURE_TYPE_GROUP_MEMBERSHIP_V1 = "http://alertme.com/schema/json/feature/node.feature.group_membership.v1.json#";
     public static final String FEATURE_TYPE_HEATING_TEMPERATURE_CONTROL_DEVICE_V1 = "http://alertme.com/schema/json/feature/node.feature.heating_temperature_control_device.v1.json#";
     public static final String FEATURE_TYPE_HEATING_TEMPERATURE_CONTROL_V1 = "http://alertme.com/schema/json/feature/node.feature.heating_temperature_control.v1.json#";
     public static final String FEATURE_TYPE_HEATING_THERMOSTAT_V1 = "http://alertme.com/schema/json/feature/node.feature.heating_thermostat.v1.json#";
@@ -107,13 +112,18 @@ public final class HiveApiConstants {
     public static final String FEATURE_TYPE_WATER_HEATER_V1 = "http://alertme.com/schema/json/feature/node.feature.water_heater.v1.json#";
     public static final String FEATURE_TYPE_ZIGBEE_DEVICE_V1 = "http://alertme.com/schema/json/feature/node.feature.zigbee_device.v1.json#";
     public static final String FEATURE_TYPE_ZIGBEE_ROUTING_DEVICE_V1 = "http://alertme.com/schema/json/feature/node.feature.zigbee_routing_device.v1.json#";
+    public static final String FEATURE_TYPE_IDENTIFY_DEVICE_V1 = "http://alertme.com/schema/json/feature/node.feature.identify_device.v1.json#";
     
+
+
     /* Node Types */
     public static final String NODE_TYPE_HUB = "http://alertme.com/schema/json/node.class.hub.json#";
+    public static final String NODE_TYPE_LIGHT = "http://alertme.com/schema/json/node.class.light.json#";
     public static final String NODE_TYPE_THERMOSTAT = "http://alertme.com/schema/json/node.class.thermostat.json#";
     public static final String NODE_TYPE_THERMOSTAT_UI = "http://alertme.com/schema/json/node.class.thermostatui.json#";
     public static final String NODE_TYPE_RADIATOR_VALVE = "http://alertme.com/schema/json/node.class.trv.json#";
     public static final String NODE_TYPE_SYNTHETIC_DAYLIGHT = "http://alertme.com/schema/json/node.class.synthetic.daylight.json#";
+    public static final String NODE_TYPE_SYNTHETIC_GROUP = "http://alertme.com/schema/json/node.class.synthetic.group.json#";
     public static final String NODE_TYPE_SYNTHETIC_HOME_STATE = "http://alertme.com/schema/json/node.class.synthetic.home.state.json#";
     public static final String NODE_TYPE_SYNTHETIC_RULE = "http://alertme.com/schema/json/node.class.synthetic.rule.json#";
     
@@ -124,6 +134,8 @@ public final class HiveApiConstants {
     public static final String PRODUCT_TYPE_HEATING = "HEATING";
     public static final String PRODUCT_TYPE_HOT_WATER = "HOT_WATER";
     public static final String PRODUCT_TYPE_HUB = "HUB";
+    public static final String PRODUCT_TYPE_LIGHT = "LIGHT";
+    public static final String PRODUCT_TYPE_GROUP = "GROUP";
     public static final String PRODUCT_TYPE_THERMOSTAT_UI = "THERMOSTAT_UI";
     public static final String PRODUCT_TYPE_TRV = "TRV";
     public static final String PRODUCT_TYPE_TRV_GROUP = "TRV_GROUP";

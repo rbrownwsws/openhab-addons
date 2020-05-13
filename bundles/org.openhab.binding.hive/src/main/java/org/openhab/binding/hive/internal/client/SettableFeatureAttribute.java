@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  *
  * @author Ross Brown - Initial contribution
+ * 
  */
 @NonNullByDefault
 public interface SettableFeatureAttribute<T> extends FeatureAttribute<T> {

@@ -19,12 +19,15 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  *
  * @author Ross Brown - Initial contribution
+ * @author John McLaughlin - 
+ * 
  */
 @NonNullByDefault
 public final class FeaturesDto {
     public @Nullable AutoBoostV1FeatureDto autoboost_v1;
     public @Nullable BatteryDeviceV1FeatureDto battery_device_v1;
     public @Nullable DeviceManagementV1FeatureDto device_management_v1;
+    public @Nullable DimmableLightV1FeatureDto dimmable_light_v1;
     public @Nullable HeatingThermostatV1FeatureDto heating_thermostat_v1;
     public @Nullable LinksV1FeatureDto links_v1;
     public @Nullable OnOffDeviceV1FeatureDto on_off_device_v1;

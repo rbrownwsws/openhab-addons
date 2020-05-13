@@ -25,6 +25,8 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
  * used across the whole binding.
  *
  * @author Ross Brown - Initial contribution
+ * @author John McLaughlin - Added support for Hive Light Bulbs and Light Groups
+ * 
  */
 @NonNullByDefault
 public final class HiveBindingConstants {
@@ -58,6 +60,16 @@ public final class HiveBindingConstants {
      * {@link ThingTypeUID} of a Hive Hub.
      */
     public static final ThingTypeUID THING_TYPE_HUB = new ThingTypeUID(BINDING_ID, "hub");
+    
+    /**
+     *  {@link ThingTypeUID} of a Hive Light
+     */
+    public static final ThingTypeUID THING_TYPE_LIGHT = new ThingTypeUID(BINDING_ID, "light");
+
+    /**
+     * {@link ThingTypeUID} of a (virtual) Hive Light Group
+     */
+    public static final ThingTypeUID THING_TYPE_GROUP = new ThingTypeUID(BINDING_ID, "group");
 
     /**
      * {@link ThingTypeUID} of a Hive Thermostat.
@@ -81,9 +93,11 @@ public final class HiveBindingConstants {
     public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.unmodifiableSet(Stream.of(
             THING_TYPE_ACCOUNT,
             THING_TYPE_BOILER_MODULE,
+            THING_TYPE_GROUP,
             THING_TYPE_HEATING,
             THING_TYPE_HOT_WATER,
             THING_TYPE_HUB,
+            THING_TYPE_LIGHT,
             THING_TYPE_THERMOSTAT,
             THING_TYPE_TRV,
             THING_TYPE_TRV_GROUP
@@ -160,6 +174,12 @@ public final class HiveBindingConstants {
      * sent to users of the Hive app.
      */
     public static final String CHANNEL_BATTERY_NOTIFICATION_STATE = "battery-notification_state";
+
+    /**
+     * Name of the channel used to control the brightness of the Hive Light,
+     * same channel is used for the Hive Light Group.
+     */
+    public static final String CHANNEL_BRIGHTNESS_LEVEL = "brightness-level";
 
     /**
      * Name of the channel that represents if a Hive device is turned on
@@ -274,7 +294,6 @@ public final class HiveBindingConstants {
      */
     public static final String CHANNEL_DUMP_NODES = "dump_nodes";
 
-
     /* ######## Config params ######## */
     /**
      * The configuration key for storing the
@@ -283,7 +302,6 @@ public final class HiveBindingConstants {
      * {@linkplain org.eclipse.smarthome.core.thing.Thing} is representing.
      */
     public static final String CONFIG_NODE_ID = "nodeId";
-
 
     /* ######## Other constants ######## */
     public static final String HEATING_EASY_MODE_OPERATING_MANUAL = "MANUAL";

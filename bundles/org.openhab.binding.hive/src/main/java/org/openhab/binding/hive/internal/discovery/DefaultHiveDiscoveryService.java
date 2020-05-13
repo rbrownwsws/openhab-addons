@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
  * The default implementation of {@link HiveDiscoveryService}.
  *
  * @author Ross Brown - Initial contribution
+ * @author John McLaughlin - Added support for Hive Lights and Light Groups
+ * 
  */
 @NonNullByDefault
 public class DefaultHiveDiscoveryService extends AbstractDiscoveryService implements HiveDiscoveryService {
@@ -140,6 +142,10 @@ public class DefaultHiveDiscoveryService extends AbstractDiscoveryService implem
                 thingTypeUID = HiveBindingConstants.THING_TYPE_HOT_WATER;
             } else if (node.getProductType().equals(ProductType.HUB)) {
                 thingTypeUID = HiveBindingConstants.THING_TYPE_HUB;
+            } else if (node.getProductType().equals(ProductType.LIGHT)) {
+                thingTypeUID = HiveBindingConstants.THING_TYPE_LIGHT;
+            } else if (node.getProductType().equals(ProductType.GROUP)) {
+                thingTypeUID = HiveBindingConstants.THING_TYPE_GROUP;
             } else if (node.getProductType().equals(ProductType.THERMOSTAT_UI)) {
                 thingTypeUID = HiveBindingConstants.THING_TYPE_THERMOSTAT;
             } else if (node.getProductType().equals(ProductType.TRV)) {
@@ -179,6 +185,10 @@ public class DefaultHiveDiscoveryService extends AbstractDiscoveryService implem
                 }
             } else if (node.getProductType().equals(ProductType.HOT_WATER)) {
                 label = "Hot Water";
+            } else if (node.getProductType().equals(ProductType.LIGHT)) {
+                label = node.getName().toString() + " (Light)";
+            } else if (node.getProductType().equals(ProductType.GROUP)) {
+                label = node.getName().toString() + " (Light Group)";
             } else if (node.getProductType().equals(ProductType.THERMOSTAT_UI)) {
                 label = node.getName().toString() + " (Thermostat)";
             } else if (node.getProductType().equals(ProductType.TRV)) {

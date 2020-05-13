@@ -10,31 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.hive.internal.client;
+package org.openhab.binding.hive.internal.client.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.hive.internal.client.BrightnessLevel;
 
 /**
- * Represents a Hive API product type.
+ *
  *
  * @author Ross Brown - Initial contribution
- * @author John McLaughlin - Added support for Hive Lights and Light Groups
+ * @author - John McLaughlin - 
  * 
  */
 @NonNullByDefault
-public enum ProductType {
-    ACTIONS,
-    BOILER_MODULE,
-    DAYLIGHT_SD,
-    HEATING,
-    HOT_WATER,
-    HUB,
-    LIGHT,
-    GROUP,
-    THERMOSTAT_UI,
-    TRV,
-    TRV_GROUP,
-    UNKNOWN,
-
-    UNEXPECTED
+public final class DimmableLightV1FeatureDto extends FeatureDtoBase {
+    public @Nullable FeatureAttributeDto<BrightnessLevel> brightnessLevel;
 }

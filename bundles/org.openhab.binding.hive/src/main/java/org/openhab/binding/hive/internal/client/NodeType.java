@@ -18,14 +18,18 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Represents a Hive API node type.
  *
  * @author Ross Brown - Initial contribution
+ * @author John McLaughlin - Added support for Hive Light Bulbs and Light Groups
+ * 
  */
 @NonNullByDefault
 public enum NodeType {
     HUB,
+    LIGHT,
     THERMOSTAT,
     THERMOSTAT_UI,
     RADIATOR_VALVE,
     SYNTHETIC_DAYLIGHT,
+    SYNTHETIC_GROUP,
     SYNTHETIC_HOME_STATE,
     SYNTHETIC_RULE,
 

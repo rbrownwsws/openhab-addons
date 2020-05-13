@@ -20,6 +20,8 @@ import org.openhab.binding.hive.internal.client.ProductType;
  * A gson {@link com.google.gson.TypeAdapter} for {@link ProductType}.
  *
  * @author Ross Brown - Initial contribution
+ * @author John McLaughlin - Added support for Hive Lights and Light Groups
+ * 
  */
 @NonNullByDefault
 public final class ProductTypeGsonAdapter extends ComplexEnumGsonTypeAdapterBase<ProductType> {
@@ -31,7 +33,9 @@ public final class ProductTypeGsonAdapter extends ComplexEnumGsonTypeAdapterBase
                 .add(ProductType.DAYLIGHT_SD, HiveApiConstants.PRODUCT_TYPE_DAYLIGHT_SD)
                 .add(ProductType.HEATING, HiveApiConstants.PRODUCT_TYPE_HEATING)
                 .add(ProductType.HOT_WATER, HiveApiConstants.PRODUCT_TYPE_HOT_WATER)
-                .add(ProductType.HUB, HiveApiConstants.PRODUCT_TYPE_HUB)
+                .add(ProductType.HUB,HiveApiConstants.PRODUCT_TYPE_HUB)
+                .add(ProductType.LIGHT,HiveApiConstants.PRODUCT_TYPE_LIGHT)
+                .add(ProductType.GROUP,HiveApiConstants.PRODUCT_TYPE_GROUP)
                 .add(ProductType.THERMOSTAT_UI, HiveApiConstants.PRODUCT_TYPE_THERMOSTAT_UI)
                 .add(ProductType.TRV, HiveApiConstants.PRODUCT_TYPE_TRV)
                 .add(ProductType.TRV_GROUP, HiveApiConstants.PRODUCT_TYPE_TRV_GROUP)

@@ -20,6 +20,8 @@ import org.openhab.binding.hive.internal.client.HiveApiConstants;
  * A gson {@link com.google.gson.TypeAdapter} for {@link FeatureType}.
  *
  * @author Ross Brown - Initial contribution
+ * @author John McLaughlin -
+ * 
  */
 @NonNullByDefault
 public final class FeatureTypeGsonAdapter extends ComplexEnumGsonTypeAdapterBase<FeatureType> {
@@ -29,7 +31,8 @@ public final class FeatureTypeGsonAdapter extends ComplexEnumGsonTypeAdapterBase
                 .add(FeatureType.AUTOBOOST_V1, HiveApiConstants.FEATURE_TYPE_AUTOBOOST_V1)
                 .add(FeatureType.BATTERY_DEVICE_V1, HiveApiConstants.FEATURE_TYPE_BATTERY_DEVICE_V1)
                 .add(FeatureType.CHILD_LOCK_V1, HiveApiConstants.FEATURE_TYPE_CHILD_LOCK_V1)
-                .add(FeatureType.DEVICE_MANAGEMENT_V1, HiveApiConstants.FEATURE_TYPE_DEVICE_MANAGEMENT_V1)
+                .add(FeatureType.DEVICE_MANAGEMENT_V1,HiveApiConstants.FEATURE_TYPE_DEVICE_MANAGEMENT_V1)
+                .add(FeatureType.DIMMABLE_LIGHT_V1, HiveApiConstants.FEATURE_TYPE_DIMMABLE_LIGHT_V1)
                 .add(FeatureType.DISPLAY_ORIENTATION_V1, HiveApiConstants.FEATURE_TYPE_DISPLAY_ORIENTATION_V1)
                 .add(FeatureType.ETHERNET_DEVICE_V1, HiveApiConstants.FEATURE_TYPE_ETHERNET_DEVICE_V1)
                 .add(FeatureType.FROST_PROTECT_V1, HiveApiConstants.FEATURE_TYPE_FROST_PROTECT_V1)

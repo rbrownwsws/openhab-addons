@@ -47,6 +47,8 @@ import org.slf4j.LoggerFactory;
  * handlers.
  *
  * @author Ross Brown - Initial contribution
+ * @author John McLaughlin - 
+ * 
  */
 @NonNullByDefault
 @Component(configurationPid = "binding.hive", service = ThingHandlerFactory.class)
@@ -54,9 +56,11 @@ public final class HiveHandlerFactory extends BaseThingHandlerFactory {
     private final Logger logger = LoggerFactory.getLogger(HiveHandlerFactory.class);
 
     private final Set<ThingHandlerStrategy> strategiesForBoilerModule;
+    private final Set<ThingHandlerStrategy> strategiesForGroup;
     private final Set<ThingHandlerStrategy> strategiesForHeating;
     private final Set<ThingHandlerStrategy> strategiesForHotWater;
     private final Set<ThingHandlerStrategy> strategiesForHub;
+    private final Set<ThingHandlerStrategy> strategiesForLight;
     private final Set<ThingHandlerStrategy> strategiesForThermostat;
     private final Set<ThingHandlerStrategy> strategiesForTrvGroup;
     private final Set<ThingHandlerStrategy> strategiesForTrv;
@@ -85,6 +89,7 @@ public final class HiveHandlerFactory extends BaseThingHandlerFactory {
         final AutoBoostHandlerStrategy autoBoostHandlerStrategy = new AutoBoostHandlerStrategy();
         final BatteryDeviceHandlerStrategy batteryDeviceHandlerStrategy = new BatteryDeviceHandlerStrategy();
         final BoostTimeRemainingHandlerStrategy boostTimeRemainingHandlerStrategy = new BoostTimeRemainingHandlerStrategy();
+        final DimmableLightHandlerStrategy dimmableLightHandlerStrategy = new DimmableLightHandlerStrategy();
         final HeatingThermostatEasyHandlerStrategy heatingThermostatEasyHandlerStrategy = new HeatingThermostatEasyHandlerStrategy();
         final HeatingThermostatHandlerStrategy heatingThermostatHandlerStrategy = new HeatingThermostatHandlerStrategy();
         final HeatingTransientModeHandlerStrategy heatingTransientModeHandlerStrategy = new HeatingTransientModeHandlerStrategy();
@@ -100,6 +105,12 @@ public final class HiveHandlerFactory extends BaseThingHandlerFactory {
         this.strategiesForBoilerModule = Collections.unmodifiableSet(Stream.of(
                 physicalDeviceHandlerStrategy,
                 zigbeeDeviceHandlerStrategy
+        ).collect(Collectors.toSet()));
+
+        this.strategiesForGroup = Collections.unmodifiableSet(Stream.of(
+            //onOffDeviceHandlerStrategy,
+            physicalDeviceHandlerStrategy
+            //zigbeeDeviceHandlerStrategy
         ).collect(Collectors.toSet()));
 
         this.strategiesForHeating = Collections.unmodifiableSet(Stream.of(
@@ -123,6 +134,13 @@ public final class HiveHandlerFactory extends BaseThingHandlerFactory {
 
         this.strategiesForHub = Collections.unmodifiableSet(Stream.of(
                 physicalDeviceHandlerStrategy
+        ).collect(Collectors.toSet()));
+
+        this.strategiesForLight = Collections.unmodifiableSet(Stream.of(
+                //dimmableLightHandlerStrategy,
+                //onOffDeviceHandlerStrategy
+                physicalDeviceHandlerStrategy,
+                zigbeeDeviceHandlerStrategy
         ).collect(Collectors.toSet()));
 
         this.strategiesForThermostat = Collections.unmodifiableSet(Stream.of(
@@ -202,12 +220,16 @@ public final class HiveHandlerFactory extends BaseThingHandlerFactory {
             return handler;
         } else if (HiveBindingConstants.THING_TYPE_BOILER_MODULE.equals(thingTypeUID)) {
             return new DefaultHiveThingHandler(thing, this.strategiesForBoilerModule);
+        } else if (HiveBindingConstants.THING_TYPE_GROUP.equals(thingTypeUID)) {
+            return new DefaultHiveThingHandler(thing, this.strategiesForGroup);
         } else if (HiveBindingConstants.THING_TYPE_HEATING.equals(thingTypeUID)) {
             return new DefaultHiveThingHandler(thing, this.strategiesForHeating);
         } else if (HiveBindingConstants.THING_TYPE_HOT_WATER.equals(thingTypeUID)) {
             return new DefaultHiveThingHandler(thing, this.strategiesForHotWater);
         } else if (HiveBindingConstants.THING_TYPE_HUB.equals(thingTypeUID)) {
             return new DefaultHiveThingHandler(thing, this.strategiesForHub);
+        } else if (HiveBindingConstants.THING_TYPE_LIGHT.equals(thingTypeUID)) {
+            return new DefaultHiveThingHandler(thing, this.strategiesForLight);
         } else if (HiveBindingConstants.THING_TYPE_THERMOSTAT.equals(thingTypeUID)) {
             return new DefaultHiveThingHandler(thing, this.strategiesForThermostat);
         } else if (HiveBindingConstants.THING_TYPE_TRV.equals(thingTypeUID)) {
