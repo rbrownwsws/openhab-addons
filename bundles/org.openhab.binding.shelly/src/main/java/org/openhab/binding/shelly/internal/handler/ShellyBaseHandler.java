@@ -17,6 +17,8 @@ import static org.openhab.binding.shelly.internal.ShellyBindingConstants.*;
 import static org.openhab.binding.shelly.internal.api.ShellyApiJsonDTO.*;
 import static org.openhab.binding.shelly.internal.util.ShellyUtils.*;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -166,7 +168,6 @@ public class ShellyBaseHandler extends BaseThingHandler implements ShellyDeviceL
                 }
             }
         }, 2, TimeUnit.SECONDS);
-
     }
 
     /**
@@ -258,11 +259,11 @@ public class ShellyBaseHandler extends BaseThingHandler implements ShellyDeviceL
             config.eventsSwitch = false;
             config.eventsButton = false;
             config.eventsPush = false;
-            config.eventsRoller = true; // so far missing with FW 1.6+CoIoT
             config.eventsSensorReport = false;
             api.setConfig(thingName, config);
         }
         if (config.eventsCoIoT) {
+            logger.debug("{}: Starting CoIoT (autoCoIoT={}/{})", thingName, bindingConfig.autoCoIoT, autoCoIoT);
             coap.start(thingName, config);
         }
 
@@ -520,10 +521,12 @@ public class ShellyBaseHandler extends BaseThingHandler implements ShellyDeviceL
                 if (type.equals(EVENT_TYPE_RELAY)) {
                     group = profile.numRelays <= 1 ? CHANNEL_GROUP_RELAY_CONTROL : CHANNEL_GROUP_RELAY_CONTROL + rindex;
                     int i = Integer.parseInt(deviceIndex);
-                    if ((i >= 0) && (i <= profile.settings.relays.size())) {
+                    if ((profile.settings.relays != null) && (i >= 0) && (i < profile.settings.relays.size())) {
                         ShellySettingsRelay relay = profile.settings.relays.get(i);
-                        if ((relay != null) && (relay.btnType.equalsIgnoreCase(SHELLY_BTNT_MOMENTARY)
-                                || relay.btnType.equalsIgnoreCase(SHELLY_BTNT_DETACHED))) {
+                        String btnType = getString(relay.btnType);
+                        if (btnType.equalsIgnoreCase(SHELLY_BTNT_MOMENTARY)
+                                || btnType.equalsIgnoreCase(SHELLY_BTNT_MOM_ON_RELEASE)
+                                || btnType.equalsIgnoreCase(SHELLY_BTNT_DETACHED)) {
                             isButton = true;
                         }
                     }
@@ -631,6 +634,21 @@ public class ShellyBaseHandler extends BaseThingHandler implements ShellyDeviceL
         }
 
         config = getConfigAs(ShellyThingConfiguration.class);
+        if (config.deviceIp.isEmpty()) {
+            logger.info("{}: IP address for the device must not be empty", thingName); // may not set in .things file
+            return;
+        }
+        try {
+            InetAddress addr = InetAddress.getByName(config.deviceIp);
+            String saddr = addr.getHostAddress();
+            if (!config.deviceIp.equals(saddr)) {
+                logger.debug("{}: hostname {} resolved to IP address {}", thingName, config.deviceIp, saddr);
+                config.deviceIp = saddr;
+            }
+        } catch (UnknownHostException e) {
+            logger.debug("{}: Unable to resolehostname {}", thingName, config.deviceIp);
+        }
+
         config.localIp = localIP;
         config.localPort = localPort;
         if (config.userId.isEmpty() && !bindingConfig.defaultUserId.isEmpty()) {
@@ -644,6 +662,7 @@ public class ShellyBaseHandler extends BaseThingHandler implements ShellyDeviceL
         if (config.updateInterval < UPDATE_MIN_DELAY) {
             config.updateInterval = UPDATE_MIN_DELAY;
         }
+
         skipCount = config.updateInterval / UPDATE_STATUS_INTERVAL_SECONDS;
     }
 
