@@ -10,12 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.hive.internal.client;
+package org.openhab.binding.hive.internal.client.feature;
 
-import java.time.Instant;
+import java.text.MessageFormat;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
  *
@@ -23,9 +22,14 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Ross Brown - Initial contribution
  */
 @NonNullByDefault
-public interface FeatureAttribute<T> {
-    T getDisplayValue();
-    T getReportedValue();
-    @Nullable Instant getReportReceivedTime();
-    @Nullable Instant getReportChangedTime();
+public final class FeatureBuilderUtil {
+    private static final String CANNOT_SET_TARGET_MESSAGE = "Cannot set target for \"{0}\" because that attribute is not available";
+
+    public static String getCannotSetTargetMessage(final String attributeName) {
+        return MessageFormat.format(CANNOT_SET_TARGET_MESSAGE, attributeName);
+    }
+
+    private FeatureBuilderUtil() {
+        throw new AssertionError();
+    }
 }

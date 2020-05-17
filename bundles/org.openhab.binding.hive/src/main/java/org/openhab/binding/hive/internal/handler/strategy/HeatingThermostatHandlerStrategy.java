@@ -12,8 +12,6 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
-import javax.measure.quantity.Temperature;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.OnOffType;
@@ -25,11 +23,13 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.client.HeatingThermostatOperatingMode;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.OverrideMode;
 import org.openhab.binding.hive.internal.client.feature.HeatingThermostatFeature;
-
 import tec.uom.se.quantity.Quantities;
+
+import javax.measure.quantity.Temperature;
 
 /**
  * A {@link ThingHandlerStrategy} for handling
@@ -46,7 +46,7 @@ public final class HeatingThermostatHandlerStrategy extends ThingHandlerStrategy
             final Command command,
             final Node hiveNode
     ) {
-        return useFeatureSafely(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
+        return useFeature(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
             @Nullable HeatingThermostatFeature newHeatingThermostatFeature = null;
 
             if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET)
@@ -96,27 +96,35 @@ public final class HeatingThermostatHandlerStrategy extends ThingHandlerStrategy
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING, operatingModeChannel -> {
-                thingHandlerCallback.stateUpdated(operatingModeChannel, new StringType(heatingThermostatFeature.getOperatingMode().getDisplayValue().toString()));
+        useFeature(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
+            useAttribute(hiveNode, HeatingThermostatFeature.class, HiveApiConstants.ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_OPERATING_MODE, heatingThermostatFeature.getOperatingMode(), operatingModeAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING, operatingModeChannel -> {
+                    thingHandlerCallback.stateUpdated(operatingModeChannel, new StringType(operatingModeAttribute.getDisplayValue().toString()));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_STATE_OPERATING, operatingStateChannel -> {
-                thingHandlerCallback.stateUpdated(operatingStateChannel, new StringType(heatingThermostatFeature.getOperatingState().getDisplayValue().toString()));
+            useAttribute(hiveNode, HeatingThermostatFeature.class, HiveApiConstants.ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_OPERATING_STATE, heatingThermostatFeature.getOperatingState(), operatingStateAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_STATE_OPERATING, operatingStateChannel -> {
+                    thingHandlerCallback.stateUpdated(operatingStateChannel, new StringType(operatingStateAttribute.getDisplayValue().toString()));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET, targetHeatTemperatureChannel -> {
-                thingHandlerCallback.stateUpdated(
-                        targetHeatTemperatureChannel,
-                        new QuantityType<>(
-                                heatingThermostatFeature.getTargetHeatTemperature().getDisplayValue().getValue(),
-                                heatingThermostatFeature.getTargetHeatTemperature().getDisplayValue().getUnit()
-                        )
-                );
+            useAttribute(hiveNode, HeatingThermostatFeature.class, HiveApiConstants.ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_TARGET_HEAT_TEMPERATURE, heatingThermostatFeature.getTargetHeatTemperature(), targetHeatTemperatureAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET, targetHeatTemperatureChannel -> {
+                    thingHandlerCallback.stateUpdated(
+                            targetHeatTemperatureChannel,
+                            new QuantityType<>(
+                                    targetHeatTemperatureAttribute.getDisplayValue().getValue(),
+                                    targetHeatTemperatureAttribute.getDisplayValue().getUnit()
+                            )
+                    );
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE, operatingModeOverrideChannel -> {
-                thingHandlerCallback.stateUpdated(operatingModeOverrideChannel, OnOffType.from(heatingThermostatFeature.getTemporaryOperatingModeOverride().getDisplayValue() == OverrideMode.TRANSIENT));
+            useAttribute(hiveNode, HeatingThermostatFeature.class, HiveApiConstants.ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_TEMPORARY_OPERATING_MODE_OVERRIDE, heatingThermostatFeature.getTemporaryOperatingModeOverride(), operatingModeOverrideAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE, operatingModeOverrideChannel -> {
+                    thingHandlerCallback.stateUpdated(operatingModeOverrideChannel, OnOffType.from(operatingModeOverrideAttribute.getDisplayValue() == OverrideMode.TRANSIENT));
+                });
             });
         });
     }

@@ -21,6 +21,7 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.OverrideMode;
 import org.openhab.binding.hive.internal.client.WaterHeaterOperatingMode;
@@ -40,7 +41,7 @@ public final class WaterHeaterHandlerStrategy extends ThingHandlerStrategyBase {
             final Command command,
             final Node hiveNode
     ) {
-        return useFeatureSafely(hiveNode, WaterHeaterFeature.class, waterHeaterFeature -> {
+        return useFeature(hiveNode, WaterHeaterFeature.class, waterHeaterFeature -> {
             @Nullable WaterHeaterFeature newWaterHeaterFeature = null;
 
             if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_MODE_OPERATING)
@@ -79,20 +80,26 @@ public final class WaterHeaterHandlerStrategy extends ThingHandlerStrategyBase {
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, WaterHeaterFeature.class, waterHeaterFeature -> {
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING, operatingModeChannel -> {
-                thingHandlerCallback.stateUpdated(operatingModeChannel, new StringType(waterHeaterFeature.getOperatingMode().getDisplayValue().toString()));
+        useFeature(hiveNode, WaterHeaterFeature.class, waterHeaterFeature -> {
+            useAttribute(hiveNode, WaterHeaterFeature.class, HiveApiConstants.ATTRIBUTE_NAME_WATER_HEATER_V1_OPERATING_MODE, waterHeaterFeature.getOperatingMode(), operatingModeAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING, operatingModeChannel -> {
+                    thingHandlerCallback.stateUpdated(operatingModeChannel, new StringType(operatingModeAttribute.getDisplayValue().toString()));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_STATE_IS_ON, isOnChannel -> {
-                thingHandlerCallback.stateUpdated(isOnChannel, OnOffType.from(waterHeaterFeature.getIsOn().getDisplayValue()));
+            useAttribute(hiveNode, WaterHeaterFeature.class, HiveApiConstants.ATTRIBUTE_NAME_WATER_HEATER_V1_IS_ON, waterHeaterFeature.getIsOn(), isOnAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_EASY_STATE_IS_ON, isOnChannel -> {
+                    thingHandlerCallback.stateUpdated(isOnChannel, OnOffType.from(isOnAttribute.getDisplayValue()));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE, operatingModeOverrideChannel -> {
-                thingHandlerCallback.stateUpdated(
-                        operatingModeOverrideChannel,
-                        OnOffType.from(waterHeaterFeature.getTemporaryOperatingModeOverride().getDisplayValue() == OverrideMode.TRANSIENT)
-                );
+            useAttribute(hiveNode, WaterHeaterFeature.class, HiveApiConstants.ATTRIBUTE_NAME_WATER_HEATER_V1_TEMPORARY_OPERATING_MODE_OVERRIDE, waterHeaterFeature.getTemporaryOperatingModeOverride(), temporaryOperatingModeOverrideAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE, operatingModeOverrideChannel -> {
+                    thingHandlerCallback.stateUpdated(
+                            operatingModeOverrideChannel,
+                            OnOffType.from(temporaryOperatingModeOverrideAttribute.getDisplayValue() == OverrideMode.TRANSIENT)
+                    );
+                });
             });
         });
     }

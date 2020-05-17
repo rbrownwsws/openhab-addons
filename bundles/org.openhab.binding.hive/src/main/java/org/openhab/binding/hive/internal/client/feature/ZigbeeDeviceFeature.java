@@ -16,7 +16,6 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.hive.internal.client.BuilderUtil;
 import org.openhab.binding.hive.internal.client.Eui64;
 import org.openhab.binding.hive.internal.client.FeatureAttribute;
 
@@ -27,25 +26,19 @@ import org.openhab.binding.hive.internal.client.FeatureAttribute;
  */
 @NonNullByDefault
 public final class ZigbeeDeviceFeature implements Feature {
-    private final FeatureAttribute<Eui64> eui64;
-    private final FeatureAttribute<Integer> averageLQI;
-    private final FeatureAttribute<Integer> lastKnownLQI;
-    private final FeatureAttribute<Integer> averageRSSI;
-    private final FeatureAttribute<Integer> lastKnownRSSI;
+    private final @Nullable FeatureAttribute<Eui64> eui64;
+    private final @Nullable FeatureAttribute<Integer> averageLQI;
+    private final @Nullable FeatureAttribute<Integer> lastKnownLQI;
+    private final @Nullable FeatureAttribute<Integer> averageRSSI;
+    private final @Nullable FeatureAttribute<Integer> lastKnownRSSI;
 
     private ZigbeeDeviceFeature(
-            final FeatureAttribute<Eui64> eui64,
-            final FeatureAttribute<Integer> averageLQI,
-            final FeatureAttribute<Integer> lastKnownLQI,
-            final FeatureAttribute<Integer> averageRSSI,
-            final FeatureAttribute<Integer> lastKnownRSSI
+            final @Nullable FeatureAttribute<Eui64> eui64,
+            final @Nullable FeatureAttribute<Integer> averageLQI,
+            final @Nullable FeatureAttribute<Integer> lastKnownLQI,
+            final @Nullable FeatureAttribute<Integer> averageRSSI,
+            final @Nullable FeatureAttribute<Integer> lastKnownRSSI
     ) {
-        Objects.requireNonNull(eui64);
-        Objects.requireNonNull(averageLQI);
-        Objects.requireNonNull(lastKnownLQI);
-        Objects.requireNonNull(averageRSSI);
-        Objects.requireNonNull(lastKnownRSSI);
-
         this.eui64 = eui64;
         this.averageLQI = averageLQI;
         this.lastKnownLQI = lastKnownLQI;
@@ -53,23 +46,23 @@ public final class ZigbeeDeviceFeature implements Feature {
         this.lastKnownRSSI = lastKnownRSSI;
     }
 
-    public FeatureAttribute<Eui64> getEui64() {
+    public @Nullable FeatureAttribute<Eui64> getEui64() {
         return this.eui64;
     }
 
-    public FeatureAttribute<Integer> getAverageLQI() {
+    public @Nullable FeatureAttribute<Integer> getAverageLQI() {
         return this.averageLQI;
     }
 
-    public FeatureAttribute<Integer> getLastKnownLQI() {
+    public @Nullable FeatureAttribute<Integer> getLastKnownLQI() {
         return this.lastKnownLQI;
     }
 
-    public FeatureAttribute<Integer> getAverageRSSI() {
+    public @Nullable FeatureAttribute<Integer> getAverageRSSI() {
         return this.averageRSSI;
     }
 
-    public FeatureAttribute<Integer> getLastKnownRSSI() {
+    public @Nullable FeatureAttribute<Integer> getLastKnownRSSI() {
         return this.lastKnownRSSI;
     }
     
@@ -94,58 +87,43 @@ public final class ZigbeeDeviceFeature implements Feature {
                     .lastKnownRSSI(zigbeeDeviceFeature.getLastKnownRSSI());
         }
 
-        public Builder eui64(final FeatureAttribute<Eui64> eui64) {
-            this.eui64 = Objects.requireNonNull(eui64);
+        public Builder eui64(final @Nullable FeatureAttribute<Eui64> eui64) {
+            this.eui64 = eui64;
 
             return this;
         }
 
-        public Builder averageLQI(final FeatureAttribute<Integer> averageLQI) {
-            this.averageLQI = Objects.requireNonNull(averageLQI);
+        public Builder averageLQI(final @Nullable FeatureAttribute<Integer> averageLQI) {
+            this.averageLQI = averageLQI;
 
             return this;
         }
 
-        public Builder lastKnownLQI(final FeatureAttribute<Integer> lastKnownLQI) {
-            this.lastKnownLQI = Objects.requireNonNull(lastKnownLQI);
+        public Builder lastKnownLQI(final @Nullable FeatureAttribute<Integer> lastKnownLQI) {
+            this.lastKnownLQI = lastKnownLQI;
 
             return this;
         }
 
-        public Builder averageRSSI(final FeatureAttribute<Integer> averageRSSI) {
-            this.averageRSSI = Objects.requireNonNull(averageRSSI);
+        public Builder averageRSSI(final @Nullable FeatureAttribute<Integer> averageRSSI) {
+            this.averageRSSI = averageRSSI;
 
             return this;
         }
 
-        public Builder lastKnownRSSI(final FeatureAttribute<Integer> lastKnownRSSI) {
-            this.lastKnownRSSI = Objects.requireNonNull(lastKnownRSSI);
+        public Builder lastKnownRSSI(final @Nullable FeatureAttribute<Integer> lastKnownRSSI) {
+            this.lastKnownRSSI = lastKnownRSSI;
 
             return this;
         }
         
         public ZigbeeDeviceFeature build() {
-            final @Nullable FeatureAttribute<Eui64> eui64 = this.eui64;
-            final @Nullable FeatureAttribute<Integer> averageLQI = this.averageLQI;
-            final @Nullable FeatureAttribute<Integer> lastKnownLQI = this.lastKnownLQI;
-            final @Nullable FeatureAttribute<Integer> averageRSSI = this.averageRSSI;
-            final @Nullable FeatureAttribute<Integer> lastKnownRSSI = this.lastKnownRSSI;
-
-            if (eui64 == null
-                    || averageLQI == null
-                    || lastKnownLQI == null
-                    || averageRSSI == null
-                    || lastKnownRSSI == null
-            ) {
-                throw new IllegalStateException(BuilderUtil.REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE);
-            }
-
             return new ZigbeeDeviceFeature(
-                    eui64,
-                    averageLQI,
-                    lastKnownLQI,
-                    averageRSSI,
-                    lastKnownRSSI
+                    this.eui64,
+                    this.averageLQI,
+                    this.lastKnownLQI,
+                    this.averageRSSI,
+                    this.lastKnownRSSI
             );
         }
     }

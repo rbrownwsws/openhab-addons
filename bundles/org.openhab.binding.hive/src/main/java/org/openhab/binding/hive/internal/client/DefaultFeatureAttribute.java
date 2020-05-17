@@ -28,21 +28,21 @@ public final class DefaultFeatureAttribute<T> implements SettableFeatureAttribut
     private final @Nullable T targetValue;
     private final T displayValue;
     private final T reportedValue;
-    private final Instant reportReceivedTime;
-    private final Instant reportChangedTime;
+    private final @Nullable Instant reportReceivedTime;
+    private final @Nullable Instant reportChangedTime;
 
     private DefaultFeatureAttribute(
             final @Nullable T targetValue,
             final T displayValue,
             final T reportedValue,
-            final Instant reportChangedTime,
-            final Instant reportReceivedTime
+            final @Nullable Instant reportChangedTime,
+            final @Nullable Instant reportReceivedTime
     ) {
         this.targetValue = targetValue;
         this.displayValue = Objects.requireNonNull(displayValue);
         this.reportedValue = Objects.requireNonNull(reportedValue);
-        this.reportChangedTime = Objects.requireNonNull(reportChangedTime);
-        this.reportReceivedTime = Objects.requireNonNull(reportReceivedTime);
+        this.reportChangedTime = reportChangedTime;
+        this.reportReceivedTime = reportReceivedTime;
     }
 
     @Override
@@ -61,12 +61,12 @@ public final class DefaultFeatureAttribute<T> implements SettableFeatureAttribut
     }
 
     @Override
-    public Instant getReportReceivedTime() {
+    public @Nullable Instant getReportReceivedTime() {
         return this.reportReceivedTime;
     }
 
     @Override
-    public Instant getReportChangedTime() {
+    public @Nullable Instant getReportChangedTime() {
         return this.reportChangedTime;
     }
 
@@ -126,14 +126,14 @@ public final class DefaultFeatureAttribute<T> implements SettableFeatureAttribut
             return this;
         }
 
-        public Builder<T> reportReceivedTime(final Instant reportReceivedTime) {
-            this.reportReceivedTime = Objects.requireNonNull(reportReceivedTime);
+        public Builder<T> reportReceivedTime(final @Nullable Instant reportReceivedTime) {
+            this.reportReceivedTime = reportReceivedTime;
 
             return this;
         }
 
-        public Builder<T> reportChangedTime(final Instant reportChangedTime) {
-            this.reportChangedTime = Objects.requireNonNull(reportChangedTime);
+        public Builder<T> reportChangedTime(final @Nullable Instant reportChangedTime) {
+            this.reportChangedTime = reportChangedTime;
 
             return this;
         }
@@ -141,13 +141,9 @@ public final class DefaultFeatureAttribute<T> implements SettableFeatureAttribut
         public DefaultFeatureAttribute<T> build() {
             final @Nullable T displayValue = this.displayValue;
             final @Nullable T reportedValue = this.reportedValue;
-            final @Nullable Instant reportReceivedTime = this.reportReceivedTime;
-            final @Nullable Instant reportChangedTime = this.reportChangedTime;
 
             if (displayValue == null
                     || reportedValue == null
-                    || reportReceivedTime == null
-                    || reportChangedTime == null
             ) {
                 throw new IllegalStateException(BuilderUtil.REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE);
             }
@@ -156,8 +152,8 @@ public final class DefaultFeatureAttribute<T> implements SettableFeatureAttribut
                     this.targetValue,
                     displayValue,
                     reportedValue,
-                    reportChangedTime,
-                    reportReceivedTime
+                    this.reportChangedTime,
+                    this.reportReceivedTime
             );
         }
     }

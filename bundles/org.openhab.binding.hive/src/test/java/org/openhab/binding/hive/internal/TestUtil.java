@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.hive.internal;
 
+import static org.mockito.Mockito.when;
+
 import java.io.*;
 import java.time.Instant;
 import java.util.Map;
@@ -19,6 +21,8 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.config.core.Configuration;
+import org.eclipse.smarthome.core.thing.Channel;
+import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
@@ -115,5 +119,16 @@ public class TestUtil {
                 .parentNodeId(new NodeId(UUID.randomUUID()))
                 .features(features)
                 .build();
+    }
+
+    public static void initMockChannel(
+            final Thing thingMock,
+            final String channelId,
+            final Channel channelMock,
+            final ChannelUID channelUidMock
+    ) {
+        when(thingMock.getChannel(channelId)).thenReturn(channelMock);
+        when(channelMock.getUID()).thenReturn(channelUidMock);
+        when(channelUidMock.getId()).thenReturn(channelId);
     }
 }

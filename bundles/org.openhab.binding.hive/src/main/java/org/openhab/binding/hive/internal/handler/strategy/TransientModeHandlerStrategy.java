@@ -12,8 +12,6 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
-import java.time.Duration;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
@@ -24,8 +22,11 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.TransientModeFeature;
+
+import java.time.Duration;
 
 /**
  * A {@link ThingHandlerStrategy} for handling
@@ -41,7 +42,7 @@ public final class TransientModeHandlerStrategy extends ThingHandlerStrategyBase
             final Command command,
             final Node hiveNode
     ) {
-        return useFeatureSafely(hiveNode, TransientModeFeature.class, transientModeFeature -> {
+        return useFeature(hiveNode, TransientModeFeature.class, transientModeFeature -> {
             @Nullable TransientModeFeature newTransientModeFeature = null;
 
             if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_TRANSIENT_DURATION)
@@ -71,22 +72,30 @@ public final class TransientModeHandlerStrategy extends ThingHandlerStrategyBase
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, TransientModeFeature.class, transientModeFeature -> {
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_DURATION, transientDurationChannel -> {
-                final long durationMins = transientModeFeature.getDuration().getDisplayValue().toMinutes();
-                thingHandlerCallback.stateUpdated(transientDurationChannel, new DecimalType(durationMins));
+        useFeature(hiveNode, TransientModeFeature.class, transientModeFeature -> {
+            useAttribute(hiveNode, TransientModeFeature.class, HiveApiConstants.ATTRIBUTE_NAME_TRANSIENT_MODE_V1_DURATION, transientModeFeature.getDuration(), durationAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_TRANSIENT_DURATION, transientDurationChannel -> {
+                    final long durationMins = durationAttribute.getDisplayValue().toMinutes();
+                    thingHandlerCallback.stateUpdated(transientDurationChannel, new DecimalType(durationMins));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_ENABLED, transientEnabledChannel -> {
-                thingHandlerCallback.stateUpdated(transientEnabledChannel, OnOffType.from(transientModeFeature.getIsEnabled().getDisplayValue()));
+            useAttribute(hiveNode, TransientModeFeature.class, HiveApiConstants.ATTRIBUTE_NAME_TRANSIENT_MODE_V1_IS_ENABLED, transientModeFeature.getIsEnabled(), isEnabledAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_TRANSIENT_ENABLED, transientEnabledChannel -> {
+                    thingHandlerCallback.stateUpdated(transientEnabledChannel, OnOffType.from(isEnabledAttribute.getDisplayValue()));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_START_TIME, transientStartTimeChannel -> {
-                thingHandlerCallback.stateUpdated(transientStartTimeChannel, new DateTimeType(transientModeFeature.getStartDatetime().getDisplayValue()));
+            useAttribute(hiveNode, TransientModeFeature.class, HiveApiConstants.ATTRIBUTE_NAME_TRANSIENT_MODE_V1_START_DATETIME, transientModeFeature.getStartDatetime(), startDatetimeAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_TRANSIENT_START_TIME, transientStartTimeChannel -> {
+                    thingHandlerCallback.stateUpdated(transientStartTimeChannel, new DateTimeType(startDatetimeAttribute.getDisplayValue()));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_END_TIME, transientEndTimeChannel -> {
-                thingHandlerCallback.stateUpdated(transientEndTimeChannel, new DateTimeType(transientModeFeature.getEndDatetime().getDisplayValue()));
+            useAttribute(hiveNode, TransientModeFeature.class, HiveApiConstants.ATTRIBUTE_NAME_TRANSIENT_MODE_V1_END_DATETIME, transientModeFeature.getEndDatetime(), endDatetimeAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_TRANSIENT_END_TIME, transientEndTimeChannel -> {
+                    thingHandlerCallback.stateUpdated(transientEndTimeChannel, new DateTimeType(endDatetimeAttribute.getDisplayValue()));
+                });
             });
         });
     }

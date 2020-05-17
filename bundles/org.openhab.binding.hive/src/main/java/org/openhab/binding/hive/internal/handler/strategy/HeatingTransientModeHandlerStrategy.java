@@ -12,11 +12,6 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
-import java.time.Instant;
-
-import javax.measure.Quantity;
-import javax.measure.quantity.Temperature;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.QuantityType;
@@ -28,9 +23,12 @@ import org.openhab.binding.hive.internal.HiveBindingConstants;
 import org.openhab.binding.hive.internal.client.DefaultFeatureAttribute;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.TransientModeHeatingActionsFeature;
-
 import tec.uom.se.quantity.Quantities;
 import tec.uom.se.unit.Units;
+
+import javax.measure.Quantity;
+import javax.measure.quantity.Temperature;
+import java.time.Instant;
 
 /**
  * A {@link ThingHandlerStrategy} for handling channels that interface with
@@ -111,14 +109,16 @@ public final class HeatingTransientModeHandlerStrategy extends ThingHandlerStrat
             final Node hiveNode
     ) {
         final TransientModeHeatingActionsFeature transientModeActionsFeature = getEffectiveTransientModeActionsFeature(hiveNode);
-        useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST, boostTargetHeatTemperatureChannel -> {
-            thingHandlerCallback.stateUpdated(
-                    boostTargetHeatTemperatureChannel,
-                    new QuantityType<>(
-                            transientModeActionsFeature.getBoostTargetTemperature().getDisplayValue().getValue(),
-                            transientModeActionsFeature.getBoostTargetTemperature().getDisplayValue().getUnit()
-                    )
-            );
+        useAttribute(hiveNode, TransientModeHeatingActionsFeature.class, "boostTargetTemperature", transientModeActionsFeature.getBoostTargetTemperature(), boostTargetTemperatureAttribute -> {
+            useChannel(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST, boostTargetHeatTemperatureChannel -> {
+                thingHandlerCallback.stateUpdated(
+                        boostTargetHeatTemperatureChannel,
+                        new QuantityType<>(
+                                boostTargetTemperatureAttribute.getDisplayValue().getValue(),
+                                boostTargetTemperatureAttribute.getDisplayValue().getUnit()
+                        )
+                );
+            });
         });
     }
 }

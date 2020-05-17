@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URI;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 
 import javax.measure.Quantity;
@@ -51,6 +50,14 @@ public final class DefaultNodeRepository implements NodeRepository {
 
     private static URI getEndpointPathForNode(final NodeId nodeId) {
         return HiveApiConstants.ENDPOINT_NODE.resolve(nodeId.toString());
+    }
+
+    private static <T> @Nullable T safeGetTargetValue(final @Nullable SettableFeatureAttribute<T> attribute) {
+        if (attribute != null) {
+            return attribute.getTargetValue();
+        } else {
+            return null;
+        }
     }
 
     private static BigDecimal temperatureToDtoValue(final Quantity<Temperature> temperature) {
@@ -165,40 +172,17 @@ public final class DefaultNodeRepository implements NodeRepository {
     private static PhysicalDeviceFeature getPhysicalDeviceFeatureFromDto(
             final PhysicalDeviceV1FeatureDto physicalDeviceV1FeatureDto
     ) throws HiveClientResponseException {
-        final FeatureAttribute<String> hardwareIdentifier;
+        final @Nullable FeatureAttribute<String> hardwareIdentifier;
 
         final @Nullable FeatureAttributeDto<String> nativeIdentifierAttributeDto = physicalDeviceV1FeatureDto.nativeIdentifier;
         final @Nullable FeatureAttributeDto<String> hardwareIdentifierAttributeDto = physicalDeviceV1FeatureDto.hardwareIdentifier;
 
         if (nativeIdentifierAttributeDto != null) {
-            hardwareIdentifier = FeatureAttributeFactory.getReadOnlyFromDto(physicalDeviceV1FeatureDto.nativeIdentifier);
+            hardwareIdentifier = FeatureAttributeFactory.getReadOnlyFromDto(nativeIdentifierAttributeDto);
         } else if (hardwareIdentifierAttributeDto != null) {
-            // Weirdly this specific attribute does not have time fields.
-            // Make it manually with fake timestamps.
-
-            final @Nullable String reportedValue = hardwareIdentifierAttributeDto.reportedValue;
-            final @Nullable String displayValue = hardwareIdentifierAttributeDto.displayValue;
-
-            if (reportedValue == null) {
-                throw new HiveClientResponseException("Hardware Identifier reported value unexpectedly null");
-            }
-            if (displayValue == null) {
-                throw new HiveClientResponseException("Hardware Identifier display value unexpectedly null");
-            }
-
-            hardwareIdentifier = DefaultFeatureAttribute.<String>builder()
-                    .displayValue(displayValue)
-                    .reportedValue(reportedValue)
-                    .reportChangedTime(Instant.now())
-                    .reportReceivedTime(Instant.now())
-                    .build();
+            hardwareIdentifier = FeatureAttributeFactory.getReadOnlyFromDto(hardwareIdentifierAttributeDto);
         } else {
-            hardwareIdentifier = DefaultFeatureAttribute.<String>builder()
-                    .displayValue("UNKNOWN")
-                    .reportedValue("UNKNOWN")
-                    .reportChangedTime(Instant.now())
-                    .reportReceivedTime(Instant.now())
-                    .build();
+            hardwareIdentifier = null;
         }
 
         return PhysicalDeviceFeature.builder()
@@ -313,8 +297,8 @@ public final class DefaultNodeRepository implements NodeRepository {
             final FeaturesDto featuresDto,
             final AutoBoostFeature autoBoostFeature
     ) {
-        final @Nullable Duration autoBoostDurationTarget = autoBoostFeature.getAutoBoostDuration().getTargetValue();
-        final @Nullable Quantity<Temperature> autoBoostTargetHeatTemperatureTarget = autoBoostFeature.getAutoBoostTargetHeatTemperature().getTargetValue();
+        final @Nullable Duration autoBoostDurationTarget = safeGetTargetValue(autoBoostFeature.getAutoBoostDuration());
+        final @Nullable Quantity<Temperature> autoBoostTargetHeatTemperatureTarget = safeGetTargetValue(autoBoostFeature.getAutoBoostTargetHeatTemperature());
 
         if (autoBoostDurationTarget != null
                 || autoBoostTargetHeatTemperatureTarget != null
@@ -341,7 +325,7 @@ public final class DefaultNodeRepository implements NodeRepository {
             final FeaturesDto featuresDto,
             final OnOffDeviceFeature onOffDeviceFeature
     ) {
-        final @Nullable OnOffMode onOffModeTarget = onOffDeviceFeature.getMode().getTargetValue();
+        final @Nullable OnOffMode onOffModeTarget = safeGetTargetValue(onOffDeviceFeature.getMode());
         if (onOffModeTarget != null) {
             final OnOffDeviceV1FeatureDto onOffDeviceV1FeatureDto = new OnOffDeviceV1FeatureDto();
             featuresDto.on_off_device_v1 = onOffDeviceV1FeatureDto;
@@ -356,9 +340,9 @@ public final class DefaultNodeRepository implements NodeRepository {
             final FeaturesDto featuresDto,
             final HeatingThermostatFeature heatingThermostatFeature
     ) {
-        final @Nullable HeatingThermostatOperatingMode operatingModeTarget = heatingThermostatFeature.getOperatingMode().getTargetValue();
-        final @Nullable Quantity<Temperature> targetHeatTemperatureTarget = heatingThermostatFeature.getTargetHeatTemperature().getTargetValue();
-        final @Nullable OverrideMode temporaryOperatingModeOverrideTarget = heatingThermostatFeature.getTemporaryOperatingModeOverride().getTargetValue();
+        final @Nullable HeatingThermostatOperatingMode operatingModeTarget = safeGetTargetValue(heatingThermostatFeature.getOperatingMode());
+        final @Nullable Quantity<Temperature> targetHeatTemperatureTarget = safeGetTargetValue(heatingThermostatFeature.getTargetHeatTemperature());
+        final @Nullable OverrideMode temporaryOperatingModeOverrideTarget = safeGetTargetValue(heatingThermostatFeature.getTemporaryOperatingModeOverride());
 
         // If one of the HeatingThermostatFeature attributes has been set...
         if (operatingModeTarget != null
@@ -392,8 +376,8 @@ public final class DefaultNodeRepository implements NodeRepository {
             final FeaturesDto featuresDto,
             final TransientModeFeature transientModeFeature
     ) {
-        final @Nullable Duration durationTarget = transientModeFeature.getDuration().getTargetValue();
-        final @Nullable Boolean isEnabledTarget = transientModeFeature.getIsEnabled().getTargetValue();
+        final @Nullable Duration durationTarget = safeGetTargetValue(transientModeFeature.getDuration());
+        final @Nullable Boolean isEnabledTarget = safeGetTargetValue(transientModeFeature.getIsEnabled());
 
         if (durationTarget != null || isEnabledTarget != null) {
             @Nullable TransientModeV1FeatureDto transientModeV1FeatureDto = featuresDto.transient_mode_v1;
@@ -420,7 +404,7 @@ public final class DefaultNodeRepository implements NodeRepository {
             final FeaturesDto featuresDto,
             final TransientModeHeatingActionsFeature transientModeHeatingActionsFeature
     ) {
-        final @Nullable Quantity<Temperature> boostTargetTemperatureTarget = transientModeHeatingActionsFeature.getBoostTargetTemperature().getTargetValue();
+        final @Nullable Quantity<Temperature> boostTargetTemperatureTarget = safeGetTargetValue(transientModeHeatingActionsFeature.getBoostTargetTemperature());
         if (boostTargetTemperatureTarget != null) {
             @Nullable TransientModeV1FeatureDto transientModeV1FeatureDto = featuresDto.transient_mode_v1;
             if (transientModeV1FeatureDto == null) {
@@ -444,8 +428,8 @@ public final class DefaultNodeRepository implements NodeRepository {
             final FeaturesDto featuresDto,
             final WaterHeaterFeature waterHeaterFeature
     ) {
-        final @Nullable WaterHeaterOperatingMode operatingModeTarget = waterHeaterFeature.getOperatingMode().getTargetValue();
-        final @Nullable OverrideMode temporaryOperatingModeOverrideTarget = waterHeaterFeature.getTemporaryOperatingModeOverride().getTargetValue();
+        final @Nullable WaterHeaterOperatingMode operatingModeTarget = safeGetTargetValue(waterHeaterFeature.getOperatingMode());
+        final @Nullable OverrideMode temporaryOperatingModeOverrideTarget = safeGetTargetValue(waterHeaterFeature.getTemporaryOperatingModeOverride());
 
         if (operatingModeTarget != null || temporaryOperatingModeOverrideTarget != null) {
             final WaterHeaterV1FeatureDto waterHeaterV1FeatureDto = new WaterHeaterV1FeatureDto();
@@ -571,12 +555,15 @@ public final class DefaultNodeRepository implements NodeRepository {
                 throw new HiveClientResponseException("DeviceManagement feature is unexpectedly null.");
             }
 
+            final @Nullable ProductType productType;
             final @Nullable FeatureAttributeDto<ProductType> productTypeFeatureAttributeDto = deviceManagementV1FeatureDto.productType;
             if (productTypeFeatureAttributeDto == null) {
-                throw new HiveClientResponseException("DeviceManagement>ProductType attribute is unexpectedly null.");
+                // Force product type for synthetic nodes created by NANO1 hub.
+                productType = ProductType.UNKNOWN;
+            } else {
+                productType = productTypeFeatureAttributeDto.reportedValue;
             }
 
-            final @Nullable ProductType productType = productTypeFeatureAttributeDto.reportedValue;
             if (productType == null) {
                 throw new HiveClientResponseException("ProductType is unexpectedly null.");
             }

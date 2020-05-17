@@ -17,6 +17,7 @@ import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.ZigbeeDeviceFeature;
 
@@ -34,26 +35,36 @@ public final class ZigbeeDeviceHandlerStrategy extends ThingHandlerStrategyBase 
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, ZigbeeDeviceFeature.class, zigbeeDeviceFeature -> {
-            thing.setProperty(HiveBindingConstants.PROPERTY_EUI64, zigbeeDeviceFeature.getEui64().toString());
+        useFeature(hiveNode, ZigbeeDeviceFeature.class, zigbeeDeviceFeature -> {
+            useAttribute(hiveNode, ZigbeeDeviceFeature.class, HiveApiConstants.ATTRIBUTE_NAME_ZIGBEE_DEVICE_V1_EUI64, zigbeeDeviceFeature.getEui64(), eui64Attribute -> {
+                thing.setProperty(HiveBindingConstants.PROPERTY_EUI64, eui64Attribute.getDisplayValue().toString());
 
-            // TODO: Extract MAC address from EUI64?
-            //thing.setProperty(Thing.PROPERTY_MAC_ADDRESS, xxx);
-
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_RADIO_LQI_AVERAGE, averageLqiChannel -> {
-                thingHandlerCallback.stateUpdated(averageLqiChannel, new DecimalType(zigbeeDeviceFeature.getAverageLQI().getDisplayValue()));
+                // TODO: Extract MAC address from EUI64?
+                //thing.setProperty(Thing.PROPERTY_MAC_ADDRESS, xxx);
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_RADIO_LQI_LAST_KNOWN, lastKnownLqiChannel -> {
-                thingHandlerCallback.stateUpdated(lastKnownLqiChannel, new DecimalType(zigbeeDeviceFeature.getLastKnownLQI().getDisplayValue()));
+            useAttribute(hiveNode, ZigbeeDeviceFeature.class, HiveApiConstants.ATTRIBUTE_NAME_ZIGBEE_DEVICE_V1_AVERAGE_LQI, zigbeeDeviceFeature.getAverageLQI(), averageLQIAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_RADIO_LQI_AVERAGE, averageLqiChannel -> {
+                    thingHandlerCallback.stateUpdated(averageLqiChannel, new DecimalType(averageLQIAttribute.getDisplayValue()));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_RADIO_RSSI_AVERAGE, averageRssiChannel -> {
-                thingHandlerCallback.stateUpdated(averageRssiChannel, new DecimalType(zigbeeDeviceFeature.getAverageRSSI().getDisplayValue()));
+            useAttribute(hiveNode, ZigbeeDeviceFeature.class, HiveApiConstants.ATTRIBUTE_NAME_ZIGBEE_DEVICE_V1_LAST_KNOWN_LQI, zigbeeDeviceFeature.getLastKnownLQI(), lastKnownLQIAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_RADIO_LQI_LAST_KNOWN, lastKnownLqiChannel -> {
+                    thingHandlerCallback.stateUpdated(lastKnownLqiChannel, new DecimalType(lastKnownLQIAttribute.getDisplayValue()));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_RADIO_RSSI_LAST_KNOWN, lastKnownRssiChannel -> {
-                thingHandlerCallback.stateUpdated(lastKnownRssiChannel, new DecimalType(zigbeeDeviceFeature.getLastKnownRSSI().getDisplayValue()));
+            useAttribute(hiveNode, ZigbeeDeviceFeature.class, HiveApiConstants.ATTRIBUTE_NAME_ZIGBEE_DEVICE_V1_AVERAGE_RSSI, zigbeeDeviceFeature.getAverageRSSI(), averageRSSIAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_RADIO_RSSI_AVERAGE, averageRSSIChannel -> {
+                    thingHandlerCallback.stateUpdated(averageRSSIChannel, new DecimalType(averageRSSIAttribute.getDisplayValue()));
+                });
+            });
+
+            useAttribute(hiveNode, ZigbeeDeviceFeature.class, HiveApiConstants.ATTRIBUTE_NAME_ZIGBEE_DEVICE_V1_LAST_KNOWN_RSSI, zigbeeDeviceFeature.getLastKnownRSSI(), lastKnownRSSIAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_RADIO_RSSI_LAST_KNOWN, lastKnownRSSIChannel -> {
+                    thingHandlerCallback.stateUpdated(lastKnownRSSIChannel, new DecimalType(lastKnownRSSIAttribute.getDisplayValue()));
+                });
             });
         });
     }

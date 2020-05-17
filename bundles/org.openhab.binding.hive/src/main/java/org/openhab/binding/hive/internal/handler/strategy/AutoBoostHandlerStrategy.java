@@ -12,10 +12,6 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
-import java.time.Duration;
-
-import javax.measure.quantity.Temperature;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -25,10 +21,13 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.AutoBoostFeature;
-
 import tec.uom.se.quantity.Quantities;
+
+import javax.measure.quantity.Temperature;
+import java.time.Duration;
 
 /**
  * A {@link ThingHandlerStrategy} for handling
@@ -45,7 +44,7 @@ public final class AutoBoostHandlerStrategy extends ThingHandlerStrategyBase {
             final Command command,
             final Node hiveNode
     ) {
-        return useFeatureSafely(hiveNode, AutoBoostFeature.class, autoBoostFeature -> {
+        return useFeature(hiveNode, AutoBoostFeature.class, autoBoostFeature -> {
             @Nullable AutoBoostFeature updatedAutoBoostFeature = null;
             if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_AUTO_BOOST_DURATION)
                     && command instanceof DecimalType
@@ -83,19 +82,23 @@ public final class AutoBoostHandlerStrategy extends ThingHandlerStrategyBase {
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, AutoBoostFeature.class, autoBoostFeature -> {
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_AUTO_BOOST_DURATION, autoBoostDurationChannel -> {
-                thingHandlerCallback.stateUpdated(autoBoostDurationChannel, new DecimalType(autoBoostFeature.getAutoBoostDuration().getDisplayValue().toMinutes()));
+        useFeature(hiveNode, AutoBoostFeature.class, autoBoostFeature -> {
+            useAttribute(hiveNode, AutoBoostFeature.class, HiveApiConstants.ATTRIBUTE_NAME_AUTO_BOOST_V1_AUTO_BOOST_DURATION, autoBoostFeature.getAutoBoostDuration(), autoBoostDurationAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_AUTO_BOOST_DURATION, autoBoostDurationChannel -> {
+                    thingHandlerCallback.stateUpdated(autoBoostDurationChannel, new DecimalType(autoBoostDurationAttribute.getDisplayValue().toMinutes()));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_AUTO_BOOST_TEMPERATURE_TARGET, autoBoostTargetHeatTemperatureChannel -> {
-                thingHandlerCallback.stateUpdated(
-                        autoBoostTargetHeatTemperatureChannel,
-                        new QuantityType<>(
-                                autoBoostFeature.getAutoBoostTargetHeatTemperature().getDisplayValue().getValue(),
-                                autoBoostFeature.getAutoBoostTargetHeatTemperature().getDisplayValue().getUnit()
-                        )
-                );
+            useAttribute(hiveNode, AutoBoostFeature.class, HiveApiConstants.ATTRIBUTE_NAME_AUTO_BOOST_V1_AUTO_BOOST_TARGET_HEAT_TEMPERATURE, autoBoostFeature.getAutoBoostTargetHeatTemperature(), autoBoostTargetHeatTemperatureAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_AUTO_BOOST_TEMPERATURE_TARGET, autoBoostTargetHeatTemperatureChannel -> {
+                    thingHandlerCallback.stateUpdated(
+                            autoBoostTargetHeatTemperatureChannel,
+                            new QuantityType<>(
+                                    autoBoostTargetHeatTemperatureAttribute.getDisplayValue().getValue(),
+                                    autoBoostTargetHeatTemperatureAttribute.getDisplayValue().getUnit()
+                            )
+                    );
+                });
             });
         });
     }

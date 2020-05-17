@@ -16,13 +16,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,10 +66,15 @@ import org.slf4j.LoggerFactory;
 public final class DefaultHiveAccountHandler extends BaseBridgeHandler implements HiveAccountHandler {
     private static final Pattern UUID_REGEX = Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
 
+    private static final int POLLING_MINIMAL_INTERVAL_SECONDS = 10;
+    private static final int POLLING_INITIAL_DELAY_SECONDS = 0;
+    private static final double POLLING_BACKOFF_FACTOR = 2;
+    private static final int POLLING_MAXIMUM_BACKOFF_INTERVAL_SECONDS = 600;
+    private static final Duration POLLING_MAXIMUM_RETRY_TIME = Duration.ofHours(24);
+
     private final Logger logger = LoggerFactory.getLogger(DefaultHiveAccountHandler.class);
 
     private final Map<NodeId, HiveThingManager> hiveThingManagers = new HashMap<>();
-    private final ReentrantLock accountStateLock = new ReentrantLock();
 
     private final HiveClientFactory hiveClientFactory;
     private final HiveDiscoveryService discoveryService;
@@ -75,6 +82,12 @@ public final class DefaultHiveAccountHandler extends BaseBridgeHandler implement
     private final @Nullable Phaser testingPhaser;
 
     private @Nullable ScheduledFuture<?> pollingJob = null;
+    private int normalPollingIntervalSeconds;
+
+    private Instant lastSuccessfulPoll;
+    private boolean pollingBackingOff;
+    private int backoffPollingIntervalSeconds;
+
 
     private @Nullable HiveClient hiveClient = null;
 
@@ -109,6 +122,8 @@ public final class DefaultHiveAccountHandler extends BaseBridgeHandler implement
         this.discoveryService = discoveryServiceFactory.create(bridge.getUID());
         this.testingPhaser = testingPhaser;
 
+        this.lastSuccessfulPoll = Instant.EPOCH;
+
         if (testingPhaser != null) {
             testingPhaser.register();
         }
@@ -118,58 +133,65 @@ public final class DefaultHiveAccountHandler extends BaseBridgeHandler implement
     public void initialize() {
         updateStatus(ThingStatus.UNKNOWN, ThingStatusDetail.CONFIGURATION_PENDING);
 
-        this.scheduler.execute(() -> {
-            // The the openHAB runtime should ensure none of this are null.
-            // Do a little dance to make the null checker happy.
-            final HiveAccountConfig config = getConfigAs(HiveAccountConfig.class);
-            final @Nullable String username = config.username;
-            final @Nullable String password = config.password;
-            final @Nullable Integer pollingInterval = config.pollingInterval;
-            if (username == null || password == null || pollingInterval == null) {
-                throw new IllegalStateException("Config is malformed");
+        this.scheduler.execute(this::doInit);
+    }
+
+    private synchronized void doInit() {
+        // The the openHAB runtime should ensure none of these are null.
+        // Do a little dance to make the null checker happy.
+        final HiveAccountConfig config = getConfigAs(HiveAccountConfig.class);
+        final @Nullable String username = config.username;
+        final @Nullable String password = config.password;
+        final @Nullable Integer pollingInterval = config.pollingInterval;
+        if (username == null || password == null || pollingInterval == null) {
+            throw new IllegalStateException("Config is malformed");
+        }
+
+        try {
+            this.hiveClient = this.hiveClientFactory.newClient(
+                    username,
+                    password
+            );
+
+            this.pollingBackingOff = false;
+            this.normalPollingIntervalSeconds = Math.max(pollingInterval, POLLING_MINIMAL_INTERVAL_SECONDS);
+            this.backoffPollingIntervalSeconds = this.normalPollingIntervalSeconds;
+
+            this.pollingJob = this.scheduler.scheduleWithFixedDelay(
+                    this::poll,
+                    POLLING_INITIAL_DELAY_SECONDS,
+                    this.normalPollingIntervalSeconds,
+                    TimeUnit.SECONDS
+            );
+
+            updateStatus(ThingStatus.ONLINE);
+        } catch (final HiveApiAuthenticationException ex) {
+            updateStatus(
+                    ThingStatus.OFFLINE,
+                    ThingStatusDetail.CONFIGURATION_ERROR,
+                    "Username and Password are not correct."
+            );
+        } catch (final HiveException ex) {
+            updateStatus(
+                    ThingStatus.OFFLINE,
+                    ThingStatusDetail.COMMUNICATION_ERROR,
+                    "Something went wrong communicating with the Hive Api. Details: " + ex.getMessage()
+            );
+            this.logger.debug("Something went wrong communicating with the Hive Api while initialising an account handler.", ex);
+        } catch (final Exception ex) {
+            updateStatus(
+                    ThingStatus.OFFLINE,
+                    ThingStatusDetail.NONE,
+                    "Something went very wrong. Details: " + ex.getMessage()
+            );
+            this.logger.debug("Something very wrong initialising an account handler.", ex);
+        } finally {
+            // If we are testing synchronise with the test.
+            final @Nullable Phaser testingPhaser = this.testingPhaser;
+            if (testingPhaser != null) {
+                testingPhaser.arriveAndAwaitAdvance();
             }
-
-            try {
-                this.hiveClient = this.hiveClientFactory.newClient(
-                        username,
-                        password
-                );
-
-                this.pollingJob = this.scheduler.scheduleWithFixedDelay(
-                        this::poll,
-                        0,
-                        Math.max(pollingInterval, 1),
-                        TimeUnit.SECONDS
-                );
-
-                updateStatus(ThingStatus.ONLINE);
-            } catch (final HiveApiAuthenticationException ex) {
-                updateStatus(
-                        ThingStatus.OFFLINE,
-                        ThingStatusDetail.CONFIGURATION_ERROR,
-                        "Username and Password are not correct."
-                );
-            } catch (final HiveException ex) {
-                updateStatus(
-                        ThingStatus.OFFLINE,
-                        ThingStatusDetail.COMMUNICATION_ERROR,
-                        "Something went wrong communicating with the Hive Api. Details: " + ex.getMessage()
-                );
-                this.logger.debug("Something went wrong communicating with the Hive Api while initialising an account handler.", ex);
-            } catch (final RuntimeException ex) {
-                updateStatus(
-                        ThingStatus.OFFLINE,
-                        ThingStatusDetail.NONE,
-                        "Something went very wrong. Details: " + ex.getMessage()
-                );
-                this.logger.debug("Something very wrong initialising an account handler.", ex);
-            } finally {
-                final @Nullable Phaser testingPhaser = this.testingPhaser;
-                if (testingPhaser != null) {
-                    testingPhaser.arriveAndAwaitAdvance();
-                }
-            }
-        });
+        }
     }
 
     @Override
@@ -269,8 +291,9 @@ public final class DefaultHiveAccountHandler extends BaseBridgeHandler implement
         }
     }
 
-    private void poll() {
-        this.accountStateLock.lock();
+    private synchronized void poll() {
+        // Wrap everything in a try-catch because we do not ever want the
+        // polling job to stop unless we do it ourselves.
         try {
             final @Nullable HiveClient hiveClient = this.hiveClient;
             if (hiveClient == null) {
@@ -294,15 +317,112 @@ public final class DefaultHiveAccountHandler extends BaseBridgeHandler implement
                 }
             }
 
+            this.lastSuccessfulPoll = Instant.now();
+
+            // Everything has gone ok so return to normal polling if we have
+            // been backing off.
+            if (this.pollingBackingOff) {
+                this.logger.debug("Polling went ok! Returning to normal polling schedule.");
+
+                // Reset backoff parameters
+                this.pollingBackingOff = false;
+                this.backoffPollingIntervalSeconds = this.normalPollingIntervalSeconds;
+
+                // Make sure the old polling job is done.
+                final @Nullable ScheduledFuture<?> oldPollingJob = this.pollingJob;
+                if (oldPollingJob != null) {
+                    oldPollingJob.cancel(false);
+                }
+
+                // Start a new repeating polling job
+                this.pollingJob = this.scheduler.scheduleWithFixedDelay(
+                        this::poll,
+                        this.normalPollingIntervalSeconds,
+                        this.normalPollingIntervalSeconds,
+                        TimeUnit.SECONDS
+                );
+
+                // Make the thing online again.
+                updateStatus(ThingStatus.ONLINE);
+            }
+
             // Update the last poll timestamp channel
             updateState(
                     HiveBindingConstants.CHANNEL_LAST_POLL_TIMESTAMP,
-                    new DateTimeType(Instant.now().atZone(ZoneId.systemDefault()))
+                    new DateTimeType(this.lastSuccessfulPoll.atZone(ZoneId.systemDefault()))
+            );
+        } catch (final HiveApiAuthenticationException ex) {
+            // Stop polling. There is no point if we are not authenticated any more.
+            final @Nullable ScheduledFuture<?> pollingJob = this.pollingJob;
+            if (pollingJob != null) {
+                pollingJob.cancel(false);
+            }
+
+            updateStatus(
+                    ThingStatus.OFFLINE,
+                    ThingStatusDetail.CONFIGURATION_ERROR,
+                    "Authentication failed - Have you changed your password?"
             );
         } catch (final Exception ex) {
             this.logger.debug("Polling failed with exception", ex);
-        } finally {
-            this.accountStateLock.unlock();
+
+            // Start backing off
+            this.pollingBackingOff = true;
+
+            // Cancel periodic polling / make sure old job is done.
+            final @Nullable ScheduledFuture<?> oldPollingJob = this.pollingJob;
+            if (oldPollingJob != null) {
+                oldPollingJob.cancel(false);
+            }
+
+            String message = MessageFormat.format(
+                    "Something went wrong polling the Hive API."
+                            + " It is now {0}."
+                            + " Last successful poll was at {1}."
+                            + " We have not had a successful poll for {2} seconds.",
+                    Instant.now().atZone(ZoneId.systemDefault()),
+                    this.lastSuccessfulPoll.atZone(ZoneId.systemDefault()),
+                    Duration.between(this.lastSuccessfulPoll, Instant.now()).getSeconds()
+            );
+            if (POLLING_MAXIMUM_RETRY_TIME.isNegative() || Duration.between(this.lastSuccessfulPoll, Instant.now()).compareTo(POLLING_MAXIMUM_RETRY_TIME) < 0) {
+                // Either the retry limit is disabled or we have not exceeded
+                // it yet.
+
+                // Increase the backoff interval.
+                this.backoffPollingIntervalSeconds = Math.min(
+                        (int) Math.ceil(this.backoffPollingIntervalSeconds * POLLING_BACKOFF_FACTOR),
+                        POLLING_MAXIMUM_BACKOFF_INTERVAL_SECONDS
+                );
+
+                // Schedule new "backed off" job.
+                this.scheduler.schedule(
+                        this::poll,
+                        this.backoffPollingIntervalSeconds,
+                        TimeUnit.SECONDS
+                );
+
+                message += MessageFormat.format(
+                        " Trying again in {0} seconds (approx {1}).",
+                        this.backoffPollingIntervalSeconds,
+                        Instant.now().plus(this.backoffPollingIntervalSeconds, ChronoUnit.SECONDS).atZone(ZoneId.systemDefault())
+                );
+            } else {
+                // We have exceeded the retry limit.
+                // Let the polling job die.
+
+                message += " Giving up as we have exceeded the retry limit.";
+            }
+
+            message += " Details: " + ex.getMessage();
+
+            this.logger.debug(message);
+
+            // Tell the user what is going on.
+            updateStatus(
+                    ThingStatus.OFFLINE,
+                    ThingStatusDetail.COMMUNICATION_ERROR,
+                    message
+            );
         }
     }
 
@@ -325,46 +445,46 @@ public final class DefaultHiveAccountHandler extends BaseBridgeHandler implement
 
         @Override
         public void handleCommand(final ChannelUID channelUID, final Command command) {
-            DefaultHiveAccountHandler.this.accountStateLock.lock();
-            try {
-                final @Nullable Node hiveNode = this.hiveNode;
-                if (hiveNode == null) {
-                    return;
+            final @Nullable Node hiveNode = this.hiveNode;
+            if (hiveNode == null) {
+                return;
+            }
+
+            // Try each strategy until we get one that can handle the command.
+            @Nullable Node modifiedNode = null;
+            final Iterator<ThingHandlerStrategy> strategyIterator = this.hiveThingHandler.getStrategies().iterator();
+            while (strategyIterator.hasNext() && modifiedNode == null) {
+                final @Nullable ThingHandlerStrategy strategy = strategyIterator.next();
+                assert strategy != null;
+
+                modifiedNode = strategy.handleCommand(channelUID, command, hiveNode);
+            }
+
+            // If the command was handled push the update to the Hive API.
+            if (modifiedNode != null) {
+                final @Nullable HiveClient hiveClient = DefaultHiveAccountHandler.this.hiveClient;
+
+                if (hiveClient == null) {
+                    throw new IllegalStateException("UpdateNode called before HiveClient has been initialised.");
                 }
 
-                // Try each strategy until we get one that can handle the command.
-                @Nullable Node modifiedNode = null;
-                final Iterator<ThingHandlerStrategy> strategyIterator = this.hiveThingHandler.getStrategies().iterator();
-                while (strategyIterator.hasNext() && modifiedNode == null) {
-                    final @Nullable ThingHandlerStrategy strategy = strategyIterator.next();
-                    assert strategy != null;
+                try {
+                    // Post the modified node to the Hive API and get the
+                    // canonical updated version of the node in return.
+                    final @Nullable Node updatedNode = hiveClient.updateNode(modifiedNode);
 
-                    modifiedNode = strategy.handleCommand(channelUID, command, hiveNode);
+                    // Handle the updated node state.
+                    // TODO: Create a better mechanism for updating state
+                    //       immediately after posting to the Hive API.
+                    //       The Hive API often provides unhelpful displayValues
+                    //       in response to posting updates that makes channel
+                    //       states "flicker".
+                    //if (updatedNode != null) {
+                    //    this.updateState(updatedNode);
+                    //}
+                } catch (final HiveException ex) {
+                    logger.debug("Something went wrong posting an update to the Hive API", ex);
                 }
-
-                // If the command was handled push the update to the Hive API.
-                if (modifiedNode != null) {
-                    final @Nullable HiveClient hiveClient = DefaultHiveAccountHandler.this.hiveClient;
-
-                    if (hiveClient == null) {
-                        throw new IllegalStateException("UpdateNode called before HiveClient has been initialised.");
-                    }
-
-                    try {
-                        // Post the modified node to the Hive API and get the
-                        // canonical updated version of the node in return.
-                        final @Nullable Node updatedNode = hiveClient.updateNode(modifiedNode);
-
-                        // Handle the updated node state.
-                        if (updatedNode != null) {
-                            this.updateState(updatedNode);
-                        }
-                    } catch (final HiveException ex) {
-                        logger.debug("Something went wrong posting an update to the Hive API" ,ex);
-                    }
-                }
-            } finally {
-                DefaultHiveAccountHandler.this.accountStateLock.unlock();
             }
         }
 

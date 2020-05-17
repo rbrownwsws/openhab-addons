@@ -20,7 +20,6 @@ import javax.measure.quantity.ElectricPotential;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.hive.internal.client.BatteryLevel;
-import org.openhab.binding.hive.internal.client.BuilderUtil;
 import org.openhab.binding.hive.internal.client.FeatureAttribute;
 
 /**
@@ -30,41 +29,36 @@ import org.openhab.binding.hive.internal.client.FeatureAttribute;
  */
 @NonNullByDefault
 public final class BatteryDeviceFeature implements Feature {
-    private final FeatureAttribute<BatteryLevel> batteryLevel;
-    private final FeatureAttribute<String> batteryState;
-    private final FeatureAttribute<Quantity<ElectricPotential>> batteryVoltage;
-    private final FeatureAttribute<String> batteryNotificationState;
+    private final @Nullable FeatureAttribute<BatteryLevel> batteryLevel;
+    private final @Nullable FeatureAttribute<String> batteryState;
+    private final @Nullable FeatureAttribute<Quantity<ElectricPotential>> batteryVoltage;
+    private final @Nullable FeatureAttribute<String> batteryNotificationState;
 
     private BatteryDeviceFeature(
-            final FeatureAttribute<BatteryLevel> batteryLevel,
-            final FeatureAttribute<String> batteryState,
-            final FeatureAttribute<Quantity<ElectricPotential>> batteryVoltage,
-            final FeatureAttribute<String> batteryNotificationState
+            final @Nullable FeatureAttribute<BatteryLevel> batteryLevel,
+            final @Nullable FeatureAttribute<String> batteryState,
+            final @Nullable FeatureAttribute<Quantity<ElectricPotential>> batteryVoltage,
+            final @Nullable FeatureAttribute<String> batteryNotificationState
     ) {
-        Objects.requireNonNull(batteryLevel);
-        Objects.requireNonNull(batteryState);
-        Objects.requireNonNull(batteryVoltage);
-        Objects.requireNonNull(batteryNotificationState);
-
         this.batteryLevel = batteryLevel;
         this.batteryState = batteryState;
         this.batteryVoltage = batteryVoltage;
         this.batteryNotificationState = batteryNotificationState;
     }
 
-    public FeatureAttribute<BatteryLevel> getBatteryLevel() {
+    public @Nullable FeatureAttribute<BatteryLevel> getBatteryLevel() {
         return this.batteryLevel;
     }
 
-    public FeatureAttribute<String> getBatteryState() {
+    public @Nullable FeatureAttribute<String> getBatteryState() {
         return this.batteryState;
     }
 
-    public FeatureAttribute<Quantity<ElectricPotential>> getBatteryVoltage() {
+    public @Nullable FeatureAttribute<Quantity<ElectricPotential>> getBatteryVoltage() {
         return this.batteryVoltage;
     }
 
-    public FeatureAttribute<String> getBatteryNotificationState() {
+    public @Nullable FeatureAttribute<String> getBatteryNotificationState() {
         return this.batteryNotificationState;
     }
 
@@ -87,49 +81,36 @@ public final class BatteryDeviceFeature implements Feature {
                     .batteryNotificationState(batteryDeviceFeature.getBatteryNotificationState());
         }
 
-        public Builder batteryLevel(final FeatureAttribute<BatteryLevel> batteryLevel) {
-            this.batteryLevel = Objects.requireNonNull(batteryLevel);
+        public Builder batteryLevel(final @Nullable FeatureAttribute<BatteryLevel> batteryLevel) {
+            this.batteryLevel = batteryLevel;
 
             return this;
         }
 
-        public Builder batteryState(final FeatureAttribute<String> batteryState) {
-            this.batteryState = Objects.requireNonNull(batteryState);
+        public Builder batteryState(final @Nullable FeatureAttribute<String> batteryState) {
+            this.batteryState = batteryState;
 
             return this;
         }
 
-        public Builder batteryVoltage(final FeatureAttribute<Quantity<ElectricPotential>> batteryVoltage) {
-            this.batteryVoltage = Objects.requireNonNull(batteryVoltage);
+        public Builder batteryVoltage(final @Nullable FeatureAttribute<Quantity<ElectricPotential>> batteryVoltage) {
+            this.batteryVoltage = batteryVoltage;
 
             return this;
         }
 
-        public Builder batteryNotificationState(final FeatureAttribute<String> batteryNotificationState) {
-            this.batteryNotificationState = Objects.requireNonNull(batteryNotificationState);
+        public Builder batteryNotificationState(final @Nullable FeatureAttribute<String> batteryNotificationState) {
+            this.batteryNotificationState = batteryNotificationState;
 
             return this;
         }
 
         public BatteryDeviceFeature build() {
-            final @Nullable FeatureAttribute<BatteryLevel> batteryLevel = this.batteryLevel;
-            final @Nullable FeatureAttribute<String> batteryState = this.batteryState;
-            final @Nullable FeatureAttribute<Quantity<ElectricPotential>> batteryVoltage = this.batteryVoltage;
-            final @Nullable FeatureAttribute<String> batteryNotificationState = this.batteryNotificationState;
-
-            if (batteryLevel == null
-                    || batteryState == null
-                    || batteryVoltage == null
-                    || batteryNotificationState == null
-            ) {
-                throw new IllegalStateException(BuilderUtil.REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE);
-            }
-
             return new BatteryDeviceFeature(
-                    batteryLevel,
-                    batteryState,
-                    batteryVoltage,
-                    batteryNotificationState
+                    this.batteryLevel,
+                    this.batteryState,
+                    this.batteryVoltage,
+                    this.batteryNotificationState
             );
         }
     }

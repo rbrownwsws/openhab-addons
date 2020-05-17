@@ -12,20 +12,22 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.client.FeatureAttribute;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.OverrideMode;
 import org.openhab.binding.hive.internal.client.feature.HeatingThermostatFeature;
 import org.openhab.binding.hive.internal.client.feature.TransientModeFeature;
 import org.openhab.binding.hive.internal.client.feature.WaterHeaterFeature;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 /**
  * A {@link ThingHandlerStrategy} that handles the "transient-remaining"
@@ -41,23 +43,33 @@ public final class BoostTimeRemainingHandlerStrategy extends ThingHandlerStrateg
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, TransientModeFeature.class, transientModeFeature -> {
-            long minutesRemaining = Instant.now().until(transientModeFeature.getEndDatetime().getDisplayValue(), ChronoUnit.MINUTES);
-            minutesRemaining = Math.max(0, minutesRemaining);
+        useFeature(hiveNode, TransientModeFeature.class, transientModeFeature -> {
+            useAttribute(hiveNode, TransientModeFeature.class, HiveApiConstants.ATTRIBUTE_NAME_TRANSIENT_MODE_V1_END_DATETIME, transientModeFeature.getEndDatetime(), endDatetimeAttribute -> {
+                long minutesRemaining = Instant.now().until(endDatetimeAttribute.getDisplayValue(), ChronoUnit.MINUTES);
+                minutesRemaining = Math.max(0, minutesRemaining);
 
-            // If we know the transient mode has been cancelled set remaining
-            // time to 0
-            final @Nullable HeatingThermostatFeature heatingThermostatFeature = hiveNode.getFeature(HeatingThermostatFeature.class);
-            final @Nullable WaterHeaterFeature waterHeaterFeature = hiveNode.getFeature(WaterHeaterFeature.class);
-            if ((heatingThermostatFeature != null && heatingThermostatFeature.getTemporaryOperatingModeOverride().getDisplayValue() == OverrideMode.NONE)
-                    || (waterHeaterFeature != null && waterHeaterFeature.getTemporaryOperatingModeOverride().getDisplayValue() == OverrideMode.NONE)
-            ) {
-                minutesRemaining = 0;
-            }
+                // If we know the transient mode has been cancelled set remaining
+                // time to 0
+                final @Nullable HeatingThermostatFeature heatingThermostatFeature = hiveNode.getFeature(HeatingThermostatFeature.class);
+                final @Nullable WaterHeaterFeature waterHeaterFeature = hiveNode.getFeature(WaterHeaterFeature.class);
+                final @Nullable FeatureAttribute<OverrideMode> overrideModeAttribute;
+                if (heatingThermostatFeature != null) {
+                    overrideModeAttribute = heatingThermostatFeature.getTemporaryOperatingModeOverride();
+                } else if (waterHeaterFeature != null) {
+                    overrideModeAttribute = waterHeaterFeature.getTemporaryOperatingModeOverride();
+                } else {
+                    overrideModeAttribute = null;
+                    this.logger.trace("Could not find either of \"HeatingThermostatFeature\" or \"WaterHeaterFeature\"");
+                }
 
-            long finalMinutesRemaining = minutesRemaining;
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TRANSIENT_REMAINING, transientRemainingChannel -> {
-                thingHandlerCallback.stateUpdated(transientRemainingChannel, new DecimalType(finalMinutesRemaining));
+                if (overrideModeAttribute != null && overrideModeAttribute.getDisplayValue() == OverrideMode.NONE) {
+                    minutesRemaining = 0;
+                }
+
+                final long finalMinutesRemaining = minutesRemaining;
+                useChannel(thing, HiveBindingConstants.CHANNEL_TRANSIENT_REMAINING, transientRemainingChannel -> {
+                    thingHandlerCallback.stateUpdated(transientRemainingChannel, new DecimalType(finalMinutesRemaining));
+                });
             });
         });
     }

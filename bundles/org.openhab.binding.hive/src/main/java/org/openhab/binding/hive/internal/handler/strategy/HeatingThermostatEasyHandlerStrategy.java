@@ -39,8 +39,8 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
             final Command command,
             final Node hiveNode
     ) {
-        return useFeatureSafely(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
-            return useFeatureSafely(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
+        return useFeature(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
+            return useFeature(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
                 return handleCommand(
                         channelUID,
                         command,
@@ -58,9 +58,10 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
-            useFeatureSafely(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
+        useFeature(hiveNode, HeatingThermostatFeature.class, heatingThermostatFeature -> {
+            useFeature(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
                 handleUpdate(
+                        hiveNode,
                         thing,
                         thingHandlerCallback,
                         heatingThermostatFeature,
@@ -124,29 +125,38 @@ public final class HeatingThermostatEasyHandlerStrategy extends ThingHandlerStra
     }
 
     private void handleUpdate(
+            final Node hiveNode,
             final Thing thing,
             final ThingHandlerCallback thingHandlerCallback,
             final HeatingThermostatFeature heatingThermostatFeature,
             final OnOffDeviceFeature onOffDeviceFeature
     ) {
-        useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING, easyModeOperatingChannel -> {
-            if (onOffDeviceFeature.getMode().getDisplayValue() == OnOffMode.OFF) {
-                thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_OFF));
-            } else if (heatingThermostatFeature.getOperatingMode().getDisplayValue() == HeatingThermostatOperatingMode.SCHEDULE) {
-                thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_SCHEDULE));
-            } else {
-                thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_MANUAL));
-            }
+        useAttribute(hiveNode, HeatingThermostatFeature.class, HiveApiConstants.ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_OPERATING_MODE, heatingThermostatFeature.getOperatingMode(), operatingModeAttribute -> {
+            useAttribute(hiveNode, OnOffDeviceFeature.class, HiveApiConstants.ATTRIBUTE_NAME_ON_OFF_DEVICE_V1_MODE, onOffDeviceFeature.getMode(), onOffModeAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING, easyModeOperatingChannel -> {
+                    if (onOffModeAttribute.getDisplayValue() == OnOffMode.OFF) {
+                        thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_OFF));
+                    } else if (operatingModeAttribute.getDisplayValue() == HeatingThermostatOperatingMode.SCHEDULE) {
+                        thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_SCHEDULE));
+                    } else {
+                        thingHandlerCallback.stateUpdated(easyModeOperatingChannel, new StringType(HiveBindingConstants.HEATING_EASY_MODE_OPERATING_MANUAL));
+                    }
+                });
+            });
         });
 
-        useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_MODE_BOOST, easyModeBoostChannel -> {
-            final OnOffType boostActive = OnOffType.from(heatingThermostatFeature.getTemporaryOperatingModeOverride().getDisplayValue() == OverrideMode.TRANSIENT);
-            thingHandlerCallback.stateUpdated(easyModeBoostChannel, boostActive);
+        useAttribute(hiveNode, HeatingThermostatFeature.class, HiveApiConstants.ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_TEMPORARY_OPERATING_MODE_OVERRIDE, heatingThermostatFeature.getTemporaryOperatingModeOverride(), heatingOverrideAttribute -> {
+            useChannel(thing, HiveBindingConstants.CHANNEL_EASY_MODE_BOOST, easyModeBoostChannel -> {
+                final OnOffType boostActive = OnOffType.from(heatingOverrideAttribute.getDisplayValue() == OverrideMode.TRANSIENT);
+                thingHandlerCallback.stateUpdated(easyModeBoostChannel, boostActive);
+            });
         });
 
-        useChannelSafely(thing, HiveBindingConstants.CHANNEL_EASY_STATE_IS_ON, easyStateIsOnChannel -> {
-            final OnOffType isOn = OnOffType.from(heatingThermostatFeature.getOperatingState().getDisplayValue().equals(HeatingThermostatOperatingState.HEAT));
-            thingHandlerCallback.stateUpdated(easyStateIsOnChannel, isOn);
+        useAttribute(hiveNode, HeatingThermostatFeature.class, HiveApiConstants.ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_OPERATING_STATE, heatingThermostatFeature.getOperatingState(), operatingStateAttribute -> {
+            useChannel(thing, HiveBindingConstants.CHANNEL_EASY_STATE_IS_ON, easyStateIsOnChannel -> {
+                final OnOffType isOn = OnOffType.from(operatingStateAttribute.getDisplayValue().equals(HeatingThermostatOperatingState.HEAT));
+                thingHandlerCallback.stateUpdated(easyStateIsOnChannel, isOn);
+            });
         });
     }
 }

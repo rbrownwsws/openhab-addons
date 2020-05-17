@@ -12,18 +12,19 @@
  */
 package org.openhab.binding.hive.internal.handler.strategy;
 
-import java.util.Objects;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.types.Command;
+import org.openhab.binding.hive.internal.client.FeatureAttribute;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 
 /**
  * A base class that makes implementing {@link ThingHandlerStrategy}s easier.
@@ -32,37 +33,47 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * Represents a method that requires a nonnull {@link ChannelUID}.
      * 
-     * @see #useChannelSafely(Thing, String, DoWithChannelUid)
+     * @see #useChannel(Thing, String, DoWithChannelUid)
      */
     @FunctionalInterface
     protected interface DoWithChannelUid {
-        void doStuff(ChannelUID channelUID);
+        void useChannelUid(ChannelUID channelUID);
     }
 
     /**
      * Represents a method that requires a nonnull {@link Feature} and returns
      * something.
      *
-     * @see #useFeatureSafely(Node, Class, DoWithFeatureAndReturn)
+     * @see #useFeature(Node, Class, DoWithFeatureAndReturn)
      */
     @FunctionalInterface
     protected interface DoWithFeatureAndReturn<F extends Feature> {
-        @Nullable Node doStuff(F feature);
+        @Nullable Node useFeature(F feature);
     }
 
     /**
      * Represents a method that requires a nonnull {@link Feature}.
      *
-     * @see #useFeatureSafely(Node, Class, DoWithFeature)
+     * @see #useFeature(Node, Class, DoWithFeature)
      */
     @FunctionalInterface
     protected interface DoWithFeature<F extends Feature> {
-        void doStuff(F feature);
+        void useFeature(F feature);
+    }
+
+    /**
+     * Represents a method that requires a nonnull {@link FeatureAttribute}.
+     *
+     * @see #useAttribute(Node, Class, String, FeatureAttribute, DoWithFeatureAttribute)
+     */
+    @FunctionalInterface
+    protected interface DoWithFeatureAttribute<T, A extends FeatureAttribute<T>> {
+        void useAttribute(A featureAttribute);
     }
 
     /**
@@ -84,7 +95,7 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
      * @param thingToDo
      *      The thing you want to do with the channel.
      */
-    protected void useChannelSafely(
+    protected void useChannel(
             final Thing thing,
             final String channelName,
             final DoWithChannelUid thingToDo
@@ -98,12 +109,16 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
         if (channel != null) {
             final ChannelUID channelUID = channel.getUID();
 
-            thingToDo.doStuff(channelUID);
+            thingToDo.useChannelUid(channelUID);
         } else {
             final @Nullable String thingLabel = thing.getLabel();
             final String thingName = thingLabel != null ? thingLabel : thing.getUID().toString();
 
-            this.logger.warn("Tried to do something with the nonexistent channel \"{}\" of thing \"{}\". Do you need to update your thing?", channelName, thingName);
+            this.logger.debug(
+                    "Tried to do something with the nonexistent channel \"{}\" of thing \"{}\". Do you need to update your thing?",
+                    channelName,
+                    thingName
+            );
         }
     }
 
@@ -133,7 +148,7 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
      *      Either the result of {@code thingToDo.doStuff(F)} if the feature
      *      is available or {@code null} if the feature is not available.
      */
-    protected <F extends Feature> @Nullable Node useFeatureSafely(
+    protected <F extends Feature> @Nullable Node useFeature(
             final Node hiveNode,
             final Class<F> featureClass,
             final DoWithFeatureAndReturn<F> thingToDo
@@ -145,9 +160,15 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
         final @Nullable F feature = hiveNode.getFeature(featureClass);
 
         if (feature != null) {
-            return thingToDo.doStuff(feature);
+            return thingToDo.useFeature(feature);
         } else {
-            this.logger.warn("Could not get feature {} for node {} ({}). Has it been given the wrong kind of handler?", featureClass.getName(), hiveNode.getName(), hiveNode.getId());
+            this.logger.debug(
+                    "Could not get feature {} for node {} ({}). Has it been given the wrong kind of handler?",
+                    featureClass.getName(),
+                    hiveNode.getName(),
+                    hiveNode.getId()
+            );
+
             return null;
         }
     }
@@ -174,12 +195,36 @@ public abstract class ThingHandlerStrategyBase implements ThingHandlerStrategy {
      * @param <F>
      *      The type of {@linkplain Feature} you want to use.
      */
-    protected <F extends Feature> void useFeatureSafely(
+    protected <F extends Feature> void useFeature(
             final Node hiveNode,
             final Class<F> featureClass,
             final DoWithFeature<F> thingToDo
     ) {
-        useFeatureSafely(hiveNode, featureClass, (feature) -> { thingToDo.doStuff(feature); return null;});
+        useFeature(hiveNode, featureClass, (feature) -> { thingToDo.useFeature(feature); return null;});
+    }
+
+    protected <T, A extends FeatureAttribute<T>> void useAttribute(
+            final Node hiveNode,
+            final Class<? extends Feature> featureClass,
+            final String attributeName,
+            final @Nullable A featureAttribute,
+            final DoWithFeatureAttribute<T, A> thingToDo
+    ) {
+        Objects.requireNonNull(hiveNode);
+        Objects.requireNonNull(featureClass);
+        Objects.requireNonNull(attributeName);
+        Objects.requireNonNull(thingToDo);
+
+        if (featureAttribute != null) {
+            thingToDo.useAttribute(featureAttribute);
+        } else {
+            this.logger.trace(
+                    "Tried to do something with the unavailable attribute \"{}\" of feature \"{}\" in node \"{}\". Old hub?",
+                    attributeName,
+                    featureClass.getName(),
+                    hiveNode.getName()
+            );
+        }
     }
 
     // Default implementation that does nothing.

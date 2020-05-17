@@ -12,12 +12,12 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.hive.internal.client.AttributeName;
 import org.openhab.binding.hive.internal.client.HiveApiConstants;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -44,7 +44,7 @@ public class AttributeNameGsonAdapterTest extends ComplexEnumGsonAdapterTest<Att
                 ),
                 Arrays.asList(
                         AttributeName.WATER_HEATER_HEATING_OPERATING_MODE,
-                        HiveApiConstants.ATTRIBUTE_NAME_WATER_HEATER_HEATING_OPERATING_MODE
+                        HiveApiConstants.ATTRIBUTE_NAME_WATER_HEATER_V1_OPERATING_MODE
                 )
         );
     }

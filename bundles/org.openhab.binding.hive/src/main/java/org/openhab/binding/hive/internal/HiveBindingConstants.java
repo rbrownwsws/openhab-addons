@@ -94,13 +94,11 @@ public final class HiveBindingConstants {
      * The set of {@link ThingTypeUID}s that can be discovered
      * (everything but accounts).
      */
-    // @formatter:off
     public static final Set<ThingTypeUID> DISCOVERABLE_THING_TYPES_UIDS = Collections.unmodifiableSet(
             SUPPORTED_THING_TYPES_UIDS.stream()
                     .filter(it -> it != THING_TYPE_ACCOUNT)
                     .collect(Collectors.toSet())
     );
-    // @formatter:on
 
     /* ######## Channel ids ######## */
     /**

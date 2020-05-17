@@ -19,6 +19,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collections;
@@ -33,10 +34,7 @@ import org.openhab.binding.hive.internal.client.*;
 import org.openhab.binding.hive.internal.client.dto.*;
 import org.openhab.binding.hive.internal.client.exception.HiveClientRequestException;
 import org.openhab.binding.hive.internal.client.exception.HiveException;
-import org.openhab.binding.hive.internal.client.feature.HeatingThermostatFeature;
-import org.openhab.binding.hive.internal.client.feature.LinksFeature;
-import org.openhab.binding.hive.internal.client.feature.TransientModeFeature;
-import org.openhab.binding.hive.internal.client.feature.TransientModeHeatingActionsFeature;
+import org.openhab.binding.hive.internal.client.feature.*;
 
 import tec.uom.se.quantity.Quantities;
 import tec.uom.se.unit.Units;
@@ -278,5 +276,45 @@ public class DefaultNodeRepositoryTest {
         assertThat(linksFeature.getReverseLinks()).isNull();
 
         // TODO: verify more
+    }
+
+    @Test
+    public void testAutoBoostFeature() throws HiveException {
+        /* Given */
+        final long autoBoostDurationMins = 30L;
+        final BigDecimal autoBoostTargetHeatTemperature = BigDecimal.valueOf(22);
+
+        final AutoBoostV1FeatureDto autoBoostV1FeatureDto = new AutoBoostV1FeatureDto();
+        autoBoostV1FeatureDto.autoBoostDuration = TestUtil.createSimpleFeatureAttributeDto(autoBoostDurationMins);
+        autoBoostV1FeatureDto.autoBoostTargetHeatTemperature = TestUtil.createSimpleFeatureAttributeDto(autoBoostTargetHeatTemperature);
+
+        final NodeDto nodeDto = TestUtil.createSimpleNodeDto(TestUtil.NODE_ID_DEADBEEF);
+        assert nodeDto.features != null;
+        nodeDto.features.autoboost_v1 = autoBoostV1FeatureDto;
+
+        final NodesDto nodesDto = new NodesDto();
+        nodesDto.nodes = Collections.singletonList(nodeDto);
+
+        this.setUpSuccessResponse(nodesDto);
+
+        final DefaultNodeRepository nodeRepository = new DefaultNodeRepository(this.requestFactory);
+
+
+        /* When */
+        final @Nullable Node node = nodeRepository.getNode(TestUtil.NODE_ID_DEADBEEF);
+
+
+        /* Then */
+        // No exceptions hopefully!
+        assertThat(node).isNotNull();
+
+        final @Nullable AutoBoostFeature autoBoostFeature = node.getFeature(AutoBoostFeature.class);
+        assertThat(autoBoostFeature).isNotNull();
+
+        assertThat(autoBoostFeature.getAutoBoostDuration().getReportedValue()).isEqualTo(Duration.ofMinutes(autoBoostDurationMins));
+        assertThat(autoBoostFeature.getAutoBoostDuration().getDisplayValue()).isEqualTo(Duration.ofMinutes(autoBoostDurationMins));
+
+        assertThat(autoBoostFeature.getAutoBoostTargetHeatTemperature().getReportedValue()).isEqualTo(Quantities.getQuantity(autoBoostTargetHeatTemperature, Units.CELSIUS));
+        assertThat(autoBoostFeature.getAutoBoostTargetHeatTemperature().getDisplayValue()).isEqualTo(Quantities.getQuantity(autoBoostTargetHeatTemperature, Units.CELSIUS));
     }
 }

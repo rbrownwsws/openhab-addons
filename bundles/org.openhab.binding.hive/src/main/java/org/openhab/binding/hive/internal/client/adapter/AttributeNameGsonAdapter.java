@@ -36,7 +36,7 @@ public final class AttributeNameGsonAdapter extends ComplexEnumGsonTypeAdapterBa
                 )
                 .add(
                         AttributeName.WATER_HEATER_HEATING_OPERATING_MODE,
-                        HiveApiConstants.ATTRIBUTE_NAME_WATER_HEATER_HEATING_OPERATING_MODE
+                        HiveApiConstants.ATTRIBUTE_NAME_WATER_HEATER_V1_OPERATING_MODE
                 )
                 .build());
     }

@@ -15,7 +15,6 @@ package org.openhab.binding.hive.internal.handler.strategy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
@@ -69,9 +68,12 @@ public class HeatingTransientModeHandlerStrategyTest {
     public void setUp() {
         initMocks(this);
 
-        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST)).thenReturn(this.boostTargetTemperatureChannel);
-        when(this.boostTargetTemperatureChannel.getUID()).thenReturn(this.boostTargetTemperatureChannelUid);
-        when(this.boostTargetTemperatureChannelUid.getId()).thenReturn(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST);
+        TestUtil.initMockChannel(
+                this.thing,
+                HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET_BOOST,
+                this.boostTargetTemperatureChannel,
+                this.boostTargetTemperatureChannelUid
+        );
     }
 
     @Test

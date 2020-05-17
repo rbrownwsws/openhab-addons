@@ -27,10 +27,30 @@ import org.openhab.binding.hive.internal.client.exception.HiveClientResponseExce
  */
 @NonNullByDefault
 public final class FeatureAttributeFactory {
-    private static final String FEATURE_ATTRIBUTE_NULL_MESSAGE = "FeatureAttribute is unexpectedly null";
-
     private FeatureAttributeFactory() {
         throw new AssertionError();
+    }
+
+    private static <F> void applyNano1DtoFix(
+            final FeatureAttributeDto<F> dto
+    ) {
+        // Try to fix the weirdness of the NANO1 hub
+        @Nullable F fixupValue = dto.targetValue;
+        if (dto.reportedValue == null && fixupValue != null) {
+            dto.reportedValue = fixupValue;
+        } else if (dto.reportedValue != null) {
+            fixupValue = dto.reportedValue;
+        } else {
+            throw new IllegalStateException("reportedValue is null and I cannot fix it");
+        }
+
+        if (dto.displayValue == null) {
+            if (fixupValue != null) {
+                dto.displayValue = fixupValue;
+            } else {
+                throw new IllegalStateException("displayValue is null and I cannot fix it");
+            }
+        }
     }
 
     private static <F, T> void buildFeatureAttribute(
@@ -57,28 +77,28 @@ public final class FeatureAttributeFactory {
         }
         featureAttributeBuilder.reportedValue(adapter.apply(reportedValue));
 
-        if (reportChangedTime == null) {
-            throw new HiveClientResponseException("Report Changed Time is unexpectedly null.");
+        if (reportChangedTime != null) {
+            featureAttributeBuilder.reportChangedTime(reportChangedTime.asInstant());
         }
-        featureAttributeBuilder.reportChangedTime(reportChangedTime.asInstant());
 
-        if (reportReceivedTime == null) {
-            throw new HiveClientResponseException("Reported Received Time is unexpectedly null.");
+        if (reportReceivedTime != null) {
+            featureAttributeBuilder.reportReceivedTime(reportReceivedTime.asInstant());
         }
-        featureAttributeBuilder.reportReceivedTime(reportReceivedTime.asInstant());
     }
 
-    public static <T> FeatureAttribute<T> getReadOnlyFromDto(final @Nullable FeatureAttributeDto<T> dto) throws HiveClientResponseException {
+    public static <T> @Nullable FeatureAttribute<T> getReadOnlyFromDto(final @Nullable FeatureAttributeDto<T> dto) throws HiveClientResponseException {
         return getReadOnlyFromDtoWithAdapter(Adapter.identity(), dto);
     }
 
-    public static <F, T> FeatureAttribute<T> getReadOnlyFromDtoWithAdapter(
+    public static <F, T> @Nullable FeatureAttribute<T> getReadOnlyFromDtoWithAdapter(
             final Adapter<F, T> adapter,
             final @Nullable FeatureAttributeDto<F> dto
     ) throws HiveClientResponseException {
         if (dto == null) {
-            throw new HiveClientResponseException(FEATURE_ATTRIBUTE_NULL_MESSAGE);
+            return null;
         }
+
+        applyNano1DtoFix(dto);
 
         final DefaultFeatureAttribute.Builder<T> featureAttributeBuilder = DefaultFeatureAttribute.builder();
 
@@ -91,17 +111,19 @@ public final class FeatureAttributeFactory {
         return featureAttributeBuilder.build();
     }
 
-    public static <T> SettableFeatureAttribute<T> getSettableFromDto(final @Nullable FeatureAttributeDto<T> dto) throws HiveClientResponseException {
+    public static <T> @Nullable SettableFeatureAttribute<T> getSettableFromDto(final @Nullable FeatureAttributeDto<T> dto) throws HiveClientResponseException {
         return getSettableFromDtoWithAdapter(Adapter.identity(), dto);
     }
 
-    public static <F, T> SettableFeatureAttribute<T> getSettableFromDtoWithAdapter(
+    public static <F, T> @Nullable SettableFeatureAttribute<T> getSettableFromDtoWithAdapter(
             final Adapter<F, T> adapter,
             final @Nullable FeatureAttributeDto<F> dto
     ) throws HiveClientResponseException {
         if (dto == null) {
-            throw new HiveClientResponseException(FEATURE_ATTRIBUTE_NULL_MESSAGE);
+            return null;
         }
+
+        applyNano1DtoFix(dto);
 
         final DefaultFeatureAttribute.Builder<T> featureAttributeBuilder = DefaultFeatureAttribute.builder();
 

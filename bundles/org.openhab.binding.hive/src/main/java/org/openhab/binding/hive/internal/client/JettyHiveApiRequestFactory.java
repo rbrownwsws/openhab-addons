@@ -14,6 +14,7 @@ package org.openhab.binding.hive.internal.client;
 
 import java.net.URI;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -31,6 +32,9 @@ import org.eclipse.jetty.client.api.Request;
 final class JettyHiveApiRequestFactory implements HiveApiRequestFactory, SessionAuthenticationManager {
     private static final String ACCESS_TOKEN_HEADER = "X-Omnia-Access-Token";
     private static final String CLIENT_ID_HEADER = "X-Omnia-Client";
+
+    private static final long TIMEOUT_VALUE = 5;
+    private static final TimeUnit TIMEOUT_UNIT = TimeUnit.SECONDS;
 
     private final HttpClient httpClient;
     private final URI apiBasePath;
@@ -113,6 +117,11 @@ final class JettyHiveApiRequestFactory implements HiveApiRequestFactory, Session
         if (session != null) {
             request.header(ACCESS_TOKEN_HEADER, session.getSessionId().toString());
         }
+
+        // Set a short timeout as the Hive API should respond very quickly.
+        // If a response is taking a long time something has gone wrong so we
+        // should abort and back off until things are back to normal.
+        request.timeout(TIMEOUT_VALUE, TIMEOUT_UNIT);
 
         return new JettyHiveApiRequest(
                 this.jsonService,

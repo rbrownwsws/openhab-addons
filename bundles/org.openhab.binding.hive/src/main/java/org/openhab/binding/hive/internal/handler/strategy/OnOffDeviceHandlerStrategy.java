@@ -20,6 +20,7 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.OnOffMode;
 import org.openhab.binding.hive.internal.client.feature.OnOffDeviceFeature;
@@ -38,7 +39,7 @@ public final class OnOffDeviceHandlerStrategy extends ThingHandlerStrategyBase {
             final Command command,
             final Node hiveNode
     ) {
-        return useFeatureSafely(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
+        return useFeature(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
             @Nullable OnOffDeviceFeature newOnOffDeviceFeature = null;
 
             if (channelUID.getId().equals(HiveBindingConstants.CHANNEL_MODE_ON_OFF)
@@ -69,10 +70,12 @@ public final class OnOffDeviceHandlerStrategy extends ThingHandlerStrategyBase {
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_MODE_ON_OFF, onOffModeChannel -> {
-                final OnOffType value = onOffDeviceFeature.getMode().getDisplayValue() == OnOffMode.ON ? OnOffType.ON : OnOffType.OFF;
-                thingHandlerCallback.stateUpdated(onOffModeChannel, value);
+        useFeature(hiveNode, OnOffDeviceFeature.class, onOffDeviceFeature -> {
+            useAttribute(hiveNode, OnOffDeviceFeature.class, HiveApiConstants.ATTRIBUTE_NAME_ON_OFF_DEVICE_V1_MODE, onOffDeviceFeature.getMode(), modeAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_MODE_ON_OFF, onOffModeChannel -> {
+                    final OnOffType value = modeAttribute.getDisplayValue() == OnOffMode.ON ? OnOffType.ON : OnOffType.OFF;
+                    thingHandlerCallback.stateUpdated(onOffModeChannel, value);
+                });
             });
         });
     }

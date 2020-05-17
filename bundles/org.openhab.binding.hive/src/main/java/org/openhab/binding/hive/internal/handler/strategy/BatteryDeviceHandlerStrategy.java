@@ -20,9 +20,9 @@ import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.BatteryDeviceFeature;
-
 import tec.uom.se.unit.Units;
 
 /**
@@ -39,26 +39,34 @@ public final class BatteryDeviceHandlerStrategy extends ThingHandlerStrategyBase
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, BatteryDeviceFeature.class,  batteryDeviceFeature -> {
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_BATTERY_LEVEL, batteryLevelChannel -> {
-                thingHandlerCallback.stateUpdated(batteryLevelChannel, new DecimalType(batteryDeviceFeature.getBatteryLevel().getDisplayValue().intValue()));
+        useFeature(hiveNode, BatteryDeviceFeature.class, batteryDeviceFeature -> {
+            useAttribute(hiveNode, BatteryDeviceFeature.class, HiveApiConstants.ATTRIBUTE_NAME_BATTERY_DEVICE_V1_BATTERY_LEVEL, batteryDeviceFeature.getBatteryLevel(), batteryLevelAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_BATTERY_LEVEL, batteryLevelChannel -> {
+                    thingHandlerCallback.stateUpdated(batteryLevelChannel, new DecimalType(batteryLevelAttribute.getDisplayValue().intValue()));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_BATTERY_LOW, batteryLowChannel -> {
-                final boolean batteryLow = batteryDeviceFeature.getBatteryState().getDisplayValue().equals("LOW");
-                thingHandlerCallback.stateUpdated(batteryLowChannel, OnOffType.from(batteryLow));
+            useAttribute(hiveNode, BatteryDeviceFeature.class, HiveApiConstants.ATTRIBUTE_NAME_BATTERY_DEVICE_V1_BATTERY_STATE, batteryDeviceFeature.getBatteryState(), batteryStateAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_BATTERY_STATE, batteryStateChannel -> {
+                    thingHandlerCallback.stateUpdated(batteryStateChannel, new StringType(batteryStateAttribute.getDisplayValue()));
+                });
+
+                useChannel(thing, HiveBindingConstants.CHANNEL_BATTERY_LOW, batteryLowChannel -> {
+                    final boolean batteryLow = batteryStateAttribute.getDisplayValue().equals("LOW");
+                    thingHandlerCallback.stateUpdated(batteryLowChannel, OnOffType.from(batteryLow));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_BATTERY_STATE, batteryStateChannel -> {
-                thingHandlerCallback.stateUpdated(batteryStateChannel, new StringType(batteryDeviceFeature.getBatteryState().getDisplayValue()));
+            useAttribute(hiveNode, BatteryDeviceFeature.class, HiveApiConstants.ATTRIBUTE_NAME_BATTERY_DEVICE_V1_BATTERY_VOLTAGE, batteryDeviceFeature.getBatteryVoltage(), batteryVoltageAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_BATTERY_VOLTAGE, batteryVoltageChannel -> {
+                    thingHandlerCallback.stateUpdated(batteryVoltageChannel, new QuantityType<>(batteryVoltageAttribute.getDisplayValue().getValue(), Units.VOLT));
+                });
             });
 
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_BATTERY_VOLTAGE, batteryVoltageChannel -> {
-                thingHandlerCallback.stateUpdated(batteryVoltageChannel, new QuantityType<>(batteryDeviceFeature.getBatteryVoltage().getDisplayValue().getValue(), Units.VOLT));
-            });
-
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_BATTERY_NOTIFICATION_STATE, batteryNotificationStateChannel -> {
-                thingHandlerCallback.stateUpdated(batteryNotificationStateChannel, new StringType(batteryDeviceFeature.getBatteryNotificationState().getDisplayValue()));
+            useAttribute(hiveNode, BatteryDeviceFeature.class, HiveApiConstants.ATTRIBUTE_NAME_BATTERY_DEVICE_V1_NOTIFICATION_STATE, batteryDeviceFeature.getBatteryNotificationState(), batteryNotificationStateAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_BATTERY_NOTIFICATION_STATE, batteryNotificationStateChannel -> {
+                    thingHandlerCallback.stateUpdated(batteryNotificationStateChannel, new StringType(batteryNotificationStateAttribute.getDisplayValue()));
+                });
             });
         });
     }

@@ -32,11 +32,22 @@ public final class PhysicalDeviceHandlerStrategy extends ThingHandlerStrategyBas
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, PhysicalDeviceFeature.class, physicalDeviceFeature -> {
-            thing.setProperty(Thing.PROPERTY_VENDOR, physicalDeviceFeature.getManufacturer().getDisplayValue());
-            thing.setProperty(Thing.PROPERTY_MODEL_ID, physicalDeviceFeature.getModel().getDisplayValue());
-            thing.setProperty(Thing.PROPERTY_FIRMWARE_VERSION, physicalDeviceFeature.getSoftwareVersion().getDisplayValue());
-            thing.setProperty(Thing.PROPERTY_SERIAL_NUMBER, physicalDeviceFeature.getHardwareIdentifier().getDisplayValue());
+        useFeature(hiveNode, PhysicalDeviceFeature.class, physicalDeviceFeature -> {
+            useAttribute(hiveNode, PhysicalDeviceFeature.class, "manufacturer", physicalDeviceFeature.getManufacturer(), manufacturerAttribute -> {
+                thing.setProperty(Thing.PROPERTY_VENDOR, manufacturerAttribute.getDisplayValue());
+            });
+
+            useAttribute(hiveNode, PhysicalDeviceFeature.class, "model", physicalDeviceFeature.getModel(), modelAttribute -> {
+                thing.setProperty(Thing.PROPERTY_MODEL_ID, modelAttribute.getDisplayValue());
+            });
+
+            useAttribute(hiveNode, PhysicalDeviceFeature.class, "softwareVersion", physicalDeviceFeature.getModel(), softwareVersionAttribute -> {
+                thing.setProperty(Thing.PROPERTY_FIRMWARE_VERSION, softwareVersionAttribute.getDisplayValue());
+            });
+
+            useAttribute(hiveNode, PhysicalDeviceFeature.class, "hardwareIdentifier", physicalDeviceFeature.getModel(), hardwareIdentifierAttribute -> {
+                thing.setProperty(Thing.PROPERTY_SERIAL_NUMBER, hardwareIdentifierAttribute.getDisplayValue());
+            });
         });
     }
 }

@@ -19,7 +19,6 @@ import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.hive.internal.client.BuilderUtil;
 import org.openhab.binding.hive.internal.client.FeatureAttribute;
 
 /**
@@ -29,17 +28,15 @@ import org.openhab.binding.hive.internal.client.FeatureAttribute;
  */
 @NonNullByDefault
 public final class TemperatureSensorFeature implements Feature {
-    private final FeatureAttribute<Quantity<Temperature>> temperature;
+    private final @Nullable FeatureAttribute<Quantity<Temperature>> temperature;
 
     private TemperatureSensorFeature(
-            final FeatureAttribute<Quantity<Temperature>> temperature
+            final @Nullable FeatureAttribute<Quantity<Temperature>> temperature
     ) {
-        Objects.requireNonNull(temperature);
-
         this.temperature = temperature;
     }
 
-    public FeatureAttribute<Quantity<Temperature>> getTemperature() {
+    public @Nullable FeatureAttribute<Quantity<Temperature>> getTemperature() {
         return this.temperature;
     }
 
@@ -56,20 +53,14 @@ public final class TemperatureSensorFeature implements Feature {
             return this.temperature(temperatureSensorFeature.getTemperature());
         }
 
-        public Builder temperature(final FeatureAttribute<Quantity<Temperature>> temperature) {
-            this.temperature = Objects.requireNonNull(temperature);
+        public Builder temperature(final @Nullable FeatureAttribute<Quantity<Temperature>> temperature) {
+            this.temperature = temperature;
 
             return this;
         }
 
         public TemperatureSensorFeature build() {
-            final @Nullable FeatureAttribute<Quantity<Temperature>> temperature = this.temperature;
-
-            if (temperature == null) {
-                throw new IllegalStateException(BuilderUtil.REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE);
-            }
-
-            return new TemperatureSensorFeature(temperature);
+            return new TemperatureSensorFeature(this.temperature);
         }
     }
 }

@@ -15,7 +15,6 @@ package org.openhab.binding.hive.internal.handler.strategy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.time.Duration;
@@ -98,17 +97,26 @@ public class WaterHeaterEasyHandlerStrategyTest {
     public void setUp() {
         initMocks(this);
 
-        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING)).thenReturn(this.easyOperatingModeChannel);
-        when(this.easyOperatingModeChannel.getUID()).thenReturn(this.easyOperatingModeChannelUid);
-        when(this.easyOperatingModeChannelUid.getId()).thenReturn(HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING);
+        TestUtil.initMockChannel(
+                this.thing,
+                HiveBindingConstants.CHANNEL_EASY_MODE_OPERATING,
+                this.easyOperatingModeChannel,
+                this.easyOperatingModeChannelUid
+        );
 
-        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_EASY_MODE_BOOST)).thenReturn(this.easyBoostModeChannel);
-        when(this.easyBoostModeChannel.getUID()).thenReturn(this.easyBoostModeChannelUid);
-        when(this.easyBoostModeChannelUid.getId()).thenReturn(HiveBindingConstants.CHANNEL_EASY_MODE_BOOST);
+        TestUtil.initMockChannel(
+                this.thing,
+                HiveBindingConstants.CHANNEL_EASY_MODE_BOOST,
+                this.easyBoostModeChannel,
+                this.easyBoostModeChannelUid
+        );
 
-        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_EASY_STATE_IS_ON)).thenReturn(this.easyIsOnStateChannel);
-        when(this.easyIsOnStateChannel.getUID()).thenReturn(this.easyIsOnStateChannelUid);
-        when(this.easyIsOnStateChannelUid.getId()).thenReturn(HiveBindingConstants.CHANNEL_EASY_STATE_IS_ON);
+        TestUtil.initMockChannel(
+                this.thing,
+                HiveBindingConstants.CHANNEL_EASY_STATE_IS_ON,
+                this.easyIsOnStateChannel,
+                this.easyIsOnStateChannelUid
+        );
     }
 
     @Test

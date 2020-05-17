@@ -17,6 +17,7 @@ import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerCallback;
 import org.openhab.binding.hive.internal.HiveBindingConstants;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
 import org.openhab.binding.hive.internal.client.Node;
 import org.openhab.binding.hive.internal.client.feature.TemperatureSensorFeature;
 
@@ -34,15 +35,17 @@ public final class TemperatureSensorHandlerStrategy extends ThingHandlerStrategy
             final ThingHandlerCallback thingHandlerCallback,
             final Node hiveNode
     ) {
-        useFeatureSafely(hiveNode, TemperatureSensorFeature.class, temperatureSensorFeature -> {
-            useChannelSafely(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_CURRENT, temperatureChannel -> {
-                thingHandlerCallback.stateUpdated(
-                        temperatureChannel,
-                        new QuantityType<>(
-                                temperatureSensorFeature.getTemperature().getDisplayValue().getValue(),
-                                temperatureSensorFeature.getTemperature().getDisplayValue().getUnit()
-                        )
-                );
+        useFeature(hiveNode, TemperatureSensorFeature.class, temperatureSensorFeature -> {
+            useAttribute(hiveNode, TemperatureSensorFeature.class, HiveApiConstants.ATTRIBUTE_NAME_TEMPERATURE_SENSOR_V1_TEMPERATURE, temperatureSensorFeature.getTemperature(), temperatureAttribute -> {
+                useChannel(thing, HiveBindingConstants.CHANNEL_TEMPERATURE_CURRENT, temperatureChannel -> {
+                    thingHandlerCallback.stateUpdated(
+                            temperatureChannel,
+                            new QuantityType<>(
+                                    temperatureAttribute.getDisplayValue().getValue(),
+                                    temperatureAttribute.getDisplayValue().getUnit()
+                            )
+                    );
+                });
             });
         });
     }

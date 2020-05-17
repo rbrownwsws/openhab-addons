@@ -12,13 +12,12 @@
  */
 package org.openhab.binding.hive.internal.client.adapter;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.hive.internal.client.HiveApiConstants;
-import org.openhab.binding.hive.internal.client.NodeType;
-import org.openhab.binding.hive.internal.client.ProductType;
-
 import java.util.Arrays;
 import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.hive.internal.client.HiveApiConstants;
+import org.openhab.binding.hive.internal.client.ProductType;
 
 /**
  *

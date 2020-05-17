@@ -14,7 +14,6 @@ package org.openhab.binding.hive.internal.handler.strategy;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.HashMap;
@@ -98,17 +97,33 @@ public class HeatingThermostatHandlerStrategyTest {
     public void setUp() {
         initMocks(this);
 
-        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_MODE_OPERATING)).thenReturn(this.operatingModeChannel);
-        when(this.operatingModeChannel.getUID()).thenReturn(this.operatingModeChannelUid);
+        TestUtil.initMockChannel(
+                this.thing,
+                HiveBindingConstants.CHANNEL_MODE_OPERATING,
+                this.operatingModeChannel,
+                this.operatingModeChannelUid
+        );
 
-        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_STATE_OPERATING)).thenReturn(this.operatingStateChannel);
-        when(this.operatingStateChannel.getUID()).thenReturn(this.operatingStateChannelUid);
+        TestUtil.initMockChannel(
+                this.thing,
+                HiveBindingConstants.CHANNEL_STATE_OPERATING,
+                this.operatingStateChannel,
+                this.operatingStateChannelUid
+        );
 
-        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET)).thenReturn(this.targetHeatTemperatureChannel);
-        when(this.targetHeatTemperatureChannel.getUID()).thenReturn(this.targetHeatTemperatureChannelUid);
+        TestUtil.initMockChannel(
+                this.thing,
+                HiveBindingConstants.CHANNEL_TEMPERATURE_TARGET,
+                this.targetHeatTemperatureChannel,
+                this.targetHeatTemperatureChannelUid
+        );
 
-        when(this.thing.getChannel(HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE)).thenReturn(this.overrideModeChannel);
-        when(this.overrideModeChannel.getUID()).thenReturn(this.overrideModeChannelUid);
+        TestUtil.initMockChannel(
+                this.thing,
+                HiveBindingConstants.CHANNEL_MODE_OPERATING_OVERRIDE,
+                this.overrideModeChannel,
+                this.overrideModeChannelUid
+        );
     }
 
     @Test

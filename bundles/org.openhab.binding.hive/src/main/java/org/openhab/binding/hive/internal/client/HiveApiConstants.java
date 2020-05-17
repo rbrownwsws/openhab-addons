@@ -12,9 +12,9 @@
  */
 package org.openhab.binding.hive.internal.client;
 
-import java.net.URI;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
+
+import java.net.URI;
 
 /**
  * Constants related to the Hive API.
@@ -71,9 +71,31 @@ public final class HiveApiConstants {
     public static final String ACTION_TYPE_GENERIC = "http://alertme.com/schema/json/configuration/configuration.device.action.generic.v1.json#";
     
     /* Attribute Names */
+    public static final String ATTRIBUTE_NAME_AUTO_BOOST_V1_AUTO_BOOST_DURATION = "autoBoostDuration";
+    public static final String ATTRIBUTE_NAME_AUTO_BOOST_V1_AUTO_BOOST_TARGET_HEAT_TEMPERATURE = "autoBoostTargetHeatTemperature";
+    public static final String ATTRIBUTE_NAME_BATTERY_DEVICE_V1_BATTERY_LEVEL = "batteryLevel";
+    public static final String ATTRIBUTE_NAME_BATTERY_DEVICE_V1_BATTERY_STATE = "batteryState";
+    public static final String ATTRIBUTE_NAME_BATTERY_DEVICE_V1_BATTERY_VOLTAGE = "batteryVoltage";
+    public static final String ATTRIBUTE_NAME_BATTERY_DEVICE_V1_NOTIFICATION_STATE = "notificationState";
+    public static final String ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_OPERATING_MODE = "operatingMode";
+    public static final String ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_OPERATING_STATE = "operatingState";
+    public static final String ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_TEMPORARY_OPERATING_MODE_OVERRIDE = "temporaryOperatingModeOverride";
     public static final String ATTRIBUTE_NAME_HEATING_THERMOSTAT_V1_TARGET_HEAT_TEMPERATURE = "targetHeatTemperature";
     public static final String ATTRIBUTE_NAME_ON_OFF_DEVICE_V1_MODE = "mode";
-    public static final String ATTRIBUTE_NAME_WATER_HEATER_HEATING_OPERATING_MODE = "operatingMode";
+    public static final String ATTRIBUTE_NAME_TEMPERATURE_SENSOR_V1_TEMPERATURE = "temperature";
+    public static final String ATTRIBUTE_NAME_TRANSIENT_MODE_V1_ACTIONS = "actions";
+    public static final String ATTRIBUTE_NAME_TRANSIENT_MODE_V1_DURATION = "duration";
+    public static final String ATTRIBUTE_NAME_TRANSIENT_MODE_V1_IS_ENABLED = "isEnabled";
+    public static final String ATTRIBUTE_NAME_TRANSIENT_MODE_V1_START_DATETIME = "startDatetime";
+    public static final String ATTRIBUTE_NAME_TRANSIENT_MODE_V1_END_DATETIME = "endDatetime";
+    public static final String ATTRIBUTE_NAME_WATER_HEATER_V1_OPERATING_MODE = "operatingMode";
+    public static final String ATTRIBUTE_NAME_WATER_HEATER_V1_IS_ON = "isOn";
+    public static final String ATTRIBUTE_NAME_WATER_HEATER_V1_TEMPORARY_OPERATING_MODE_OVERRIDE = "temporaryOperatingModeOverride";
+    public static final String ATTRIBUTE_NAME_ZIGBEE_DEVICE_V1_EUI64 = "eui64";
+    public static final String ATTRIBUTE_NAME_ZIGBEE_DEVICE_V1_AVERAGE_LQI = "averageLQI";
+    public static final String ATTRIBUTE_NAME_ZIGBEE_DEVICE_V1_LAST_KNOWN_LQI = "lastKnownLQI";
+    public static final String ATTRIBUTE_NAME_ZIGBEE_DEVICE_V1_AVERAGE_RSSI = "averageRSSI";
+    public static final String ATTRIBUTE_NAME_ZIGBEE_DEVICE_V1_LAST_KNOWN_RSSI = "lastKnownRSSI";
     
     /* Group IDs */
     public static final String GROUP_ID_TRVS = "trvs";

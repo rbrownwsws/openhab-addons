@@ -18,7 +18,6 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.hive.internal.client.BuilderUtil;
 import org.openhab.binding.hive.internal.client.FeatureAttribute;
 import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
 
@@ -29,57 +28,62 @@ import org.openhab.binding.hive.internal.client.SettableFeatureAttribute;
  */
 @NonNullByDefault
 public final class TransientModeFeature implements Feature {
-    private final SettableFeatureAttribute<Duration> duration;
-    private final SettableFeatureAttribute<Boolean> isEnabled;
-    private final FeatureAttribute<ZonedDateTime> startDatetime;
-    private final FeatureAttribute<ZonedDateTime> endDatetime;
+    private final @Nullable SettableFeatureAttribute<Duration> duration;
+    private final @Nullable SettableFeatureAttribute<Boolean> isEnabled;
+    private final @Nullable FeatureAttribute<ZonedDateTime> startDatetime;
+    private final @Nullable FeatureAttribute<ZonedDateTime> endDatetime;
 
     private TransientModeFeature(
-            final SettableFeatureAttribute<Duration> duration,
-            final SettableFeatureAttribute<Boolean> isEnabled,
-            final FeatureAttribute<ZonedDateTime> startDatetime,
-            final FeatureAttribute<ZonedDateTime> endDatetime
+            final @Nullable SettableFeatureAttribute<Duration> duration,
+            final @Nullable SettableFeatureAttribute<Boolean> isEnabled,
+            final @Nullable FeatureAttribute<ZonedDateTime> startDatetime,
+            final @Nullable FeatureAttribute<ZonedDateTime> endDatetime
     ) {
-        Objects.requireNonNull(duration);
-        Objects.requireNonNull(isEnabled);
-        Objects.requireNonNull(startDatetime);
-        Objects.requireNonNull(endDatetime);
-
         this.duration = duration;
         this.isEnabled = isEnabled;
         this.startDatetime = startDatetime;
         this.endDatetime = endDatetime;
     }
 
-    public SettableFeatureAttribute<Duration> getDuration() {
+    public @Nullable SettableFeatureAttribute<Duration> getDuration() {
         return this.duration;
     }
 
     public TransientModeFeature withTargetDuration(final Duration targetDuration) {
         Objects.requireNonNull(targetDuration);
 
+        final @Nullable SettableFeatureAttribute<Duration> duration = this.duration;
+        if (duration == null) {
+            throw new IllegalStateException(FeatureBuilderUtil.getCannotSetTargetMessage("duration"));
+        }
+
         return TransientModeFeature.builder()
                 .from(this)
-                .duration(this.duration.withTargetValue(targetDuration))
+                .duration(duration.withTargetValue(targetDuration))
                 .build();
     }
 
-    public SettableFeatureAttribute<Boolean> getIsEnabled() {
+    public @Nullable SettableFeatureAttribute<Boolean> getIsEnabled() {
         return this.isEnabled;
     }
 
     public TransientModeFeature withTargetIsEnabled(final boolean targetIsEnabled) {
+        final @Nullable SettableFeatureAttribute<Boolean> isEnabled = this.isEnabled;
+        if (isEnabled == null) {
+            throw new IllegalStateException(FeatureBuilderUtil.getCannotSetTargetMessage("isEnabled"));
+        }
+
         return TransientModeFeature.builder()
                 .from(this)
-                .isEnabled(this.isEnabled.withTargetValue(targetIsEnabled))
+                .isEnabled(isEnabled.withTargetValue(targetIsEnabled))
                 .build();
     }
 
-    public FeatureAttribute<ZonedDateTime> getStartDatetime() {
+    public @Nullable FeatureAttribute<ZonedDateTime> getStartDatetime() {
         return this.startDatetime;
     }
 
-    public FeatureAttribute<ZonedDateTime> getEndDatetime() {
+    public @Nullable FeatureAttribute<ZonedDateTime> getEndDatetime() {
         return this.endDatetime;
     }
 
@@ -102,49 +106,36 @@ public final class TransientModeFeature implements Feature {
                     .endDatetime(transientModeFeature.getEndDatetime());
         }
 
-        public Builder duration(final SettableFeatureAttribute<Duration> duration) {
-            this.duration = Objects.requireNonNull(duration);
+        public Builder duration(final @Nullable SettableFeatureAttribute<Duration> duration) {
+            this.duration = duration;
 
             return this;
         }
 
-        public Builder isEnabled(final SettableFeatureAttribute<Boolean> isEnabled) {
-            this.isEnabled = Objects.requireNonNull(isEnabled);
+        public Builder isEnabled(final @Nullable SettableFeatureAttribute<Boolean> isEnabled) {
+            this.isEnabled = isEnabled;
 
             return this;
         }
 
-        public Builder startDatetime(final FeatureAttribute<ZonedDateTime> startDatetime) {
-            this.startDatetime = Objects.requireNonNull(startDatetime);
+        public Builder startDatetime(final @Nullable FeatureAttribute<ZonedDateTime> startDatetime) {
+            this.startDatetime = startDatetime;
 
             return this;
         }
 
-        public Builder endDatetime(final FeatureAttribute<ZonedDateTime> endDatetime) {
-            this.endDatetime = Objects.requireNonNull(endDatetime);
+        public Builder endDatetime(final @Nullable FeatureAttribute<ZonedDateTime> endDatetime) {
+            this.endDatetime = endDatetime;
 
             return this;
         }
 
         public TransientModeFeature build() {
-            final @Nullable SettableFeatureAttribute<Duration> duration = this.duration;
-            final @Nullable SettableFeatureAttribute<Boolean> isEnabled = this.isEnabled;
-            final @Nullable FeatureAttribute<ZonedDateTime> startDatetime = this.startDatetime;
-            final @Nullable FeatureAttribute<ZonedDateTime> endDatetime = this.endDatetime;
-
-            if (duration == null
-                    || isEnabled == null
-                    || startDatetime == null
-                    || endDatetime == null
-            ) {
-                throw new IllegalStateException(BuilderUtil.REQUIRED_ATTRIBUTE_NOT_SET_MESSAGE);
-            }
-
             return new TransientModeFeature(
-                    duration,
-                    isEnabled,
-                    startDatetime,
-                    endDatetime
+                    this.duration,
+                    this.isEnabled,
+                    this.startDatetime,
+                    this.endDatetime
             );
         }
     }
